@@ -143,10 +143,39 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
             }
         }
 
-        var sorted = results
-            .OrderByDescending(r => r.FusedScore)
-            .Take(query.MaxResults)
-            .ToArray();
+        HybridMemorySearchResult[] sorted;
+        if (results.Count <= query.MaxResults)
+        {
+            sorted = results
+                .OrderByDescending(r => r.FusedScore)
+                .ToArray();
+        }
+        else
+        {
+            var minHeap = new PriorityQueue<HybridMemorySearchResult, double>(query.MaxResults);
+            foreach (var r in results)
+            {
+                if (minHeap.Count < query.MaxResults)
+                {
+                    minHeap.Enqueue(r, r.FusedScore);
+                }
+                else
+                {
+                    minHeap.TryPeek(out _, out var minScore);
+                    if (r.FusedScore > minScore)
+                    {
+                        minHeap.DequeueEnqueue(r, r.FusedScore);
+                    }
+                }
+            }
+
+            sorted = new HybridMemorySearchResult[minHeap.Count];
+            for (var i = sorted.Length - 1; i >= 0; i--)
+            {
+                minHeap.TryDequeue(out var item, out _);
+                sorted[i] = item!;
+            }
+        }
 
         if (_telemetrySink is not null && sorted.Length > 0)
         {

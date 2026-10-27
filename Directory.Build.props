@@ -21,10 +21,10 @@
     <RepositoryUrl>https://github.com/OmniTechSolutionsCA/MyAgents-Community</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ai;agents;llm;orchestration;dotnet</PackageTags>
-    <Version>0.1.0-preview.1</Version>
+    <Version>0.2.0-preview.1</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>0.1.0-preview.1</InformationalVersion>
+    <InformationalVersion>0.2.0-preview.1</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsPackable)' != 'false'">
