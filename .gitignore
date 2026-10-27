@@ -1,0 +1,63 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+out/
+artifacts/
+.tmp/
+
+# .NET user-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# VS Code / Visual Studio
+.vs/
+.vscode/
+
+# Test and coverage output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+
+# Benchmark output
+BenchmarkDotNet.Artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.*
+NuGet.Local.Config
+studio-data/
+.webui_secret_key
+
+# Local tool cache
+.mcp.json
+.dotnet/
+.dotnet-cli/
+
+# Agent scratch
+.sisyphus/
+.playwright-mcp/
+.test-results/

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">MyAgents icon</title>
+  <rect width="256" height="256" rx="48" fill="#171717"/>
+  <g transform="translate(8 18)" fill="none" stroke="#D5884C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M77 72V43L120 18l43 25v29"/>
+    <path d="M73 85 30 110v50l43 25 43-25"/>
+    <path d="M167 85 210 110v50l-43 25-43-25"/>
+    <path d="M83 83 120 104l37-21M120 104v40"/>
+  </g>
+  <g fill="#D5884C"><circle cx="85" cy="98" r="10"/><circle cx="171" cy="98" r="10"/><circle cx="128" cy="173" r="10"/></g>
+</svg>

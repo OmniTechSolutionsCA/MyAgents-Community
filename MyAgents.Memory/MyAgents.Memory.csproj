@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\MyAgents.Core\MyAgents.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" />
+  </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <!-- MIT-licensed package (open-core). See LICENSE in this directory. -->
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <!-- Depends on Microsoft.SemanticKernel.Connectors.InMemory, still preview upstream; NuGet (NU5104)
+         disallows a stable package depending on a prerelease one, so this package's own version tracks
+         that until a stable connector release lands. -->
+    <Version>0.1.0-preview.1</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="$(MSBuildThisFileDirectory)..\LICENSE" Pack="false" />
+    <None Include="LICENSE" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+</Project>

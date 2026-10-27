@@ -1,0 +1,33 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NuGetAuditMode>all</NuGetAuditMode>
+
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- NuGet package metadata -->
+  <PropertyGroup>
+    <Authors>Michspirit99</Authors>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Description>MyAgents — A .NET agent orchestration framework built on Microsoft.Extensions.AI.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://github.com/OmniTechSolutionsCA/MyAgents-Community</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ai;agents;llm;orchestration;dotnet</PackageTags>
+    <Version>0.1.0-preview.1</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>0.1.0-preview.1</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsPackable)' != 'false'">
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+</Project>

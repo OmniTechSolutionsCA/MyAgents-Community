@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220" role="img" aria-labelledby="title">
+  <title id="title">MyAgents connected hexagons</title>
+  <g fill="none" stroke="#AE622A" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M77 72V43L120 18l43 25v29"/>
+    <path d="M73 85 30 110v50l43 25 43-25"/>
+    <path d="M167 85 210 110v50l-43 25-43-25"/>
+    <path d="M83 83 120 104l37-21M120 104v40"/>
+  </g>
+  <g fill="#AE622A"><circle cx="77" cy="80" r="10"/><circle cx="163" cy="80" r="10"/><circle cx="120" cy="155" r="10"/></g>
+</svg>

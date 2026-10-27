@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="MyAgents.Core/MyAgents.Core.csproj" />
+  <Project Path="MyAgents.Agents/MyAgents.Agents.csproj" />
+  <Project Path="MyAgents.Runtime.Chat/MyAgents.Runtime.Chat.csproj" />
+  <Project Path="MyAgents.Memory/MyAgents.Memory.csproj" />
+  <Project Path="MyAgents.Mcp/MyAgents.Mcp.csproj" />
+  <Project Path="MyAgents.Testing/MyAgents.Testing.csproj" />
+  <Project Path="community/tests/MyAgents.Community.Tests/MyAgents.Community.Tests.csproj" />
+  <Project Path="community/samples/ChatWithTools/ChatWithTools.csproj" />
+</Solution>
