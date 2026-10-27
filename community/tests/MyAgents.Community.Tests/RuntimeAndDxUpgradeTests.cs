@@ -283,6 +283,45 @@ public sealed class RuntimeAndDxUpgradeTests
     }
 
     [Test]
+    public async Task ChatClientRuntime_InvokeStreamingAsync_executes_tool_calls_across_rounds()
+    {
+        var client = new CapturingChatClient();
+        // Round 1: stream a FunctionCallContent
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, [
+                new FunctionCallContent("call-stream-1", "get_city", new Dictionary<string, object?> { ["country"] = "Canada" })
+            ]),
+        ]);
+        // Round 2: stream final text deltas after tool execution
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, "The capital is "),
+            new ChatResponseUpdate(null, "Ottawa."),
+        ]);
+
+        using var provider = new ServiceCollection().BuildServiceProvider();
+        var runtime = new ChatClientRuntime(client, Options.Create(new ChatClientRuntimeOptions()));
+        var tools = new ToolsFeature().AddFunction((string country) => $"Ottawa ({country})", "get_city", "Gets capital");
+        var session = await new DefaultAgentSessionFactory(runtime, provider).CreateSessionAsync(
+            "stream-tool-session",
+            new AgentDefinition("stream-tool-agent", [tools]));
+
+        var chunks = new List<AgentTurnResult>();
+        await foreach (var result in session.InvokeStreamingAsync([AgentMessage.FromText("user", "capital of Canada?")]))
+        {
+            chunks.Add(result);
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(chunks, Has.Count.EqualTo(2));
+            Assert.That(string.Concat(chunks.Select(c => c.Output[0].Content)), Is.EqualTo("The capital is Ottawa."));
+            Assert.That(chunks.Last().Telemetry.ToolCalls, Is.EqualTo(1));
+            Assert.That(client.Requests, Has.Count.EqualTo(2));
+            Assert.That(client.Requests[1].Last().Role, Is.EqualTo(ChatRole.Tool));
+        });
+    }
+
+    [Test]
     public async Task ChatClientRuntime_executes_parallel_tools_concurrently()
     {
         var tool1 = new DelayedTool("fast_tool", delayMs: 10, returnValue: "fast");
