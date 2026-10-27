@@ -37,10 +37,15 @@ public static class AgentCapabilities
         "telemetry",
         "Agent emits OpenTelemetry traces and metrics via TelemetryFeature.");
 
-    /// <summary>The agent is connected to an <see cref="MyAgents.Core.Messaging.IAgentChannel"/> message bus.</summary>
+    /// <summary>The agent is connected to an <see cref=\"MyAgents.Core.Messaging.IAgentChannel\"/> message bus.</summary>
     public static readonly IAgentCapability Channel = new BuiltInCapability(
         "channel",
         "Agent is connected to an IAgentChannel pub/sub message bus.");
+
+    /// <summary>The agent supports structured output with schema-constrained responses.</summary>
+    public static readonly IAgentCapability StructuredOutput = new BuiltInCapability(
+        "structured-output",
+        "Agent supports structured output with schema-constrained responses.");
     // ──────────────────────────────────────────────────────────────────────────
 
     private sealed record BuiltInCapability(string Id, string Description) : IAgentCapability;

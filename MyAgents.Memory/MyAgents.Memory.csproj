@@ -21,7 +21,7 @@
     <!-- Depends on Microsoft.SemanticKernel.Connectors.InMemory, still preview upstream; NuGet (NU5104)
          disallows a stable package depending on a prerelease one, so this package's own version tracks
          that until a stable connector release lands. -->
-    <Version>0.1.0-preview.1</Version>
+    <Version>0.2.0-preview.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Update="$(MSBuildThisFileDirectory)..\LICENSE" Pack="false" />

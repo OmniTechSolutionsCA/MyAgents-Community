@@ -108,7 +108,6 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
         return merged;
     }
 
-
     /// <summary>
     /// Minimal IServiceProvider overlay that serves session-scoped services
     /// (<see cref="IMemoryStore"/>, <see cref="PromptRegistry"/>) and delegates
@@ -180,11 +179,19 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
             Capabilities  = capabilities;
             _ownedResources = ownedResources;
         }
+
         public ValueTask<AgentTurnResult> InvokeAsync(
             IReadOnlyList<AgentMessage> messages,
             CancellationToken cancellationToken = default)
+            => InvokeAsync(messages, configureContext: null, cancellationToken);
+
+        public ValueTask<AgentTurnResult> InvokeAsync(
+            IReadOnlyList<AgentMessage> messages,
+            Action<AgentTurnContext>? configureContext,
+            CancellationToken cancellationToken = default)
         {
             var context = new AgentTurnContext(SessionId, messages, new AgentTurnServices(_rootProvider));
+            configureContext?.Invoke(context);
             return _pipeline.InvokeAsync(_agent, context, cancellationToken);
         }
 

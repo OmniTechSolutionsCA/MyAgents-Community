@@ -38,6 +38,19 @@ public interface IAgentSession : IDisposable, IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Invokes a turn within this session and waits for the full response, optionally configuring turn context.
+    /// </summary>
+    /// <param name="messages">Messages for this turn.</param>
+    /// <param name="configureContext">Optional action to configure the turn context before pipeline execution.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The complete result of the turn execution.</returns>
+    ValueTask<AgentTurnResult> InvokeAsync(
+        IReadOnlyList<AgentMessage> messages,
+        Action<AgentTurnContext>? configureContext,
+        CancellationToken cancellationToken = default)
+        => InvokeAsync(messages, cancellationToken);
+
+    /// <summary>
     /// Invokes a turn and streams partial results as they arrive.
     /// Each yielded result contains one or more new output chunks.
     /// </summary>

@@ -46,7 +46,7 @@ public sealed class FakeAgentSession : IAgentSession
     public IReadOnlyList<IReadOnlyList<AgentMessage>> ReceivedMessages =>
         _agent.ReceivedContexts.Select(c => c.Messages).ToList();
 
-    /// <summary>Total number of times <see cref="InvokeAsync"/> was called.</summary>
+    /// <summary>Total number of times <see cref="InvokeAsync(IReadOnlyList{AgentMessage}, CancellationToken)"/> was called.</summary>
     public int InvocationCount => _agent.InvocationCount;
 
     /// <summary>The underlying <see cref="InMemoryAgent"/> for advanced assertions.</summary>
@@ -112,11 +112,19 @@ public sealed class FakeAgentSession : IAgentSession
     public ValueTask<AgentTurnResult> InvokeAsync(
         IReadOnlyList<AgentMessage> messages,
         CancellationToken cancellationToken = default)
+        => InvokeAsync(messages, configureContext: null, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask<AgentTurnResult> InvokeAsync(
+        IReadOnlyList<AgentMessage> messages,
+        Action<AgentTurnContext>? configureContext,
+        CancellationToken cancellationToken = default)
     {
         var context = new AgentTurnContext(
             SessionId,
             messages,
             new AgentTurnServices(EmptyServiceProvider));
+        configureContext?.Invoke(context);
         return _pipeline.InvokeAsync(_agent, context, cancellationToken);
     }
 

@@ -12,9 +12,8 @@ namespace MyAgents.Runtime.Chat;
 /// </summary>
 /// <remarks>
 /// This Community runtime supports text and multimodal message forwarding, model selection,
-/// and framework-managed tool calls with the core approval and observation contracts. It is
-/// intentionally in-process and does not include graph persistence, hosted execution, or a
-/// provider-specific client.
+/// schema-constrained structured output, true token-by-token streaming, and framework-managed
+/// tool calls (including parallel execution) with the core approval and observation contracts.
 /// </remarks>
 public sealed class ChatClientRuntime : IAgentRuntime
 {
@@ -73,7 +72,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
             ArgumentNullException.ThrowIfNull(context);
 
             var history = BuildMessages(context.Messages);
-            var requestOptions = BuildChatOptions();
+            var requestOptions = BuildChatOptions(context);
             var started = Stopwatch.GetTimestamp();
             var toolCallCount = 0;
             long? promptTokens = null;
@@ -111,24 +110,9 @@ public sealed class ChatClientRuntime : IAgentRuntime
                     throw new InvalidOperationException(
                         $"The chat client exceeded the configured tool round-trip limit of {options.MaxToolRoundTrips}.");
 
-                foreach (var call in functionCalls)
-                {
-                    if (call.Exception is not null)
-                        throw new InvalidOperationException($"The model returned an invalid call for tool '{call.Name}'.", call.Exception);
-
-                    var tool = tools.FirstOrDefault(item =>
-                        string.Equals(item.Name, call.Name, StringComparison.OrdinalIgnoreCase));
-                    if (tool is null)
-                        throw new InvalidOperationException($"The model requested unknown tool '{call.Name}'.");
-                    if (string.IsNullOrWhiteSpace(call.CallId))
-                        throw new InvalidOperationException($"The model returned tool '{call.Name}' without a call ID.");
-
-                    var arguments = JsonSerializer.Serialize(call.Arguments ?? new Dictionary<string, object?>());
-                    var result = await InvokeToolAsync(context, tool, call, arguments, cancellationToken)
-                        .ConfigureAwait(false);
-                    history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(call.CallId, result)]));
-                    toolCallCount++;
-                }
+                var executed = await ExecuteToolCallsAsync(context, functionCalls, history, cancellationToken)
+                    .ConfigureAwait(false);
+                toolCallCount += executed;
             }
 
             throw new InvalidOperationException("The chat client runtime did not complete the turn.");
@@ -138,8 +122,72 @@ public sealed class ChatClientRuntime : IAgentRuntime
             AgentTurnContext context,
             [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            // Buffering keeps the same approval-checked tool loop for streaming callers.
-            yield return await InvokeAsync(context, cancellationToken).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(context);
+
+            var history = BuildMessages(context.Messages);
+            var requestOptions = BuildChatOptions(context);
+            var started = Stopwatch.GetTimestamp();
+            var toolCallCount = 0;
+            long? promptTokens = null;
+            long? completionTokens = null;
+
+            for (var round = 0; round <= options.MaxToolRoundTrips; round++)
+            {
+                var updates = new List<ChatResponseUpdate>();
+                var currentRole = ChatRole.Assistant;
+
+                await foreach (var update in chatClient.GetStreamingResponseAsync(history, requestOptions, cancellationToken).ConfigureAwait(false))
+                {
+                    updates.Add(update);
+                    if (update.Role.HasValue)
+                    {
+                        currentRole = update.Role.Value;
+                    }
+
+                    if (!string.IsNullOrEmpty(update.Text))
+                    {
+                        var chunkMessage = AgentMessage.FromText(currentRole.ToString().ToLowerInvariant(), update.Text);
+                        yield return new AgentTurnResult(
+                            [chunkMessage],
+                            new AgentTurnTelemetry(
+                                Stopwatch.GetElapsedTime(started),
+                                toolCallCount,
+                                ToTelemetryTokenCount(promptTokens),
+                                ToTelemetryTokenCount(completionTokens),
+                                modelId));
+                    }
+                }
+
+                var response = updates.ToChatResponse();
+                promptTokens = AddTokenCounts(promptTokens, response.Usage?.InputTokenCount);
+                completionTokens = AddTokenCounts(completionTokens, response.Usage?.OutputTokenCount);
+
+                var message = response.Messages.LastOrDefault();
+                if (message is not null)
+                {
+                    history.Add(message);
+                }
+
+                var functionCalls = message?.Contents
+                    .OfType<FunctionCallContent>()
+                    .Where(static call => !call.InformationalOnly)
+                    .ToArray() ?? Array.Empty<FunctionCallContent>();
+
+                if (functionCalls.Length == 0)
+                {
+                    yield break;
+                }
+
+                if (round == options.MaxToolRoundTrips)
+                    throw new InvalidOperationException(
+                        $"The chat client exceeded the configured tool round-trip limit of {options.MaxToolRoundTrips}.");
+
+                var executed = await ExecuteToolCallsAsync(context, functionCalls, history, cancellationToken)
+                    .ConfigureAwait(false);
+                toolCallCount += executed;
+            }
+
+            throw new InvalidOperationException("The chat client runtime did not complete the turn.");
         }
 
         public void Dispose()
@@ -156,14 +204,109 @@ public sealed class ChatClientRuntime : IAgentRuntime
             return history;
         }
 
-        private ChatOptions BuildChatOptions()
-            => new()
+        private ChatOptions BuildChatOptions(AgentTurnContext context)
+        {
+            ChatResponseFormat? responseFormat = null;
+            if (context.Capabilities.TryGet<AgentResponseFormat>(out var agentFormat))
+            {
+                responseFormat = agentFormat switch
+                {
+                    AgentResponseFormat.JsonSchemaFormat schemaFormat =>
+                        ChatResponseFormat.ForJsonSchema(
+                            JsonSerializer.Deserialize<JsonElement>(schemaFormat.SchemaJson),
+                            schemaFormat.SchemaName,
+                            schemaFormat.SchemaDescription),
+                    AgentResponseFormat.JsonObjectFormat =>
+                        ChatResponseFormat.Json,
+                    _ => null,
+                };
+            }
+
+            return new ChatOptions
             {
                 ModelId = modelId,
                 Temperature = options.Temperature,
                 MaxOutputTokens = options.MaxOutputTokens,
                 Tools = _modelTools.Count == 0 ? null : _modelTools.ToList(),
+                ResponseFormat = responseFormat,
             };
+        }
+
+        private async ValueTask<int> ExecuteToolCallsAsync(
+            AgentTurnContext context,
+            FunctionCallContent[] functionCalls,
+            List<ChatMessage> history,
+            CancellationToken cancellationToken)
+        {
+            if (options.MaxParallelToolCalls == 1 || functionCalls.Length == 1)
+            {
+                for (var i = 0; i < functionCalls.Length; i++)
+                {
+                    var (callId, result) = await ExecuteSingleToolAsync(context, functionCalls[i], cancellationToken)
+                        .ConfigureAwait(false);
+                    history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, result)]));
+                }
+                return functionCalls.Length;
+            }
+
+            var tasks = new Task<(string CallId, string? Result)>[functionCalls.Length];
+            if (options.MaxParallelToolCalls > 1)
+            {
+                var throttle = new SemaphoreSlim(options.MaxParallelToolCalls);
+                for (var i = 0; i < functionCalls.Length; i++)
+                {
+                    var call = functionCalls[i];
+                    tasks[i] = Task.Run(async () =>
+                    {
+                        await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            return await ExecuteSingleToolAsync(context, call, cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            throttle.Release();
+                        }
+                    }, cancellationToken);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < functionCalls.Length; i++)
+                {
+                    var call = functionCalls[i];
+                    tasks[i] = ExecuteSingleToolAsync(context, call, cancellationToken).AsTask();
+                }
+            }
+
+            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+            foreach (var (callId, result) in results)
+            {
+                history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, result)]));
+            }
+
+            return functionCalls.Length;
+        }
+
+        private async ValueTask<(string CallId, string? Result)> ExecuteSingleToolAsync(
+            AgentTurnContext context,
+            FunctionCallContent call,
+            CancellationToken cancellationToken)
+        {
+            if (call.Exception is not null)
+                throw new InvalidOperationException($"The model returned an invalid call for tool '{call.Name}'.", call.Exception);
+
+            var tool = tools.FirstOrDefault(item =>
+                string.Equals(item.Name, call.Name, StringComparison.OrdinalIgnoreCase))
+                ?? throw new InvalidOperationException($"The model requested unknown tool '{call.Name}'.");
+            if (string.IsNullOrWhiteSpace(call.CallId))
+                throw new InvalidOperationException($"The model returned tool '{call.Name}' without a call ID.");
+
+            var arguments = JsonSerializer.Serialize(call.Arguments ?? new Dictionary<string, object?>());
+            var result = await InvokeToolAsync(context, tool, call, arguments, cancellationToken)
+                .ConfigureAwait(false);
+            return (call.CallId, result);
+        }
 
         private async ValueTask<string?> InvokeToolAsync(
             AgentTurnContext context,

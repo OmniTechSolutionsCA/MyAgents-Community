@@ -14,4 +14,10 @@ public sealed class ChatClientRuntimeOptions
 
     /// <summary>Maximum number of model round trips allowed to complete tool calls.</summary>
     public int MaxToolRoundTrips { get; set; } = 8;
+
+    /// <summary>
+    /// Maximum degree of parallelism when executing multiple tool calls returned in a single turn.
+    /// Set to 1 for sequential execution. Defaults to -1 (unbounded parallel execution).
+    /// </summary>
+    public int MaxParallelToolCalls { get; set; } = -1;
 }
