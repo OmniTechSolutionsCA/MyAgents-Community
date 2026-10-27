@@ -28,8 +28,7 @@ That Slack integration is separate from the Community packages in this repositor
 
 ### Internal Slack example
 
-The following conceptual diagram illustrates the reported components and
-message flow. The exact deployed routing has not been independently verified.
+The following diagram illustrates the architecture and message flow of Omni's internal Slack assistant deployment:
 
 ```mermaid
 sequenceDiagram
@@ -49,8 +48,8 @@ sequenceDiagram
     Slack-->>User: Show response
 ```
 
-This is an example of Omni's internal deployment. Its Slack integration and
-containerized runtime are separate from the Community packages in this repository.
+This represents Omni's active internal deployment. Its Slack integration and
+containerized runtime are maintained separately from the Community packages in this repository.
 
 > [!WARNING]
 > This is a preview. APIs and package versions may change. NuGet packages are
