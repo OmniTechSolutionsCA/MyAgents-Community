@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose a change to the MyAgents Community edition.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing issues first. Proposals must fit the Community scope and license boundary.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Explain the use case and who is affected.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

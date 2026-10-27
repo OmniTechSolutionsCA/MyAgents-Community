@@ -1,0 +1,32 @@
+name: Question
+description: Ask for help using MyAgents Community.
+title: "[Question]: "
+body:
+  - type: markdown
+    attributes:
+      value: Include a minimal example and versions. Do not post credentials, customer data, or proprietary source.
+  - type: input
+    id: version
+    attributes:
+      label: MyAgents version or commit
+    validations:
+      required: true
+  - type: input
+    id: dotnet
+    attributes:
+      label: .NET SDK version
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal example and what you tried
+      render: text
+    validations:
+      required: true
