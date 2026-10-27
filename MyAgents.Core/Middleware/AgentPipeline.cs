@@ -13,6 +13,56 @@ public sealed class AgentPipeline
     }
 
     /// <summary>
+    /// Builds the execution chain for a specific inner agent.
+    /// Useful for caching the composed invocation pipeline across multiple turns.
+    /// </summary>
+    /// <param name="agent">The inner agent to execute at the end of the chain.</param>
+    /// <returns>A compiled pipeline invocation function.</returns>
+    public Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> BuildChain(IAgent agent)
+    {
+        ArgumentNullException.ThrowIfNull(agent);
+
+        if (_middlewares.Count == 0)
+            return agent.InvokeAsync;
+
+        Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> current = agent.InvokeAsync;
+
+        for (int i = _middlewares.Count - 1; i >= 0; i--)
+        {
+            var middleware = _middlewares[i];
+            var next = current;
+            current = (ctx, ct) => middleware.InvokeAsync(ctx, next, ct);
+        }
+
+        return current;
+    }
+
+    /// <summary>
+    /// Builds the streaming execution chain for a specific inner agent.
+    /// Useful for caching the composed streaming pipeline across multiple turns.
+    /// </summary>
+    /// <param name="agent">The inner agent to execute at the end of the chain.</param>
+    /// <returns>A compiled pipeline streaming function.</returns>
+    public Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> BuildStreamingChain(IAgent agent)
+    {
+        ArgumentNullException.ThrowIfNull(agent);
+
+        if (_middlewares.Count == 0)
+            return agent.InvokeStreamingAsync;
+
+        Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> current = agent.InvokeStreamingAsync;
+
+        for (int i = _middlewares.Count - 1; i >= 0; i--)
+        {
+            var middleware = _middlewares[i];
+            var next = current;
+            current = (ctx, ct) => middleware.InvokeStreamingAsync(ctx, next, ct);
+        }
+
+        return current;
+    }
+
+    /// <summary>
     /// Invokes the pipeline with the given agent as the inner handler.
     /// Middleware executes in registration order; the agent is the innermost handler.
     /// </summary>
@@ -21,19 +71,11 @@ public sealed class AgentPipeline
         AgentTurnContext context,
         CancellationToken cancellationToken = default)
     {
-        // Build the chain from inside-out
-        Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> current =
-            (ctx, ct) => agent.InvokeAsync(ctx, ct);
+        ArgumentNullException.ThrowIfNull(agent);
+        if (_middlewares.Count == 0)
+            return agent.InvokeAsync(context, cancellationToken);
 
-        // Wrap with each middleware, outermost first in registration order
-        for (int i = _middlewares.Count - 1; i >= 0; i--)
-        {
-            var middleware = _middlewares[i];
-            var next = current;
-            current = (ctx, ct) => middleware.InvokeAsync(ctx, next, ct);
-        }
-
-        return current(context, cancellationToken);
+        return BuildChain(agent)(context, cancellationToken);
     }
 
     /// <summary>
@@ -47,18 +89,10 @@ public sealed class AgentPipeline
         AgentTurnContext context,
         CancellationToken cancellationToken = default)
     {
-        // Build the streaming chain from inside-out
-        Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> current =
-            (ctx, ct) => agent.InvokeStreamingAsync(ctx, ct);
+        ArgumentNullException.ThrowIfNull(agent);
+        if (_middlewares.Count == 0)
+            return agent.InvokeStreamingAsync(context, cancellationToken);
 
-        // Wrap with each middleware in reverse registration order (outermost first)
-        for (int i = _middlewares.Count - 1; i >= 0; i--)
-        {
-            var middleware = _middlewares[i];
-            var next = current;
-            current = (ctx, ct) => middleware.InvokeStreamingAsync(ctx, next, ct);
-        }
-
-        return current(context, cancellationToken);
+        return BuildStreamingChain(agent)(context, cancellationToken);
     }
 }

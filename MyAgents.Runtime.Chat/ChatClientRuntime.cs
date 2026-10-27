@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
@@ -64,6 +65,9 @@ public sealed class ChatClientRuntime : IAgentRuntime
         private readonly IReadOnlyList<AITool> _modelTools = tools
             .Select(static tool => (AITool)new ToolDeclaration(tool))
             .ToArray();
+
+        private readonly FrozenDictionary<string, ITool> _toolsByName = tools
+            .ToFrozenDictionary(static t => t.Name, StringComparer.OrdinalIgnoreCase);
 
         public async ValueTask<AgentTurnResult> InvokeAsync(
             AgentTurnContext context,
@@ -146,7 +150,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
 
                     if (!string.IsNullOrEmpty(update.Text))
                     {
-                        var chunkMessage = AgentMessage.FromText(currentRole.ToString().ToLowerInvariant(), update.Text);
+                        var chunkMessage = AgentMessage.FromText(MapRoleToString(currentRole), update.Text);
                         yield return new AgentTurnResult(
                             [chunkMessage],
                             new AgentTurnTelemetry(
@@ -213,7 +217,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                 {
                     AgentResponseFormat.JsonSchemaFormat schemaFormat =>
                         ChatResponseFormat.ForJsonSchema(
-                            JsonSerializer.Deserialize<JsonElement>(schemaFormat.SchemaJson),
+                            schemaFormat.ParsedSchema,
                             schemaFormat.SchemaName,
                             schemaFormat.SchemaDescription),
                     AgentResponseFormat.JsonObjectFormat =>
@@ -227,7 +231,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                 ModelId = modelId,
                 Temperature = options.Temperature,
                 MaxOutputTokens = options.MaxOutputTokens,
-                Tools = _modelTools.Count == 0 ? null : _modelTools.ToList(),
+                Tools = _modelTools.Count == 0 ? null : (IList<AITool>)_modelTools,
                 ResponseFormat = responseFormat,
             };
         }
@@ -252,22 +256,15 @@ public sealed class ChatClientRuntime : IAgentRuntime
             var tasks = new Task<(string CallId, string? Result)>[functionCalls.Length];
             if (options.MaxParallelToolCalls > 1)
             {
-                var throttle = new SemaphoreSlim(options.MaxParallelToolCalls);
+                using var throttle = new SemaphoreSlim(options.MaxParallelToolCalls, options.MaxParallelToolCalls);
                 for (var i = 0; i < functionCalls.Length; i++)
                 {
-                    var call = functionCalls[i];
-                    tasks[i] = Task.Run(async () =>
-                    {
-                        await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
-                        try
-                        {
-                            return await ExecuteSingleToolAsync(context, call, cancellationToken).ConfigureAwait(false);
-                        }
-                        finally
-                        {
-                            throttle.Release();
-                        }
-                    }, cancellationToken);
+                    tasks[i] = ExecuteThrottledToolAsync(context, functionCalls[i], throttle, cancellationToken);
+                }
+                var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+                foreach (var (callId, result) in results)
+                {
+                    history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, result)]));
                 }
             }
             else
@@ -277,15 +274,31 @@ public sealed class ChatClientRuntime : IAgentRuntime
                     var call = functionCalls[i];
                     tasks[i] = ExecuteSingleToolAsync(context, call, cancellationToken).AsTask();
                 }
-            }
-
-            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-            foreach (var (callId, result) in results)
-            {
-                history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, result)]));
+                var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+                foreach (var (callId, result) in results)
+                {
+                    history.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(callId, result)]));
+                }
             }
 
             return functionCalls.Length;
+        }
+
+        private async Task<(string CallId, string? Result)> ExecuteThrottledToolAsync(
+            AgentTurnContext context,
+            FunctionCallContent call,
+            SemaphoreSlim throttle,
+            CancellationToken cancellationToken)
+        {
+            await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await ExecuteSingleToolAsync(context, call, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                throttle.Release();
+            }
         }
 
         private async ValueTask<(string CallId, string? Result)> ExecuteSingleToolAsync(
@@ -296,9 +309,8 @@ public sealed class ChatClientRuntime : IAgentRuntime
             if (call.Exception is not null)
                 throw new InvalidOperationException($"The model returned an invalid call for tool '{call.Name}'.", call.Exception);
 
-            var tool = tools.FirstOrDefault(item =>
-                string.Equals(item.Name, call.Name, StringComparison.OrdinalIgnoreCase))
-                ?? throw new InvalidOperationException($"The model requested unknown tool '{call.Name}'.");
+            if (!_toolsByName.TryGetValue(call.Name, out var tool))
+                throw new InvalidOperationException($"The model requested unknown tool '{call.Name}'.");
             if (string.IsNullOrWhiteSpace(call.CallId))
                 throw new InvalidOperationException($"The model returned tool '{call.Name}' without a call ID.");
 
@@ -373,11 +385,11 @@ public sealed class ChatClientRuntime : IAgentRuntime
             var contents = parts.Select(static part => part switch
             {
                 TextAgentContent text => (AIContent)new TextContent(text.Text),
-                ImageAgentContent image => new DataContent(image.Data.ToArray(), image.MediaType),
-                DataAgentContent data => new DataContent(data.Data.ToArray(), data.MediaType),
-                AudioAgentContent audio => new DataContent(audio.Data.ToArray(), audio.MediaType),
-                VideoAgentContent video => new DataContent(video.Data.ToArray(), video.MediaType),
-                DocumentAgentContent document => new DataContent(document.Data.ToArray(), document.MediaType),
+                ImageAgentContent image => new DataContent(image.Data, image.MediaType),
+                DataAgentContent data => new DataContent(data.Data, data.MediaType),
+                AudioAgentContent audio => new DataContent(audio.Data, audio.MediaType),
+                VideoAgentContent video => new DataContent(video.Data, video.MediaType),
+                DocumentAgentContent document => new DataContent(document.Data, document.MediaType),
                 UriImageAgentContent uriImage => new TextContent(uriImage.Uri.ToString()),
                 _ => new TextContent(part.ToString() ?? string.Empty),
             });
@@ -386,7 +398,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
 
         private static AgentMessage ToAgentMessage(ChatMessage message)
             => AgentMessage.FromText(
-                message.Role.ToString().ToLowerInvariant(),
+                MapRoleToString(message.Role),
                 string.Join("\n", message.Contents.OfType<TextContent>().Select(static content => content.Text)));
 
         private static ChatRole MapRole(string role) => role.ToLowerInvariant() switch
@@ -396,6 +408,15 @@ public sealed class ChatClientRuntime : IAgentRuntime
             "tool" => ChatRole.Tool,
             _ => ChatRole.User,
         };
+
+        private static string MapRoleToString(ChatRole role)
+        {
+            if (role == ChatRole.Assistant) return "assistant";
+            if (role == ChatRole.User) return "user";
+            if (role == ChatRole.System) return "system";
+            if (role == ChatRole.Tool) return "tool";
+            return role.Value.ToLowerInvariant();
+        }
 
         private static long? AddTokenCounts(long? current, long? next)
             => current is null && next is null ? null : (current ?? 0) + (next ?? 0);

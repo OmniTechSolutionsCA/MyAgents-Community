@@ -6,9 +6,10 @@ namespace MyAgents.Memory;
 /// High-performance in-memory BM25 (Best Matching 25) sparse lexical index and ranking engine.
 /// Computes probabilistic relevance using term frequency saturation and document length normalization.
 /// </summary>
-public sealed class BM25Index
+public sealed partial class BM25Index
 {
-    private static readonly Regex TokenRegex = new(@"[a-zA-Z0-9_\-\.]{2,}", RegexOptions.Compiled);
+    [GeneratedRegex(@"[a-zA-Z0-9_\-\.]{2,}")]
+    private static partial Regex GetTokenRegex();
 
     private readonly double _k1;
     private readonly double _b;
@@ -169,11 +170,43 @@ public sealed class BM25Index
                 }
             }
 
-            return docScores
-                .OrderByDescending(kv => kv.Value)
-                .Take(maxResults)
-                .Select(kv => (kv.Key, kv.Value))
-                .ToArray();
+            if (docScores.Count == 0)
+            {
+                return Array.Empty<(string, double)>();
+            }
+
+            if (docScores.Count <= maxResults)
+            {
+                return docScores
+                    .OrderByDescending(kv => kv.Value)
+                    .Select(kv => (kv.Key, kv.Value))
+                    .ToArray();
+            }
+
+            var minHeap = new PriorityQueue<string, double>(maxResults);
+            foreach (var (docId, score) in docScores)
+            {
+                if (minHeap.Count < maxResults)
+                {
+                    minHeap.Enqueue(docId, score);
+                }
+                else
+                {
+                    minHeap.TryPeek(out _, out var minScore);
+                    if (score > minScore)
+                    {
+                        minHeap.DequeueEnqueue(docId, score);
+                    }
+                }
+            }
+
+            var results = new (string DocId, double Score)[minHeap.Count];
+            for (var i = results.Length - 1; i >= 0; i--)
+            {
+                minHeap.TryDequeue(out var docId, out var score);
+                results[i] = (docId!, score);
+            }
+            return results;
         }
     }
 
@@ -198,7 +231,10 @@ public sealed class BM25Index
 
     private static string[] Tokenize(string text)
     {
-        var matches = TokenRegex.Matches(text);
+        var matches = GetTokenRegex().Matches(text);
+        if (matches.Count == 0)
+            return Array.Empty<string>();
+
         var tokens = new string[matches.Count];
         for (var i = 0; i < matches.Count; i++)
         {

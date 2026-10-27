@@ -86,7 +86,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
     // Satisfy the IAgentSessionFactory interface (sync entry point delegates to async)
     // — placed here so the compiler sees it as the explicit implementation.
 
-    // ── Inner helpers ────────────────────────────────────────────────────────
+    // ── Inner helpers ───────────────────────────────────────────────────────────
     /// <summary>Merges definition-level + feature-contributed capabilities, deduplicating by Id.</summary>
     private static IReadOnlyList<IAgentCapability> MergeCapabilities(
         IReadOnlyList<IAgentCapability>? definitionCaps,
@@ -160,6 +160,8 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
 
         private readonly IAgent _agent;
         private readonly AgentPipeline _pipeline;
+        private readonly Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> _invoker;
+        private readonly Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> _streamingInvoker;
         private readonly IServiceProvider _rootProvider;
         private readonly IReadOnlyList<object> _ownedResources;
         private int _disposeState;
@@ -172,12 +174,14 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
             IReadOnlyList<IAgentCapability> capabilities,
             IReadOnlyList<object> ownedResources)
         {
-            SessionId     = sessionId;
-            _agent        = agent;
-            _pipeline     = pipeline;
-            _rootProvider = rootProvider;
-            Capabilities  = capabilities;
-            _ownedResources = ownedResources;
+            SessionId        = sessionId;
+            _agent           = agent;
+            _pipeline        = pipeline;
+            _invoker         = pipeline.BuildChain(agent);
+            _streamingInvoker = pipeline.BuildStreamingChain(agent);
+            _rootProvider    = rootProvider;
+            Capabilities     = capabilities;
+            _ownedResources  = ownedResources;
         }
 
         public ValueTask<AgentTurnResult> InvokeAsync(
@@ -192,7 +196,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
         {
             var context = new AgentTurnContext(SessionId, messages, new AgentTurnServices(_rootProvider));
             configureContext?.Invoke(context);
-            return _pipeline.InvokeAsync(_agent, context, cancellationToken);
+            return _invoker(context, cancellationToken);
         }
 
         public IAsyncEnumerable<AgentTurnResult> InvokeStreamingAsync(
@@ -200,7 +204,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
             CancellationToken cancellationToken = default)
         {
             var context = new AgentTurnContext(SessionId, messages, new AgentTurnServices(_rootProvider));
-            return _pipeline.InvokeStreamingAsync(_agent, context, cancellationToken);
+            return _streamingInvoker(context, cancellationToken);
         }
 
         public void Dispose()

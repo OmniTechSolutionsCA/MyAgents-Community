@@ -5,23 +5,23 @@ using System.Text.Json.Schema;
 namespace MyAgents.Core;
 
 /// <summary>
-/// Specifies the expected response format for an agent turn.
+/// Specifies the expected response format for an agent turn or session.
 /// </summary>
 public abstract record AgentResponseFormat
 {
-    /// <summary>Unconstrained free-form text response.</summary>
+    /// <summary>Unconstrained free-form text response (default).</summary>
     public static AgentResponseFormat Text { get; } = new TextFormat();
 
-    /// <summary>Generic JSON object response without an enforced schema.</summary>
-    public static AgentResponseFormat Json { get; } = new JsonObjectFormat();
+    /// <summary>Generic JSON object response without a schema constraint.</summary>
+    public static AgentResponseFormat JsonObject { get; } = new JsonObjectFormat();
 
     /// <summary>
-    /// Schema-constrained JSON response using the specified JSON schema string.
+    /// Creates a schema-constrained JSON response format with a pre-rendered JSON schema string.
     /// </summary>
-    /// <param name="schemaName">Name of the schema or model structure.</param>
-    /// <param name="schemaJson">The JSON schema string.</param>
+    /// <param name="schemaName">Name identifying the schema.</param>
+    /// <param name="schemaJson">JSON Schema definition string.</param>
     /// <param name="schemaDescription">Optional human-readable description of the schema.</param>
-    /// <param name="strict">Whether strict schema adherence is requested from the model.</param>
+    /// <param name="strict">Whether the model provider should enforce strict schema adherence.</param>
     public static AgentResponseFormat ForJsonSchema(
         string schemaName,
         string schemaJson,
@@ -34,13 +34,13 @@ public abstract record AgentResponseFormat
     }
 
     /// <summary>
-    /// Generates a schema-constrained JSON response format for the specified type <typeparamref name="T"/>.
+    /// Creates a schema-constrained JSON response format for a strongly-typed .NET model type.
     /// </summary>
-    /// <typeparam name="T">The target type whose JSON schema will be exported.</typeparam>
-    /// <param name="schemaName">Optional schema name. Defaults to the type name.</param>
-    /// <param name="schemaDescription">Optional description of the schema.</param>
-    /// <param name="options">Optional JSON serializer options to control schema generation.</param>
-    /// <param name="strict">Whether strict schema adherence is requested.</param>
+    /// <typeparam name="T">The type to generate a JSON schema for.</typeparam>
+    /// <param name="schemaName">Optional schema name. Defaults to typeof(T).Name.</param>
+    /// <param name="schemaDescription">Optional human-readable description of the schema.</param>
+    /// <param name="options">Optional JSON serializer options for schema generation.</param>
+    /// <param name="strict">Whether the model provider should enforce strict schema adherence.</param>
     public static AgentResponseFormat ForType<T>(
         string? schemaName = null,
         string? schemaDescription = null,
@@ -49,13 +49,13 @@ public abstract record AgentResponseFormat
         => ForType(typeof(T), schemaName, schemaDescription, options, strict);
 
     /// <summary>
-    /// Generates a schema-constrained JSON response format for the specified type.
+    /// Creates a schema-constrained JSON response format for a given .NET type.
     /// </summary>
-    /// <param name="type">The target type whose JSON schema will be exported.</param>
-    /// <param name="schemaName">Optional schema name. Defaults to the type name.</param>
-    /// <param name="schemaDescription">Optional description of the schema.</param>
-    /// <param name="options">Optional JSON serializer options to control schema generation.</param>
-    /// <param name="strict">Whether strict schema adherence is requested.</param>
+    /// <param name="type">The type to generate a JSON schema for.</param>
+    /// <param name="schemaName">Optional schema name. Defaults to type.Name.</param>
+    /// <param name="schemaDescription">Optional human-readable description of the schema.</param>
+    /// <param name="options">Optional JSON serializer options for schema generation.</param>
+    /// <param name="strict">Whether the model provider should enforce strict schema adherence.</param>
     public static AgentResponseFormat ForType(
         Type type,
         string? schemaName = null,
@@ -81,5 +81,13 @@ public abstract record AgentResponseFormat
         string SchemaName,
         string SchemaJson,
         string? SchemaDescription = null,
-        bool? Strict = null) : AgentResponseFormat;
+        bool? Strict = null) : AgentResponseFormat
+    {
+        private JsonElement? _parsedSchema;
+
+        /// <summary>
+        /// Gets the parsed JSON schema element, deserialized once and cached for reuse.
+        /// </summary>
+        public JsonElement ParsedSchema => _parsedSchema ??= JsonSerializer.Deserialize<JsonElement>(SchemaJson);
+    }
 }
