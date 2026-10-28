@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -236,9 +237,9 @@ public static class OrchestratorSteps
         var builder = new StringBuilder();
         builder.AppendLine("Create an orchestration plan as a JSON array.");
         builder.AppendLine("Return ONLY JSON.");
-        builder.AppendLine($"Allowed worker agents: {string.Join(", ", options.WorkerAgentNames)}");
-        builder.AppendLine($"Limit the plan to at most {options.MaxSteps} steps.");
-        builder.AppendLine($"Parallel execution enabled: {options.AllowParallelExecution}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Allowed worker agents: {string.Join(", ", options.WorkerAgentNames)}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Limit the plan to at most {options.MaxSteps} steps.");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Parallel execution enabled: {options.AllowParallelExecution}");
         builder.AppendLine("""
             JSON schema:
             [
@@ -360,9 +361,9 @@ public static class OrchestratorSteps
         IReadOnlyList<OrchestratorStepResult> priorResults)
     {
         var builder = new StringBuilder();
-        builder.AppendLine($"Current orchestration step: {step.Name}");
-        builder.AppendLine($"Worker agent: {step.WorkerAgentName}");
-        builder.AppendLine($"Instruction: {step.Instruction}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Current orchestration step: {step.Name}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Worker agent: {step.WorkerAgentName}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Instruction: {step.Instruction}");
         builder.AppendLine();
         builder.AppendLine("Completed step summaries:");
 
@@ -374,7 +375,7 @@ public static class OrchestratorSteps
         {
             foreach (var prior in priorResults)
             {
-                builder.AppendLine($"- {prior.Step.Name} [{prior.WorkerAgentName}]: {FlattenMessages(prior.Result.Output)}");
+                builder.AppendLine(CultureInfo.InvariantCulture, $"- {prior.Step.Name} [{prior.WorkerAgentName}]: {FlattenMessages(prior.Result.Output)}");
             }
         }
 
@@ -395,15 +396,15 @@ public static class OrchestratorSteps
         builder.AppendLine("Plan:");
         foreach (var step in plan.Steps)
         {
-            builder.AppendLine($"- {step.Name} [{step.WorkerAgentName}] parallel={step.CanRunInParallel}: {step.Instruction}");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"- {step.Name} [{step.WorkerAgentName}] parallel={step.CanRunInParallel}: {step.Instruction}");
         }
 
         builder.AppendLine();
         builder.AppendLine("Step outputs:");
         foreach (var result in results)
         {
-            builder.AppendLine($"- Batch {result.BatchNumber} :: {result.Step.Name} [{result.WorkerAgentName}]");
-            builder.AppendLine($"  {FlattenMessages(result.Result.Output)}");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"- Batch {result.BatchNumber} :: {result.Step.Name} [{result.WorkerAgentName}]");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"  {FlattenMessages(result.Result.Output)}");
         }
 
         return

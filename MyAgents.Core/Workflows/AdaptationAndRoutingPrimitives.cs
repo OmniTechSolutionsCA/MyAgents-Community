@@ -1,3 +1,4 @@
+using System.Globalization;
 namespace MyAgents.Core.Workflows;
 
 /// <summary>
@@ -598,9 +599,9 @@ public sealed class DefaultModelRoutingPolicy : IModelRoutingPolicy
             -(costUnits * 10_000d)
             + headroom;
 
-        var reason = $"Latency={candidate.EstimatedLatency?.TotalMilliseconds.ToString("0.###") ?? "unknown"}ms; " +
-                     $"Cost={candidate.EstimatedCost?.ToString("0.###") ?? "unknown"}; " +
-                     $"Headroom={(headroom <= -1_000_000 ? "unknown" : headroom.ToString())}";
+        var reason = $"Latency={candidate.EstimatedLatency?.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture) ?? "unknown"}ms; " +
+                     $"Cost={candidate.EstimatedCost?.ToString("0.###", CultureInfo.InvariantCulture) ?? "unknown"}; " +
+                     $"Headroom={(headroom <= -1_000_000 ? "unknown" : headroom.ToString(CultureInfo.InvariantCulture))}";
 
         return ValueTask.FromResult(new RoutingScoreResult(score, reason));
     }
