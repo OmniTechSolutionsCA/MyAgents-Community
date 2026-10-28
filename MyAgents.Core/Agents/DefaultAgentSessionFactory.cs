@@ -40,7 +40,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
         // never need to block a thread pool thread via .GetAwaiter().GetResult().
         var assembly = new AgentAssembly();
         foreach (var feature in definition.Features)
-            await feature.ContributeAsync(assembly).ConfigureAwait(false);
+            await feature.ContributeAsync(assembly, cancellationToken).ConfigureAwait(false);
 
         var toolCatalog = new ToolCatalog(assembly.Tools.Build());
 
