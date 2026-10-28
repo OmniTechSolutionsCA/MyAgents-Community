@@ -6,6 +6,39 @@ stable release.
 
 ## [Unreleased]
 
+### Fixed
+- **Streaming content loss with blocking middleware.** `IAgentMiddleware`'s default
+  streaming bridge accumulated the chunks of a turn and then yielded only the final one,
+  so registering any middleware that implements just the blocking path (for example
+  `LoggingFeature`) silently truncated the caller's response to its last delta. The bridge
+  now folds the chunks into the shape a blocking turn would have produced and yields the
+  complete turn.
+- **Guardrails could be bypassed on the streaming path.** `GuardrailMiddleware` evaluated
+  only the last delta of a stream and then appended its replacement message to text that had
+  already been delivered — leaking the flagged content while appearing to block it. Guardrails
+  now buffer the whole turn, evaluate policies against it, and release either the clean turn
+  or only the replacement message.
+- **Streamed fragments were treated as separate messages.** Because `IGuardrailPolicy` is a
+  whole-turn contract, per-delta messages defeated it: the blocklist policy joins messages with
+  a newline, which severed a blocked phrase spanning two deltas, and `MaxLengthGuardrailPolicy`
+  summed per-message lengths instead of the turn total.
+
+### Added
+- `AgentOutputAccumulator`: folds the chunks of a streamed turn into the single result a blocking
+  turn would have produced. Exposed publicly because any middleware overriding
+  `IAgentMiddleware.InvokeStreamingAsync` needs the same fold to reason about a complete turn.
+- `PublicApiApprovalTests` and approved public-API baselines, so that an intentional or accidental
+  change to any package's public surface fails the build instead of shipping silently.
+
+### Changed
+- **An agent using `GuardrailsFeature` no longer streams token-by-token.** Guardrail evaluation
+  now happens before any output is released, at latency parity with the blocking path. This is a
+  deliberate trade: text already handed to a caller cannot be retracted, and `IGuardrailPolicy`
+  cannot be evaluated per-delta. Middleware that wants true incremental streaming overrides
+  `InvokeStreamingAsync`; the guardrail middleware deliberately does not.
+  `ChatClientRuntime.InvokeStreamingAsync` itself still emits incremental updates, so streaming
+  remains token-level for agents without guardrails.
+
 ## [0.2.0-preview.1] - 2026-10-27
 
 ### Added

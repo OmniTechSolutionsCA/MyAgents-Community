@@ -1,0 +1,392 @@
+TYPE class MyAgents.Agents.AgentChannelFeature
+  CTOR AgentChannelFeature(MyAgents.Core.Messaging.IAgentChannel channel)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.BlocklistGuardrailPolicy
+  CTOR BlocklistGuardrailPolicy(System.Collections.Generic.IEnumerable<string> blockedPhrases)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.CapabilityFeature
+  CTOR CapabilityFeature(MyAgents.Core.IAgentCapability[] capabilities)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.CapabilityRouter
+  CTOR CapabilityRouter(Microsoft.Extensions.AI.IChatClient chatClient, System.Collections.Generic.IEnumerable<MyAgents.Core.AgentDefinition> agents, Microsoft.Extensions.Logging.ILogger<MyAgents.Agents.CapabilityRouter> logger, string fallbackAgentName)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.CapabilityRouterResult> RouteAsync(string taskDescription, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.CapabilityRouterResult
+  CTOR CapabilityRouterResult(MyAgents.Core.AgentDefinition SelectedAgent, string Reasoning)
+  PROP string Reasoning { get; set; }
+  PROP MyAgents.Core.AgentDefinition SelectedAgent { get; set; }
+  METHOD MyAgents.Agents.CapabilityRouterResult <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.CapabilityRouterResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.AgentDefinition& SelectedAgent, string& Reasoning)
+TYPE class MyAgents.Agents.ContextWindowFeature
+  CTOR ContextWindowFeature(MyAgents.Core.IContextWindowTrimmer trimmer)
+  CTOR ContextWindowFeature(int maxMessages)
+  METHOD MyAgents.Agents.ContextWindowFeature WithTokenBudget(int maxTokens, MyAgents.Core.ITokenCounter tokenCounter)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.DelegateToSubagentTool
+  CTOR DelegateToSubagentTool(MyAgents.Agents.ISubagentDispatcher dispatcher)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.EmptyResponseGuardrailPolicy
+  CTOR EmptyResponseGuardrailPolicy()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.FallbackFeature
+  CTOR FallbackFeature(MyAgents.Core.IFallbackPolicy policy)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.ForkSubagentTool
+  CTOR ForkSubagentTool(MyAgents.Agents.ISubagentDispatcher dispatcher)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.FunctionCallingFeature
+  CTOR FunctionCallingFeature(int maxToolRoundTrips)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.GetSubagentTaskStatusTool
+  CTOR GetSubagentTaskStatusTool(MyAgents.Agents.ISubagentDispatcher dispatcher)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.GroupChat
+  CTOR GroupChat(MyAgents.Agents.GroupChatOptions options, MyAgents.Core.IAgentSessionFactory factory)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.GroupChatResult> RunAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>, int, MyAgents.Core.AgentDefinition> selectionFunc, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.GroupChatOptions
+  CTOR GroupChatOptions(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition> Agents, int MaxTurns, MyAgents.Core.ITerminationCondition Termination)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition> Agents { get; set; }
+  PROP int MaxTurns { get; set; }
+  PROP MyAgents.Core.ITerminationCondition Termination { get; set; }
+  METHOD MyAgents.Agents.GroupChatOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.GroupChatOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition>& Agents, int& MaxTurns, MyAgents.Core.ITerminationCondition& Termination)
+TYPE class MyAgents.Agents.GroupChatResult
+  CTOR GroupChatResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Conversation, int TotalTurns, string LastSpeaker)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Conversation { get; set; }
+  PROP string LastSpeaker { get; set; }
+  PROP int TotalTurns { get; set; }
+  METHOD MyAgents.Agents.GroupChatResult <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.GroupChatResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Conversation, int& TotalTurns, string& LastSpeaker)
+TYPE class MyAgents.Agents.GuardrailMiddleware
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.GuardrailsFeature
+  CTOR GuardrailsFeature()
+  CTOR GuardrailsFeature(MyAgents.Core.IGuardrailPolicy[] policies)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.HierarchicalSubagentDispatcher
+  CTOR HierarchicalSubagentDispatcher(MyAgents.Core.IAgentSessionFactory sessionFactory, System.Collections.Generic.IEnumerable<MyAgents.Core.AgentDefinition> subagents, MyAgents.Agents.SubagentOrchestratorOptions options)
+  METHOD MyAgents.Core.AgentDefinition GetSubagentDefinition(string agentName)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> DelegateStreamingAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Collections.Generic.IReadOnlyList<string> GetAvailableSubagentNames()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentResult> DelegateAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentResult> GetTaskResultAsync(string taskId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentTaskHandle> ForkAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> CancelTaskAsync(string taskId, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()
+TYPE interface MyAgents.Agents.ISubagentDispatcher
+  METHOD MyAgents.Core.AgentDefinition GetSubagentDefinition(string agentName)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> DelegateStreamingAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Collections.Generic.IReadOnlyList<string> GetAvailableSubagentNames()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentResult> DelegateAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentResult> GetTaskResultAsync(string taskId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SubagentTaskHandle> ForkAsync(MyAgents.Agents.SubagentTask task, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> CancelTaskAsync(string taskId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Agents.ITokenCostTelemetrySink
+  METHOD System.Threading.Tasks.ValueTask RecordMetricsAsync(MyAgents.Agents.ModelRoutingCostMetrics metrics, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.InMemoryTokenCostTelemetrySink
+  CTOR InMemoryTokenCostTelemetrySink()
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Agents.ModelRoutingCostMetrics> GetRecords()
+  METHOD System.Threading.Tasks.ValueTask RecordMetricsAsync(MyAgents.Agents.ModelRoutingCostMetrics metrics, System.Threading.CancellationToken cancellationToken)
+  METHOD decimal GetTotalCostUsd(string sessionId)
+  METHOD long GetTotalTokens(string sessionId)
+TYPE class MyAgents.Agents.LoggingFeature
+  CTOR LoggingFeature()
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.LoggingMiddleware
+  CTOR LoggingMiddleware()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.MaxDelegationDepthExceededException
+  CTOR MaxDelegationDepthExceededException(int currentDepth, int maxDepth)
+  PROP int CurrentDepth { get; }
+  PROP int MaxDepth { get; }
+TYPE class MyAgents.Agents.MaxLengthGuardrailPolicy
+  CTOR MaxLengthGuardrailPolicy(int maxLength)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.MemoryFeature
+  CTOR MemoryFeature()
+  CTOR MemoryFeature(MyAgents.Core.Memory.IMemoryStore store)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.ModelCandidate
+  CTOR ModelCandidate(string ModelId, Microsoft.Extensions.AI.IChatClient Client, MyAgents.Agents.ModelTier Tier, MyAgents.Agents.ModelPricing Pricing, System.Nullable<int> MaxInputTokens, bool IsFallback)
+  PROP Microsoft.Extensions.AI.IChatClient Client { get; set; }
+  PROP bool IsFallback { get; set; }
+  PROP System.Nullable<int> MaxInputTokens { get; set; }
+  PROP string ModelId { get; set; }
+  PROP MyAgents.Agents.ModelPricing Pricing { get; set; }
+  PROP MyAgents.Agents.ModelTier Tier { get; set; }
+  METHOD MyAgents.Agents.ModelCandidate <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.ModelCandidate other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ModelId, Microsoft.Extensions.AI.IChatClient& Client, MyAgents.Agents.ModelTier& Tier, MyAgents.Agents.ModelPricing& Pricing, System.Nullable<int>& MaxInputTokens, bool& IsFallback)
+TYPE class MyAgents.Agents.ModelFeature
+  CTOR ModelFeature(string modelId)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.ModelPricing
+  CTOR ModelPricing(string ModelId, decimal InputCostPerMillionTokens, decimal OutputCostPerMillionTokens)
+  PROP decimal InputCostPerMillionTokens { get; set; }
+  PROP string ModelId { get; set; }
+  PROP decimal OutputCostPerMillionTokens { get; set; }
+  METHOD MyAgents.Agents.ModelPricing <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.ModelPricing other)
+  METHOD bool Equals(object obj)
+  METHOD decimal CalculateCost(long inputTokens, long outputTokens)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ModelId, decimal& InputCostPerMillionTokens, decimal& OutputCostPerMillionTokens)
+TYPE class MyAgents.Agents.ModelRoutingCostMetrics
+  CTOR ModelRoutingCostMetrics(string OperationId, string SessionId, string SelectedModelId, MyAgents.Agents.ModelTier SelectedTier, long InputTokens, long OutputTokens, long TotalTokens, decimal EstimatedCostUsd, System.TimeSpan Duration, bool FallbackTriggered, string FallbackReason, System.DateTimeOffset Timestamp)
+  PROP System.TimeSpan Duration { get; set; }
+  PROP decimal EstimatedCostUsd { get; set; }
+  PROP string FallbackReason { get; set; }
+  PROP bool FallbackTriggered { get; set; }
+  PROP long InputTokens { get; set; }
+  PROP string OperationId { get; set; }
+  PROP long OutputTokens { get; set; }
+  PROP string SelectedModelId { get; set; }
+  PROP MyAgents.Agents.ModelTier SelectedTier { get; set; }
+  PROP string SessionId { get; set; }
+  PROP System.DateTimeOffset Timestamp { get; set; }
+  PROP long TotalTokens { get; set; }
+  METHOD MyAgents.Agents.ModelRoutingCostMetrics <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.ModelRoutingCostMetrics other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& OperationId, string& SessionId, string& SelectedModelId, MyAgents.Agents.ModelTier& SelectedTier, long& InputTokens, long& OutputTokens, long& TotalTokens, decimal& EstimatedCostUsd, System.TimeSpan& Duration, bool& FallbackTriggered, string& FallbackReason, System.DateTimeOffset& Timestamp)
+TYPE enum MyAgents.Agents.ModelTier
+  FIELD MyAgents.Agents.ModelTier Advanced
+  FIELD MyAgents.Agents.ModelTier Economy
+  FIELD MyAgents.Agents.ModelTier Standard
+TYPE class MyAgents.Agents.MultiModelRoutingBuilder
+  CTOR MultiModelRoutingBuilder()
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Agents.ModelCandidate> Candidates { get; }
+  PROP MyAgents.Agents.MultiModelRoutingOptions Options { get; }
+  METHOD MyAgents.Agents.MultiModelRoutingBuilder AddCandidate(MyAgents.Agents.ModelCandidate candidate)
+  METHOD MyAgents.Agents.MultiModelRoutingBuilder AddCandidate(string modelId, Microsoft.Extensions.AI.IChatClient client, MyAgents.Agents.ModelTier tier, MyAgents.Agents.ModelPricing pricing, System.Nullable<int> maxInputTokens, bool isFallback)
+  METHOD MyAgents.Agents.MultiModelRoutingBuilder ConfigureOptions(System.Action<MyAgents.Agents.MultiModelRoutingOptions> configure)
+TYPE class MyAgents.Agents.MultiModelRoutingChatClient
+  CTOR MultiModelRoutingChatClient(System.Collections.Generic.IEnumerable<MyAgents.Agents.ModelCandidate> candidates, MyAgents.Agents.MultiModelRoutingOptions options, MyAgents.Agents.ITokenCostTelemetrySink telemetrySink)
+  PROP Microsoft.Extensions.AI.ChatClientMetadata Metadata { get; }
+  METHOD MyAgents.Agents.ModelCandidate SelectCandidate(System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.ChatMessage> messages, Microsoft.Extensions.AI.ChatOptions options)
+  METHOD System.Collections.Generic.IAsyncEnumerable<Microsoft.Extensions.AI.ChatResponseUpdate> GetStreamingResponseAsync(System.Collections.Generic.IEnumerable<Microsoft.Extensions.AI.ChatMessage> messages, Microsoft.Extensions.AI.ChatOptions options, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.Task<Microsoft.Extensions.AI.ChatResponse> GetResponseAsync(System.Collections.Generic.IEnumerable<Microsoft.Extensions.AI.ChatMessage> messages, Microsoft.Extensions.AI.ChatOptions options, System.Threading.CancellationToken cancellationToken)
+  METHOD object GetService(System.Type serviceType, object serviceKey)
+  METHOD void Dispose()
+TYPE class MyAgents.Agents.MultiModelRoutingOptions
+  CTOR MultiModelRoutingOptions()
+  PROP System.Func<System.Collections.Generic.IEnumerable<Microsoft.Extensions.AI.ChatMessage>, Microsoft.Extensions.AI.ChatOptions, System.Collections.Generic.IReadOnlyList<MyAgents.Agents.ModelCandidate>, MyAgents.Agents.ModelCandidate> CustomSelector { get; set; }
+  PROP bool EnableFallbackCascade { get; set; }
+  PROP System.Nullable<decimal> MaxCostPerSessionUsd { get; set; }
+  PROP System.Nullable<decimal> MaxCostPerTurnUsd { get; set; }
+  PROP System.Nullable<long> MaxTokensPerSession { get; set; }
+  PROP System.Nullable<long> MaxTokensPerTurn { get; set; }
+TYPE class MyAgents.Agents.MultiModelRoutingServiceExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMultiModelRouting(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<MyAgents.Agents.MultiModelRoutingBuilder> configure)
+TYPE class MyAgents.Agents.MyAgentsActivitySource
+  FIELD System.Diagnostics.ActivitySource Source
+TYPE class MyAgents.Agents.MyAgentsOtelExtensions
+  FIELD string ActivitySourceName
+  FIELD string MeaiActivitySourceName
+  FIELD string MeterName
+  METHOD OpenTelemetry.OpenTelemetryBuilder AddMyAgentsMetrics(OpenTelemetry.OpenTelemetryBuilder builder)
+  METHOD OpenTelemetry.OpenTelemetryBuilder AddMyAgentsTracing(OpenTelemetry.OpenTelemetryBuilder builder)
+TYPE class MyAgents.Agents.PromptRegistryFeature
+  CTOR PromptRegistryFeature(MyAgents.Core.Prompts.PromptRegistry registry)
+  CTOR PromptRegistryFeature(MyAgents.Core.Prompts.PromptRegistry registry, string systemTemplateName, System.Collections.Generic.IReadOnlyDictionary<string, string> variables)
+  CTOR PromptRegistryFeature(MyAgents.Core.Prompts.PromptRegistry registry, string systemTemplateName, string systemTemplateVersion, System.Collections.Generic.IReadOnlyDictionary<string, string> variables)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.RoutingException
+  CTOR RoutingException(string rawResponse)
+  PROP string RawResponse { get; }
+TYPE class MyAgents.Agents.Scrapai.ScrapaiCrawlTool
+  CTOR ScrapaiCrawlTool(MyAgents.Core.Tools.IProcessRunner runner, string executablePath)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.Scrapai.ScrapaiFeature
+  CTOR ScrapaiFeature(MyAgents.Core.Tools.IProcessRunner runner, string executablePath)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.Scrapai.ScrapaiListSpidersTool
+  CTOR ScrapaiListSpidersTool(MyAgents.Core.Tools.IProcessRunner runner, string executablePath)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.Scrapai.ScrapaiTool
+  CTOR ScrapaiTool(MyAgents.Core.Tools.IProcessRunner runner, string executablePath)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.Scrapai.ScrapaiToolBase
+  PROP string Description { get; }
+  PROP string Name { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.SelectorGroupChat
+  CTOR SelectorGroupChat(MyAgents.Agents.SelectorGroupChatOptions options, MyAgents.Core.IAgentSessionFactory factory)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Agents.SelectorGroupChatResult> RunAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.SelectorGroupChatOptions
+  CTOR SelectorGroupChatOptions(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition> Agents, Microsoft.Extensions.AI.IChatClient SelectorClient, string SelectorPrompt, int MaxTurns, MyAgents.Core.ITerminationCondition Termination)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition> Agents { get; set; }
+  PROP int MaxTurns { get; set; }
+  PROP Microsoft.Extensions.AI.IChatClient SelectorClient { get; set; }
+  PROP string SelectorPrompt { get; set; }
+  PROP MyAgents.Core.ITerminationCondition Termination { get; set; }
+  METHOD MyAgents.Agents.SelectorGroupChatOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.SelectorGroupChatOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition>& Agents, Microsoft.Extensions.AI.IChatClient& SelectorClient, string& SelectorPrompt, int& MaxTurns, MyAgents.Core.ITerminationCondition& Termination)
+TYPE class MyAgents.Agents.SelectorGroupChatResult
+  CTOR SelectorGroupChatResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Conversation, int TotalTurns, string LastSpeaker, System.Collections.Generic.IReadOnlyList<string> SelectionReasoning)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Conversation { get; set; }
+  PROP string LastSpeaker { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> SelectionReasoning { get; set; }
+  PROP int TotalTurns { get; set; }
+  METHOD MyAgents.Agents.SelectorGroupChatResult <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.SelectorGroupChatResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Conversation, int& TotalTurns, string& LastSpeaker, System.Collections.Generic.IReadOnlyList<string>& SelectionReasoning)
+TYPE class MyAgents.Agents.StructuredOutputFeature<T>
+  CTOR StructuredOutputFeature`1(int maxValidationRetries, System.Text.Json.JsonSerializerOptions jsonSerializerOptions, string schemaName, string schemaDescription, System.Nullable<bool> strict)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.StructuredOutputMiddleware<T>
+  CTOR StructuredOutputMiddleware`1(MyAgents.Core.AgentResponseFormat format, int maxValidationRetries, System.Text.Json.JsonSerializerOptions jsonSerializerOptions)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.SubagentDelegationFeature
+  CTOR SubagentDelegationFeature(MyAgents.Agents.ISubagentDispatcher dispatcher)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE enum MyAgents.Agents.SubagentExecutionState
+  FIELD MyAgents.Agents.SubagentExecutionState Canceled
+  FIELD MyAgents.Agents.SubagentExecutionState Completed
+  FIELD MyAgents.Agents.SubagentExecutionState Failed
+  FIELD MyAgents.Agents.SubagentExecutionState Queued
+  FIELD MyAgents.Agents.SubagentExecutionState Running
+TYPE class MyAgents.Agents.SubagentOrchestratorBuilder
+  CTOR SubagentOrchestratorBuilder()
+  PROP MyAgents.Agents.SubagentOrchestratorOptions Options { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentDefinition> Subagents { get; }
+  METHOD MyAgents.Agents.SubagentOrchestratorBuilder AddSubagent(MyAgents.Core.AgentDefinition agentDefinition)
+  METHOD MyAgents.Agents.SubagentOrchestratorBuilder ConfigureOptions(System.Action<MyAgents.Agents.SubagentOrchestratorOptions> configure)
+TYPE class MyAgents.Agents.SubagentOrchestratorOptions
+  CTOR SubagentOrchestratorOptions()
+  PROP System.TimeSpan DefaultTimeout { get; set; }
+  PROP int MaxDelegationDepth { get; set; }
+  PROP bool PrefixSubagentSessionId { get; set; }
+TYPE class MyAgents.Agents.SubagentResult
+  CTOR SubagentResult(string TaskId, string TargetAgentName, MyAgents.Agents.SubagentExecutionState Status, string FinalOutput, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> OutputMessages, System.TimeSpan Duration, System.Nullable<int> PromptTokens, System.Nullable<int> CompletionTokens, System.Nullable<int> TotalTokens, string ErrorMessage)
+  PROP System.Nullable<int> CompletionTokens { get; set; }
+  PROP System.TimeSpan Duration { get; set; }
+  PROP string ErrorMessage { get; set; }
+  PROP string FinalOutput { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> OutputMessages { get; set; }
+  PROP System.Nullable<int> PromptTokens { get; set; }
+  PROP MyAgents.Agents.SubagentExecutionState Status { get; set; }
+  PROP string TargetAgentName { get; set; }
+  PROP string TaskId { get; set; }
+  PROP System.Nullable<int> TotalTokens { get; set; }
+  METHOD MyAgents.Agents.SubagentResult <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.SubagentResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& TaskId, string& TargetAgentName, MyAgents.Agents.SubagentExecutionState& Status, string& FinalOutput, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& OutputMessages, System.TimeSpan& Duration, System.Nullable<int>& PromptTokens, System.Nullable<int>& CompletionTokens, System.Nullable<int>& TotalTokens, string& ErrorMessage)
+TYPE class MyAgents.Agents.SubagentServiceExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddHierarchicalSubagents(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<MyAgents.Agents.SubagentOrchestratorBuilder> configure)
+TYPE class MyAgents.Agents.SubagentTask
+  CTOR SubagentTask(string TaskId, string TargetAgentName, string Instructions, string ParentSessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> InitialContext, int CurrentDepth, System.Nullable<System.TimeSpan> Timeout, System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata)
+  PROP int CurrentDepth { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> InitialContext { get; set; }
+  PROP string Instructions { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP string ParentSessionId { get; set; }
+  PROP string TargetAgentName { get; set; }
+  PROP string TaskId { get; set; }
+  PROP System.Nullable<System.TimeSpan> Timeout { get; set; }
+  METHOD MyAgents.Agents.SubagentTask <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.SubagentTask other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& TaskId, string& TargetAgentName, string& Instructions, string& ParentSessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& InitialContext, int& CurrentDepth, System.Nullable<System.TimeSpan>& Timeout, System.Collections.Generic.IReadOnlyDictionary<string, object>& Metadata)
+TYPE class MyAgents.Agents.SubagentTaskHandle
+  CTOR SubagentTaskHandle(string TaskId, string TargetAgentName, MyAgents.Agents.SubagentExecutionState Status, System.DateTimeOffset CreatedAt)
+  PROP System.DateTimeOffset CreatedAt { get; set; }
+  PROP MyAgents.Agents.SubagentExecutionState Status { get; set; }
+  PROP string TargetAgentName { get; set; }
+  PROP string TaskId { get; set; }
+  METHOD MyAgents.Agents.SubagentTaskHandle <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.SubagentTaskHandle other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& TaskId, string& TargetAgentName, MyAgents.Agents.SubagentExecutionState& Status, System.DateTimeOffset& CreatedAt)
+TYPE class MyAgents.Agents.TelemetryFeature
+  CTOR TelemetryFeature()
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.TelemetryMiddleware
+  CTOR TelemetryMiddleware()
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.TokenBudgetQuotaException
+  CTOR TokenBudgetQuotaException(string message, string sessionId, System.Nullable<decimal> quotaLimit, System.Nullable<decimal> currentUsage)
+  PROP System.Nullable<decimal> CurrentUsage { get; }
+  PROP System.Nullable<decimal> QuotaLimit { get; }
+  PROP string SessionId { get; }
+TYPE class MyAgents.Agents.ToolObserverFeature
+  CTOR ToolObserverFeature(MyAgents.Core.Tools.IToolCallObserver[] observers)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.ToolsFeature
+  CTOR ToolsFeature()
+  CTOR ToolsFeature(MyAgents.Core.Tools.ITool[] tools)
+  METHOD MyAgents.Agents.ToolsFeature Add(MyAgents.Core.Tools.ITool tool)
+  METHOD MyAgents.Agents.ToolsFeature AddFunction(System.Delegate method, string name, string description, System.Text.Json.JsonSerializerOptions jsonSerializerOptions)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.WebSearch.BraveSearchProvider
+  CTOR BraveSearchProvider(System.Net.Http.HttpClient httpClient, string apiKey)
+  METHOD System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<MyAgents.Agents.WebSearch.SearchResult>> SearchAsync(string query, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Agents.WebSearch.IWebSearchProvider
+  METHOD System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<MyAgents.Agents.WebSearch.SearchResult>> SearchAsync(string query, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.WebSearch.SearchResult
+  CTOR SearchResult(string Title, string Url, string Snippet)
+  PROP string Snippet { get; set; }
+  PROP string Title { get; set; }
+  PROP string Url { get; set; }
+  METHOD MyAgents.Agents.WebSearch.SearchResult <Clone>$()
+  METHOD bool Equals(MyAgents.Agents.WebSearch.SearchResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Title, string& Url, string& Snippet)
+TYPE class MyAgents.Agents.WebSearch.WebSearchFeature
+  CTOR WebSearchFeature(MyAgents.Agents.WebSearch.IWebSearchProvider provider)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.WebSearch.WebSearchTool
+  CTOR WebSearchTool(MyAgents.Agents.WebSearch.IWebSearchProvider provider)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)

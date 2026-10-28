@@ -1,0 +1,194 @@
+TYPE class MyAgents.Mcp.DiscoverSkillsTool
+  CTOR DiscoverSkillsTool(MyAgents.Mcp.ISkillDiscoveryService discoveryService)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.DiscoveredSkill
+  CTOR DiscoveredSkill(string Name, string Description, string SourcePath, System.Collections.Generic.IReadOnlyList<string> Tags)
+  PROP string Description { get; set; }
+  PROP string Name { get; set; }
+  PROP string SourcePath { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> Tags { get; set; }
+  METHOD MyAgents.Mcp.DiscoveredSkill <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.DiscoveredSkill other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Description, string& SourcePath, System.Collections.Generic.IReadOnlyList<string>& Tags)
+TYPE class MyAgents.Mcp.DynamicToolCatalog
+  CTOR DynamicToolCatalog(System.Collections.Generic.IEnumerable<MyAgents.Core.Tools.ITool> initialTools)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Tools.ITool> Tools { get; }
+  EVENT System.EventHandler CatalogChanged
+  METHOD bool RemoveDynamicTools(string sourcePrefix)
+  METHOD bool TryGet(string name, MyAgents.Core.Tools.ITool& tool)
+  METHOD void RegisterStaticTool(MyAgents.Core.Tools.ITool tool)
+  METHOD void SetDynamicTools(string sourcePrefix, System.Collections.Generic.IEnumerable<MyAgents.Core.Tools.ITool> tools)
+TYPE interface MyAgents.Mcp.IMcpServerHotReloadManager
+  EVENT System.EventHandler<MyAgents.Mcp.McpServerReloadResult> OnServerReloaded
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpServerInfo> GetActiveServers()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Mcp.McpServerReloadResult> ReloadServerAsync(string serverName, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpServerReloadResult>> ReloadAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> RegisterServerAsync(string name, ModelContextProtocol.Client.IClientTransport transport, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> UnregisterServerAsync(string name, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Mcp.IMcpSessionContext
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Mcp.McpPromptResolution> ResolvePromptAsync(string name, System.Collections.Generic.IReadOnlyDictionary<string, string> arguments, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpPromptDescriptor>> ListPromptsAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpResourceDescriptor>> ListResourcesAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpToolDescriptor>> ListToolsAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<string> ReadResourceAsync(string reference, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Mcp.ISkillDiscoveryService
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.DiscoveredSkill>> DiscoverSkillsAsync(string directoryPath, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.ListActiveMcpServersTool
+  CTOR ListActiveMcpServersTool(MyAgents.Mcp.IMcpServerHotReloadManager manager)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.McpFeature
+  CTOR McpFeature(ModelContextProtocol.Client.IClientTransport transport)
+  CTOR McpFeature(ModelContextProtocol.Client.IClientTransport transport, MyAgents.Mcp.McpFeatureOptions options)
+  METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Mcp.McpFeatureOptions
+  CTOR McpFeatureOptions(bool ImportPrompts, bool ExposeResourceTools)
+  PROP bool ExposeResourceTools { get; set; }
+  PROP bool ImportPrompts { get; set; }
+  METHOD MyAgents.Mcp.McpFeatureOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpFeatureOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(bool& ImportPrompts, bool& ExposeResourceTools)
+TYPE class MyAgents.Mcp.McpHotReloadFeature
+  CTOR McpHotReloadFeature(MyAgents.Mcp.IMcpServerHotReloadManager manager, MyAgents.Mcp.DynamicToolCatalog catalog, MyAgents.Mcp.ISkillDiscoveryService discoveryService)
+  METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Mcp.McpMultiServerFeature
+  CTOR McpMultiServerFeature(System.Collections.Generic.IEnumerable<MyAgents.Mcp.McpMultiServerFeature+ServerConfig> servers, MyAgents.Mcp.McpMultiServerFeatureOptions options, System.Nullable<System.TimeSpan> refreshInterval)
+  CTOR McpMultiServerFeature(System.Collections.Generic.IEnumerable<MyAgents.Mcp.McpMultiServerFeature+ServerConfig> servers, System.Nullable<System.TimeSpan> refreshInterval)
+  EVENT System.EventHandler<MyAgents.Mcp.ToolListChangedEventArgs> ToolListChanged
+  METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Mcp.McpMultiServerFeature+ServerConfig
+  CTOR ServerConfig(string Name, ModelContextProtocol.Client.IClientTransport Transport, bool EnableDynamicRefresh)
+  PROP bool EnableDynamicRefresh { get; set; }
+  PROP string Name { get; set; }
+  PROP ModelContextProtocol.Client.IClientTransport Transport { get; set; }
+  METHOD MyAgents.Mcp.McpMultiServerFeature+ServerConfig <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpMultiServerFeature+ServerConfig other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, ModelContextProtocol.Client.IClientTransport& Transport, bool& EnableDynamicRefresh)
+TYPE class MyAgents.Mcp.McpMultiServerFeatureOptions
+  CTOR McpMultiServerFeatureOptions(bool ImportPrompts, bool ExposeResourceTools, System.Collections.Generic.IReadOnlySet<string> AllowedToolNames)
+  PROP System.Collections.Generic.IReadOnlySet<string> AllowedToolNames { get; set; }
+  PROP bool ExposeResourceTools { get; set; }
+  PROP bool ImportPrompts { get; set; }
+  METHOD MyAgents.Mcp.McpMultiServerFeatureOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpMultiServerFeatureOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(bool& ImportPrompts, bool& ExposeResourceTools, System.Collections.Generic.IReadOnlySet<string>& AllowedToolNames)
+TYPE class MyAgents.Mcp.McpPromptDescriptor
+  CTOR McpPromptDescriptor(string Name, string Description, System.Collections.Generic.IReadOnlyList<string> Arguments)
+  PROP System.Collections.Generic.IReadOnlyList<string> Arguments { get; set; }
+  PROP string Description { get; set; }
+  PROP string Name { get; set; }
+  METHOD MyAgents.Mcp.McpPromptDescriptor <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpPromptDescriptor other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Description, System.Collections.Generic.IReadOnlyList<string>& Arguments)
+TYPE class MyAgents.Mcp.McpPromptResolution
+  CTOR McpPromptResolution(string Name, string Content)
+  PROP string Content { get; set; }
+  PROP string Name { get; set; }
+  METHOD MyAgents.Mcp.McpPromptResolution <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpPromptResolution other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Content)
+TYPE class MyAgents.Mcp.McpResourceDescriptor
+  CTOR McpResourceDescriptor(string Reference, string Uri, string Name, string Description, string MimeType)
+  PROP string Description { get; set; }
+  PROP string MimeType { get; set; }
+  PROP string Name { get; set; }
+  PROP string Reference { get; set; }
+  PROP string Uri { get; set; }
+  METHOD MyAgents.Mcp.McpResourceDescriptor <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpResourceDescriptor other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Reference, string& Uri, string& Name, string& Description, string& MimeType)
+TYPE class MyAgents.Mcp.McpServerHotReloadManager
+  CTOR McpServerHotReloadManager(MyAgents.Mcp.DynamicToolCatalog catalog)
+  EVENT System.EventHandler<MyAgents.Mcp.McpServerReloadResult> OnServerReloaded
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpServerInfo> GetActiveServers()
+  METHOD System.Threading.Tasks.ValueTask DisposeAsync()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Mcp.McpServerReloadResult> ReloadServerAsync(string serverName, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.McpServerReloadResult>> ReloadAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> RegisterServerAsync(string name, ModelContextProtocol.Client.IClientTransport transport, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> UnregisterServerAsync(string name, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.McpServerInfo
+  CTOR McpServerInfo(string Name, MyAgents.Mcp.McpServerStatus Status, int ToolCount, System.Collections.Generic.IReadOnlyList<string> DiscoveredTools, System.DateTimeOffset LastRefreshedAt, string ErrorMessage)
+  PROP System.Collections.Generic.IReadOnlyList<string> DiscoveredTools { get; set; }
+  PROP string ErrorMessage { get; set; }
+  PROP System.DateTimeOffset LastRefreshedAt { get; set; }
+  PROP string Name { get; set; }
+  PROP MyAgents.Mcp.McpServerStatus Status { get; set; }
+  PROP int ToolCount { get; set; }
+  METHOD MyAgents.Mcp.McpServerInfo <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpServerInfo other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, MyAgents.Mcp.McpServerStatus& Status, int& ToolCount, System.Collections.Generic.IReadOnlyList<string>& DiscoveredTools, System.DateTimeOffset& LastRefreshedAt, string& ErrorMessage)
+TYPE class MyAgents.Mcp.McpServerReloadResult
+  CTOR McpServerReloadResult(string ServerName, bool Success, int PreviousToolCount, int NewToolCount, System.Collections.Generic.IReadOnlyList<string> AddedTools, System.Collections.Generic.IReadOnlyList<string> RemovedTools, string ErrorMessage)
+  PROP System.Collections.Generic.IReadOnlyList<string> AddedTools { get; set; }
+  PROP string ErrorMessage { get; set; }
+  PROP int NewToolCount { get; set; }
+  PROP int PreviousToolCount { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> RemovedTools { get; set; }
+  PROP string ServerName { get; set; }
+  PROP bool Success { get; set; }
+  METHOD MyAgents.Mcp.McpServerReloadResult <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpServerReloadResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ServerName, bool& Success, int& PreviousToolCount, int& NewToolCount, System.Collections.Generic.IReadOnlyList<string>& AddedTools, System.Collections.Generic.IReadOnlyList<string>& RemovedTools, string& ErrorMessage)
+TYPE enum MyAgents.Mcp.McpServerStatus
+  FIELD MyAgents.Mcp.McpServerStatus Connected
+  FIELD MyAgents.Mcp.McpServerStatus Disconnected
+  FIELD MyAgents.Mcp.McpServerStatus Faulted
+  FIELD MyAgents.Mcp.McpServerStatus Reloading
+TYPE class MyAgents.Mcp.McpSkillDiscoveryService
+  CTOR McpSkillDiscoveryService()
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Mcp.DiscoveredSkill>> DiscoverSkillsAsync(string directoryPath, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.McpToolDescriptor
+  CTOR McpToolDescriptor(string Name, string Description)
+  PROP string Description { get; set; }
+  PROP string Name { get; set; }
+  METHOD MyAgents.Mcp.McpToolDescriptor <Clone>$()
+  METHOD bool Equals(MyAgents.Mcp.McpToolDescriptor other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Description)
+TYPE class MyAgents.Mcp.ReloadMcpServerTool
+  CTOR ReloadMcpServerTool(MyAgents.Mcp.IMcpServerHotReloadManager manager)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Mcp.ToolListChangedEventArgs
+  CTOR ToolListChangedEventArgs(string serverName, System.Collections.Generic.IList<ModelContextProtocol.Client.McpClientTool> tools)
+  PROP string ServerName { get; }
+  PROP System.Collections.Generic.IList<ModelContextProtocol.Client.McpClientTool> Tools { get; }

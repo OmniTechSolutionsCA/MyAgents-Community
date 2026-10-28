@@ -22,4 +22,7 @@
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Baselines/*.approved.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
