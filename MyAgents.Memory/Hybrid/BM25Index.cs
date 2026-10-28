@@ -125,7 +125,7 @@ public sealed partial class BM25Index
         var queryTokens = Tokenize(query);
         if (queryTokens.Length == 0)
         {
-            return Array.Empty<(string, double)>();
+            return [];
         }
 
         lock (_sync)
@@ -133,7 +133,7 @@ public sealed partial class BM25Index
             var nDocs = _documents.Count;
             if (nDocs == 0 || _totalDocLength == 0)
             {
-                return Array.Empty<(string, double)>();
+                return [];
             }
 
             var avgDocLength = (double)_totalDocLength / nDocs;
@@ -172,7 +172,7 @@ public sealed partial class BM25Index
 
             if (docScores.Count == 0)
             {
-                return Array.Empty<(string, double)>();
+                return [];
             }
 
             if (docScores.Count <= maxResults)
@@ -231,15 +231,17 @@ public sealed partial class BM25Index
 
     private static string[] Tokenize(string text)
     {
-        var matches = GetTokenRegex().Matches(text);
-        if (matches.Count == 0)
-            return Array.Empty<string>();
+        if (string.IsNullOrEmpty(text))
+            return [];
 
-        var tokens = new string[matches.Count];
-        for (var i = 0; i < matches.Count; i++)
+        var regex = GetTokenRegex();
+        var matches = regex.EnumerateMatches(text.AsSpan());
+        var list = new List<string>();
+        foreach (var match in matches)
         {
-            tokens[i] = matches[i].Value.ToLowerInvariant();
+            list.Add(text.Substring(match.Index, match.Length).ToLowerInvariant());
         }
-        return tokens;
+
+        return list.Count == 0 ? [] : list.ToArray();
     }
 }

@@ -419,7 +419,7 @@ public static class OrchestratorSteps
         var trimmed = payload.Trim();
         if (trimmed.StartsWith("```", StringComparison.Ordinal))
         {
-            var firstLineEnd = trimmed.IndexOf('\n');
+            var firstLineEnd = trimmed.IndexOf('\n', StringComparison.Ordinal);
             if (firstLineEnd >= 0)
                 trimmed = trimmed[(firstLineEnd + 1)..];
 
@@ -428,7 +428,7 @@ public static class OrchestratorSteps
                 trimmed = trimmed[..closingFence];
         }
 
-        var start = trimmed.IndexOf('[');
+        var start = trimmed.IndexOf('[', StringComparison.Ordinal);
         var end = trimmed.LastIndexOf(']');
         if (start < 0 || end < start)
             throw new InvalidOperationException("Planner response did not contain a JSON array.");
@@ -437,11 +437,20 @@ public static class OrchestratorSteps
     }
 
     private static string FlattenMessages(IReadOnlyList<AgentMessage> messages)
-        => string.Join(
-            Environment.NewLine,
-            messages
-                .Where(static message => !string.IsNullOrWhiteSpace(message.Content))
-                .Select(static message => $"[{message.Role}] {message.Content}"));
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < messages.Count; i++)
+        {
+            var msg = messages[i];
+            if (!string.IsNullOrWhiteSpace(msg.Content))
+            {
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append('[').Append(msg.Role).Append("] ").Append(msg.Content);
+            }
+        }
+        return sb.ToString();
+    }
 }
 
 /// <summary>

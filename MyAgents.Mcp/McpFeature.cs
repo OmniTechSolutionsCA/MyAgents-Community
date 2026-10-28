@@ -70,12 +70,12 @@ public sealed class McpFeature : IAgentFeature
             _transport,
             clientOptions: null,
             loggerFactory: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
         assembly.RegisterOwnedResource(client);
 
         IList<McpClientTool> tools = await client.ListToolsAsync(
             options: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var descriptors = tools
             .Select(static tool => new McpToolDescriptor(tool.Name, tool.Description))

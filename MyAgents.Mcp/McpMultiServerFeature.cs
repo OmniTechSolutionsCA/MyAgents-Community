@@ -85,13 +85,13 @@ public sealed class McpMultiServerFeature : IAgentFeature
                 server.Transport,
                 clientOptions: null,
                 loggerFactory: null,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             sessionResources.Clients.Add((client, server));
 
             var listedTools = await client.ListToolsAsync(
                 options: null,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             var tools = _options.AllowedToolNames is { Count: > 0 } allowedToolNames
                 ? listedTools.Where(tool => allowedToolNames.Contains(tool.Name)).ToArray()
                 : listedTools;

@@ -43,10 +43,12 @@ public sealed class ChatClientRuntimeExtendedTests
         public string? Description => $"Tool {name}";
         public string? ParametersSchemaJson => null;
         public int InvocationCount { get; private set; }
+        public string? LastArguments { get; private set; }
 
         public ValueTask<string> InvokeAsync(string jsonArguments, CancellationToken cancellationToken = default)
         {
             InvocationCount++;
+            LastArguments = jsonArguments;
             return ValueTask.FromResult($"Executed {name}");
         }
     }
@@ -139,6 +141,67 @@ public sealed class ChatClientRuntimeExtendedTests
             Assert.That(tool1.InvocationCount, Is.EqualTo(1));
             Assert.That(tool2.InvocationCount, Is.EqualTo(1));
             Assert.That(client.Requests, Has.Count.EqualTo(2));
+        });
+    }
+
+    [Test]
+    public async Task ChatRuntime_handles_null_and_empty_arguments_in_function_calls()
+    {
+        var tool1 = new MultiArgTool("tool_null_args");
+        var tool2 = new MultiArgTool("tool_empty_args");
+
+        var client = new MultiTurnMockChatClient();
+        client.Enqueue(new ChatResponse(new ChatMessage(ChatRole.Assistant,
+        [
+            new FunctionCallContent("call-1", "tool_null_args", null),
+            new FunctionCallContent("call-2", "tool_empty_args", new Dictionary<string, object?>())
+        ])));
+        client.Enqueue(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Executed parameterless tools.")));
+
+        var runtime = new ChatClientRuntime(client, Options.Create(new ChatClientRuntimeOptions()));
+        var services = new ServiceCollection().BuildServiceProvider();
+        var session = await new DefaultAgentSessionFactory(runtime, services)
+            .CreateSessionAsync("parameterless-tools-session", new AgentDefinition("agent", [new ToolFeature(tool1, tool2)]));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "Run tools without args")]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo("Executed parameterless tools."));
+            Assert.That(result.Telemetry.ToolCalls, Is.EqualTo(2));
+            Assert.That(tool1.InvocationCount, Is.EqualTo(1));
+            Assert.That(tool1.LastArguments, Is.EqualTo("{}"));
+            Assert.That(tool2.InvocationCount, Is.EqualTo(1));
+            Assert.That(tool2.LastArguments, Is.EqualTo("{}"));
+        });
+    }
+
+    [Test]
+    public async Task ChatRuntime_ignores_informational_only_function_calls()
+    {
+        var tool1 = new MultiArgTool("info_tool");
+        var tool2 = new MultiArgTool("actual_tool");
+
+        var client = new MultiTurnMockChatClient();
+        var infoCall = new FunctionCallContent("call-info", "info_tool", null) { InformationalOnly = true };
+        var actualCall = new FunctionCallContent("call-act", "actual_tool", null) { InformationalOnly = false };
+
+        client.Enqueue(new ChatResponse(new ChatMessage(ChatRole.Assistant, [infoCall, actualCall])));
+        client.Enqueue(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Completed only actual tool.")));
+
+        var runtime = new ChatClientRuntime(client, Options.Create(new ChatClientRuntimeOptions()));
+        var services = new ServiceCollection().BuildServiceProvider();
+        var session = await new DefaultAgentSessionFactory(runtime, services)
+            .CreateSessionAsync("informational-tools-session", new AgentDefinition("agent", [new ToolFeature(tool1, tool2)]));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "Run actual tool only")]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo("Completed only actual tool."));
+            Assert.That(result.Telemetry.ToolCalls, Is.EqualTo(1));
+            Assert.That(tool1.InvocationCount, Is.EqualTo(0));
+            Assert.That(tool2.InvocationCount, Is.EqualTo(1));
         });
     }
 }

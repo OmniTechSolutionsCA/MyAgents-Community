@@ -79,6 +79,77 @@ public sealed class StreamingPipelineTests
             "with no middleware the stream must stay token-incremental");
     }
 
+    [Test]
+    public async Task Streaming_with_LoggingFeature_stays_token_incremental()
+    {
+        var client = new ScriptedChatClient();
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, "Hel"),
+            new ChatResponseUpdate(null, "lo, "),
+            new ChatResponseUpdate(null, "wor"),
+            new ChatResponseUpdate(null, "ld!"),
+        ]);
+
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
+        var session = await CreateSessionAsync(provider, client, [new LoggingFeature()]);
+
+        var chunkCount = 0;
+        await foreach (var _ in session.InvokeStreamingAsync([AgentMessage.FromText("user", "hi")]))
+            chunkCount++;
+
+        Assert.That(chunkCount, Is.EqualTo(4),
+            "LoggingFeature should preserve streaming incrementality rather than collapsing to a single chunk");
+    }
+
+    [Test]
+    public async Task Streaming_with_LoggingFeature_propagates_exception_and_records_failure()
+    {
+        var client = new ScriptedChatClient();
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, "Starting stream..."),
+        ]);
+        client.ThrowOnStream(new InvalidOperationException("Upstream LLM network error"));
+
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
+        var session = await CreateSessionAsync(provider, client, [new LoggingFeature()]);
+
+        var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in session.InvokeStreamingAsync([AgentMessage.FromText("user", "hi")]))
+            {
+            }
+        });
+
+        Assert.That(ex!.Message, Is.EqualTo("Upstream LLM network error"));
+    }
+
+    [Test]
+    public async Task Streaming_with_LoggingFeature_handles_cancellation_cleanly()
+    {
+        var client = new ScriptedChatClient();
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, "Chunk 1"),
+            new ChatResponseUpdate(null, "Chunk 2"),
+            new ChatResponseUpdate(null, "Chunk 3"),
+        ]);
+
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
+        var session = await CreateSessionAsync(provider, client, [new LoggingFeature()]);
+
+        using var cts = new CancellationTokenSource();
+        var received = 0;
+        Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        {
+            await foreach (var _ in session.InvokeStreamingAsync([AgentMessage.FromText("user", "hi")], cancellationToken: cts.Token))
+            {
+                received++;
+                cts.Cancel();
+            }
+        });
+
+        Assert.That(received, Is.EqualTo(1));
+    }
+
     // ── 2. Guardrails must not be bypassable on the streaming path ──
 
     [Test]
@@ -92,7 +163,7 @@ public sealed class StreamingPipelineTests
             new ChatResponseUpdate(null, "t is 1234"),
         ]);
 
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
         var session = await CreateSessionAsync(
             provider,
             client,
@@ -113,7 +184,7 @@ public sealed class StreamingPipelineTests
             new ChatResponseUpdate(null, "the secret is 1234"),
         ]);
 
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
         var session = await CreateSessionAsync(
             provider,
             client,
@@ -140,7 +211,7 @@ public sealed class StreamingPipelineTests
             new ChatResponseUpdate(null, "clear"),
         ]);
 
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
         var session = await CreateSessionAsync(
             provider,
             client,
@@ -160,7 +231,7 @@ public sealed class StreamingPipelineTests
             new ChatResponseUpdate(ChatRole.Assistant, "the secret is 1234"),
         ]);
 
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
         var session = await CreateSessionAsync(
             provider,
             client,
@@ -267,8 +338,10 @@ public sealed class StreamingPipelineTests
     private sealed class ScriptedChatClient : IChatClient
     {
         private readonly Queue<List<ChatResponseUpdate>> _streams = new();
+        private Exception? _throwOnStream;
 
         public void EnqueueStream(List<ChatResponseUpdate> updates) => _streams.Enqueue(updates);
+        public void ThrowOnStream(Exception ex) => _throwOnStream = ex;
 
         public Task<ChatResponse> GetResponseAsync(
             IEnumerable<ChatMessage> messages,
@@ -284,8 +357,14 @@ public sealed class StreamingPipelineTests
             var batch = _streams.Count > 0 ? _streams.Dequeue() : [];
             foreach (var update in batch)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 await Task.Yield();
                 yield return update;
+            }
+
+            if (_throwOnStream is not null)
+            {
+                throw _throwOnStream;
             }
         }
 

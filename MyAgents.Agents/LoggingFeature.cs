@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using MyAgents.Core;
 
@@ -42,7 +43,7 @@ public sealed partial class LoggingMiddleware : IAgentMiddleware
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            var result = await next(context, cancellationToken);
+            var result = await next(context, cancellationToken).ConfigureAwait(false);
             stopwatch.Stop();
 
             if (logger is not null)
@@ -68,6 +69,83 @@ public sealed partial class LoggingMiddleware : IAgentMiddleware
                     stopwatch.ElapsedMilliseconds);
             }
             throw;
+        }
+    }
+
+    async IAsyncEnumerable<AgentTurnResult> IAgentMiddleware.InvokeStreamingAsync(
+        AgentTurnContext context,
+        Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> next,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var logger = context.Services.GetService<ILogger<LoggingMiddleware>>();
+        if (logger is not null)
+        {
+            LogTurnStarted(logger, context.SessionId);
+        }
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var toolCalls = 0;
+        IAsyncEnumerator<AgentTurnResult>? enumerator = null;
+        try
+        {
+            enumerator = next(context, cancellationToken).GetAsyncEnumerator(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            if (logger is not null)
+            {
+                LogTurnFailed(logger, ex, context.SessionId, stopwatch.ElapsedMilliseconds);
+            }
+            throw;
+        }
+
+        try
+        {
+            while (true)
+            {
+                AgentTurnResult chunk;
+                try
+                {
+                    if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
+                    {
+                        break;
+                    }
+                    chunk = enumerator.Current;
+                    if (chunk.Telemetry.ToolCalls > toolCalls)
+                    {
+                        toolCalls = chunk.Telemetry.ToolCalls;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    if (logger is not null)
+                    {
+                        LogTurnFailed(logger, ex, context.SessionId, stopwatch.ElapsedMilliseconds);
+                    }
+                    throw;
+                }
+
+                yield return chunk;
+            }
+
+            stopwatch.Stop();
+            if (logger is not null)
+            {
+                LogTurnCompleted(
+                    logger,
+                    context.SessionId,
+                    stopwatch.ElapsedMilliseconds,
+                    toolCalls);
+            }
+        }
+        finally
+        {
+            if (enumerator is not null)
+            {
+                await enumerator.DisposeAsync().ConfigureAwait(false);
+            }
         }
     }
 }

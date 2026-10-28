@@ -739,7 +739,7 @@ public sealed class AgentGraph<TState>
     }
 
     private static string Sanitize(string name) =>
-        name.Replace(" ", "_").Replace("-", "_").Replace(".", "_");
+        name.Replace(' ', '_').Replace('-', '_').Replace('.', '_');
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 

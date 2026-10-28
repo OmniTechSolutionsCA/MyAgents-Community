@@ -343,6 +343,30 @@ public sealed class AgentGraphTests
     }
 
     [Test]
+    public void AgentGraph_ToMermaid_sanitizes_complex_node_names_with_spaces_dots_and_dashes()
+    {
+        var (factory, _, _, _) = CreateTestFixtures();
+        var defA = new AgentDefinition("Alpha Beta", []);
+        var defB = new AgentDefinition("Gamma-Delta.1", []);
+        var graph = new AgentGraph<TestGraphState>(
+            factory,
+            [defA, defB],
+            merge: (_, next) => next);
+
+        graph.AddNode("Alpha Beta", (s, _, _) => ValueTask.FromResult(s));
+        graph.AddNode("Gamma-Delta.1", (s, _, _) => ValueTask.FromResult(s));
+        graph.AddEdge("Alpha Beta", "Gamma-Delta.1");
+
+        var mermaid = graph.ToMermaid();
+        Assert.Multiple(() =>
+        {
+            Assert.That(mermaid, Does.Contain("Alpha_Beta[\"Alpha Beta\"]"));
+            Assert.That(mermaid, Does.Contain("Gamma_Delta_1[\"Gamma-Delta.1\"]"));
+            Assert.That(mermaid, Does.Contain("Alpha_Beta --> Gamma_Delta_1"));
+        });
+    }
+
+    [Test]
     public void ConsensusSteps_ReduceMajority_identifies_winner_and_tie_breaks()
     {
         var turnResult = new AgentTurnResult([], new AgentTurnTelemetry(TimeSpan.Zero, 0, null, null, null));
