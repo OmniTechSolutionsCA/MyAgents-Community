@@ -8,6 +8,7 @@
     <NuGetAuditMode>all</NuGetAuditMode>
 
     <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 

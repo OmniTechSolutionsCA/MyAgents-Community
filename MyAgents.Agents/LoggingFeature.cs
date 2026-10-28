@@ -17,15 +17,27 @@ public sealed class LoggingFeature : IAgentFeature
 /// <summary>
 /// Middleware that logs agent turn execution.
 /// </summary>
-public sealed class LoggingMiddleware : IAgentMiddleware
+public sealed partial class LoggingMiddleware : IAgentMiddleware
 {
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Agent turn started for session {SessionId}")]
+    private static partial void LogTurnStarted(ILogger logger, string sessionId);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Agent turn completed for session {SessionId} in {DurationMs}ms. Tool calls: {ToolCalls}")]
+    private static partial void LogTurnCompleted(ILogger logger, string sessionId, long durationMs, int toolCalls);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Agent turn failed for session {SessionId} after {DurationMs}ms")]
+    private static partial void LogTurnFailed(ILogger logger, Exception ex, string sessionId, long durationMs);
+
     public async ValueTask<AgentTurnResult> InvokeAsync(
         AgentTurnContext context,
         Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> next,
         CancellationToken cancellationToken = default)
     {
         var logger = context.Services.GetService<ILogger<LoggingMiddleware>>();
-        logger?.LogInformation("Agent turn started for session {SessionId}", context.SessionId);
+        if (logger is not null)
+        {
+            LogTurnStarted(logger, context.SessionId);
+        }
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
@@ -33,21 +45,28 @@ public sealed class LoggingMiddleware : IAgentMiddleware
             var result = await next(context, cancellationToken);
             stopwatch.Stop();
 
-            logger?.LogInformation(
-                "Agent turn completed for session {SessionId} in {DurationMs}ms. Tool calls: {ToolCalls}",
-                context.SessionId,
-                stopwatch.ElapsedMilliseconds,
-                result.Telemetry.ToolCalls);
+            if (logger is not null)
+            {
+                LogTurnCompleted(
+                    logger,
+                    context.SessionId,
+                    stopwatch.ElapsedMilliseconds,
+                    result.Telemetry.ToolCalls);
+            }
 
             return result;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            logger?.LogError(ex,
-                "Agent turn failed for session {SessionId} after {DurationMs}ms",
-                context.SessionId,
-                stopwatch.ElapsedMilliseconds);
+            if (logger is not null)
+            {
+                LogTurnFailed(
+                    logger,
+                    ex,
+                    context.SessionId,
+                    stopwatch.ElapsedMilliseconds);
+            }
             throw;
         }
     }

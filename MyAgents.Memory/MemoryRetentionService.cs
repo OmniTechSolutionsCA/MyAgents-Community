@@ -1,3 +1,4 @@
+using System.Globalization;
 using MyAgents.Core.Memory;
 
 namespace MyAgents.Memory;
@@ -62,7 +63,7 @@ public sealed class MemoryRetentionService
                 Metadata: new Dictionary<string, string>
                 {
                     ["kind"] = "summary",
-                    ["sourceCount"] = summarized.Length.ToString(),
+                    ["sourceCount"] = summarized.Length.ToString(CultureInfo.InvariantCulture),
                 },
                 CreatedAt: DateTimeOffset.UtcNow);
             await _store.SetAsync(summaryEntry, cancellationToken).ConfigureAwait(false);

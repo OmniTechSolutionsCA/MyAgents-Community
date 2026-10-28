@@ -23,7 +23,7 @@ public sealed class ListActiveMcpServersTool : ITool
     public ValueTask<string> InvokeAsync(string jsonArguments, CancellationToken cancellationToken = default)
     {
         var servers = _manager.GetActiveServers();
-        var json = JsonSerializer.Serialize(servers, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(servers, McpJsonOptions.Indented);
         return ValueTask.FromResult(json);
     }
 }
@@ -63,7 +63,7 @@ public sealed class ReloadMcpServerTool : ITool
         {
             try
             {
-                var args = JsonSerializer.Deserialize<ReloadArgs>(jsonArguments, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var args = JsonSerializer.Deserialize<ReloadArgs>(jsonArguments, McpJsonOptions.CaseInsensitive);
                 serverName = args?.server_name;
             }
             catch
@@ -75,12 +75,12 @@ public sealed class ReloadMcpServerTool : ITool
         if (!string.IsNullOrWhiteSpace(serverName))
         {
             var res = await _manager.ReloadServerAsync(serverName, cancellationToken).ConfigureAwait(false);
-            return JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(res, McpJsonOptions.Indented);
         }
         else
         {
             var allRes = await _manager.ReloadAllAsync(cancellationToken).ConfigureAwait(false);
-            return JsonSerializer.Serialize(allRes, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(allRes, McpJsonOptions.Indented);
         }
     }
 }
@@ -121,7 +121,7 @@ public sealed class DiscoverSkillsTool : ITool
         {
             try
             {
-                var args = JsonSerializer.Deserialize<DiscoverArgs>(jsonArguments, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var args = JsonSerializer.Deserialize<DiscoverArgs>(jsonArguments, McpJsonOptions.CaseInsensitive);
                 dir = args?.directory_path;
             }
             catch
@@ -136,7 +136,7 @@ public sealed class DiscoverSkillsTool : ITool
         }
 
         var skills = await _discoveryService.DiscoverSkillsAsync(dir, cancellationToken).ConfigureAwait(false);
-        return JsonSerializer.Serialize(skills, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(skills, McpJsonOptions.Indented);
     }
 }
 

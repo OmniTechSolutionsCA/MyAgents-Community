@@ -62,7 +62,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
         IReadOnlyList<IToolCallObserver> observers,
         ChatClientRuntimeOptions options) : IAgent
     {
-        private readonly IReadOnlyList<AITool> _modelTools = tools
+        private readonly AITool[] _modelTools = tools
             .Select(static tool => (AITool)new ToolDeclaration(tool))
             .ToArray();
 
@@ -231,7 +231,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                 ModelId = modelId,
                 Temperature = options.Temperature,
                 MaxOutputTokens = options.MaxOutputTokens,
-                Tools = _modelTools.Count == 0 ? null : (IList<AITool>)_modelTools,
+                Tools = _modelTools.Length == 0 ? null : _modelTools,
                 ResponseFormat = responseFormat,
             };
         }

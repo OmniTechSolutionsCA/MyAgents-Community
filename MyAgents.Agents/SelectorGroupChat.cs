@@ -1,10 +1,11 @@
+using System.Globalization;
 using Microsoft.Extensions.AI;
 using MyAgents.Core;
 
 namespace MyAgents.Agents;
 
 /// <summary>
-/// Configuration for <see cref="SelectorGroupChat"/>.
+/// Configuration for <see cref=\"SelectorGroupChat\"/>.
 /// </summary>
 public sealed record SelectorGroupChatOptions(
     /// <summary>
@@ -39,7 +40,7 @@ public sealed record SelectorGroupChatOptions(
 /// the conversation context. This is the AutoGen <c>SelectorGroupChat</c> pattern.
 /// </summary>
 /// <remarks>
-/// Unlike <see cref="GroupChat"/> (round-robin), this pattern uses an LLM to dynamically
+/// Unlike <see cref=\"GroupChat\"/> (round-robin), this pattern uses an LLM to dynamically
 /// determine the best agent for each turn based on the conversation so far.
 /// </remarks>
 public sealed class SelectorGroupChat
@@ -62,8 +63,8 @@ public sealed class SelectorGroupChat
     /// <summary>
     /// Runs the selector group chat until termination condition is met or max turns reached.
     /// </summary>
-    /// <param name="initialMessages">Initial messages to start the conversation.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name=\"initialMessages\">Initial messages to start the conversation.</param>
+    /// <param name=\"cancellationToken\">Cancellation token.</param>
     /// <returns>The final conversation history, the last agent to speak, and selection reasoning.</returns>
     public async ValueTask<SelectorGroupChatResult> RunAsync(
         IReadOnlyList<AgentMessage> initialMessages,
@@ -138,11 +139,11 @@ public sealed class SelectorGroupChat
         for (var i = 0; i < _options.Agents.Count; i++)
         {
             var agent = _options.Agents[i];
-            sb.AppendLine($"- {agent.Name}: {agent.Description ?? "No description"}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"- {agent.Name}: {agent.Description ?? "No description"}");
 
             if (agent.Capabilities is { Count: > 0 })
             {
-                sb.AppendLine($"  Capabilities: {string.Join(", ", agent.Capabilities.Select(c => c.Id))}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"  Capabilities: {string.Join(", ", agent.Capabilities.Select(c => c.Id))}");
             }
         }
 
@@ -150,7 +151,7 @@ public sealed class SelectorGroupChat
         sb.AppendLine("Conversation so far:");
         foreach (var msg in conversation.TakeLast(6))  // Last 6 messages to keep context manageable
         {
-            sb.AppendLine($"[{msg.Role}]: {msg.Content[..Math.Min(msg.Content.Length, 200)]}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"[{msg.Role}]: {msg.Content[..Math.Min(msg.Content.Length, 200)]}");
         }
 
         sb.AppendLine();
@@ -175,7 +176,7 @@ public sealed class SelectorGroupChat
 }
 
 /// <summary>
-/// Result of a <see cref="SelectorGroupChat"/> run.
+/// Result of a <see cref=\"SelectorGroupChat\"/> run.
 /// </summary>
 public sealed record SelectorGroupChatResult(
     IReadOnlyList<AgentMessage> Conversation,

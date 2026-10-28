@@ -74,7 +74,7 @@ public sealed class HierarchicalSubagentDispatcher : ISubagentDispatcher, IDispo
             stopwatch.Stop();
 
             var assistantMsg = turnResult.Output.LastOrDefault(m => string.Equals(m.Role, "assistant", StringComparison.OrdinalIgnoreCase))
-                               ?? turnResult.Output.LastOrDefault();
+                               ?? (turnResult.Output.Count > 0 ? turnResult.Output[^1] : null);
             var finalOutput = assistantMsg?.Content;
 
             return new SubagentResult(
@@ -235,7 +235,7 @@ public sealed class HierarchicalSubagentDispatcher : ISubagentDispatcher, IDispo
         return $"sub:{task.TargetAgentName}:{task.TaskId}";
     }
 
-    private static IReadOnlyList<AgentMessage> PrepareInputMessages(SubagentTask task)
+    private static List<AgentMessage> PrepareInputMessages(SubagentTask task)
     {
         var list = new List<AgentMessage>();
         if (task.InitialContext is { Count: > 0 })

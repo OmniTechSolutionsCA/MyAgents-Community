@@ -321,7 +321,7 @@ internal static class McpReflection
         if (method is null)
             return null;
 
-        var invocationArguments = BuildInvocationArguments(method, cancellationToken, namedArguments);
+        var invocationArguments = BuildInvocationArguments(method, namedArguments, cancellationToken);
         var invocationResult = method.Invoke(target, invocationArguments);
         return await AwaitAsync(invocationResult).ConfigureAwait(false);
     }
@@ -414,8 +414,8 @@ internal static class McpReflection
 
     private static object?[] BuildInvocationArguments(
         MethodInfo method,
-        CancellationToken cancellationToken,
-        IReadOnlyDictionary<string, object?>? namedArguments)
+        IReadOnlyDictionary<string, object?>? namedArguments,
+        CancellationToken cancellationToken)
     {
         var arguments = new object?[method.GetParameters().Length];
         for (var index = 0; index < arguments.Length; index++)

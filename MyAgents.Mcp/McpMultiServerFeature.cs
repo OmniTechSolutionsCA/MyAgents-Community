@@ -22,7 +22,7 @@ public sealed record McpMultiServerFeatureOptions(
 /// </remarks>
 public sealed class McpMultiServerFeature : IAgentFeature
 {
-    private readonly IReadOnlyList<ServerConfig> _servers;
+    private readonly List<ServerConfig> _servers;
     private readonly TimeSpan? _refreshInterval;
     private readonly McpMultiServerFeatureOptions _options;
 

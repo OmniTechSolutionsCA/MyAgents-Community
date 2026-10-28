@@ -98,7 +98,7 @@ internal sealed class RetrievalAugmentationMiddleware : IAgentMiddleware
         return new AgentMessage("system", builder.ToString());
     }
 
-    private static IReadOnlyList<AgentMessage> InjectRetrievedContext(
+    private static AgentMessage[] InjectRetrievedContext(
         IReadOnlyList<AgentMessage> messages,
         AgentMessage contextMessage)
     {

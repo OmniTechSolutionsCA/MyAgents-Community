@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using MyAgents.Core.Memory;
 
@@ -133,7 +134,7 @@ public sealed class EpisodicMemoryStore : IEpisodicMemoryStore
             Entities: distinctEntities,
             Timestamp: toConsolidate.Max(e => e.Timestamp),
             Salience: maxSalience,
-            Metadata: new Dictionary<string, string> { ["consolidated_count"] = toConsolidate.Count.ToString() });
+            Metadata: new Dictionary<string, string> { ["consolidated_count"] = toConsolidate.Count.ToString(CultureInfo.InvariantCulture) });
 
         // Save new consolidated episode
         await SaveEpisodeAsync(consolidatedEpisode, cancellationToken).ConfigureAwait(false);
@@ -157,7 +158,7 @@ public sealed class EpisodicMemoryStore : IEpisodicMemoryStore
             ["session_id"] = episode.SessionId,
             ["key_facts"] = JsonSerializer.Serialize(episode.KeyFacts),
             ["entities"] = JsonSerializer.Serialize(episode.Entities),
-            ["salience"] = episode.Salience.ToString("R"),
+            ["salience"] = episode.Salience.ToString("R", CultureInfo.InvariantCulture),
             ["timestamp"] = episode.Timestamp.ToString("O")
         };
 

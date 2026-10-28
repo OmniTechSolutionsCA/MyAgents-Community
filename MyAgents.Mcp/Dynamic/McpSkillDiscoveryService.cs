@@ -51,10 +51,7 @@ public sealed class McpSkillDiscoveryService : ISkillDiscoveryService
             try
             {
                 var content = await File.ReadAllTextAsync(file, cancellationToken).ConfigureAwait(false);
-                var manifest = JsonSerializer.Deserialize<SkillManifest>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var manifest = JsonSerializer.Deserialize<SkillManifest>(content, McpJsonOptions.CaseInsensitive);
 
                 if (manifest is not null && !string.IsNullOrWhiteSpace(manifest.Name))
                 {

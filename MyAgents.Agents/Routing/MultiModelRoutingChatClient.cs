@@ -12,7 +12,7 @@ namespace MyAgents.Agents;
 /// </summary>
 public sealed class MultiModelRoutingChatClient : IChatClient, IDisposable
 {
-    private readonly IReadOnlyList<ModelCandidate> _candidates;
+    private readonly ModelCandidate[] _candidates;
     private readonly MultiModelRoutingOptions _options;
     private readonly ITokenCostTelemetrySink? _telemetrySink;
     private readonly ConcurrentDictionary<string, SessionSpendTracker> _sessionSpends = new(StringComparer.OrdinalIgnoreCase);
@@ -24,7 +24,7 @@ public sealed class MultiModelRoutingChatClient : IChatClient, IDisposable
     {
         ArgumentNullException.ThrowIfNull(candidates);
         _candidates = candidates.ToArray();
-        if (_candidates.Count == 0)
+        if (_candidates.Length == 0)
         {
             throw new ArgumentException("At least one model candidate must be registered.", nameof(candidates));
         }
@@ -34,7 +34,8 @@ public sealed class MultiModelRoutingChatClient : IChatClient, IDisposable
     }
 
     /// <inheritdoc />
-    public ChatClientMetadata Metadata => new("MyAgents.MultiModelRouter");
+    private readonly ChatClientMetadata _metadata = new("MyAgents.MultiModelRouter");
+    public ChatClientMetadata Metadata => _metadata;
 
     /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null)
