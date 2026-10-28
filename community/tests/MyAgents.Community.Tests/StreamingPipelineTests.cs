@@ -53,19 +53,30 @@ public sealed class StreamingPipelineTests
         using var provider = new ServiceCollection().AddLogging().BuildServiceProvider();
         var session = await CreateSessionAsync(provider, client, [new LoggingFeature()]);
 
-        var chunks = new List<string>();
-        await foreach (var result in session.InvokeStreamingAsync([AgentMessage.FromText("user", "hi")]))
-        {
-            chunks.Add(result.Output[0].Content);
-        }
+        var emitted = await CollectStreamAsync(session);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(string.Concat(chunks), Is.EqualTo("Hello, world!"),
-                "every delta must survive a blocking middleware in the streaming chain");
-            Assert.That(chunks, Has.Count.EqualTo(4),
-                "the stream must stay incremental, not collapse into one chunk");
-        });
+        Assert.That(emitted, Is.EqualTo("Hello, world!"),
+            "every delta must survive a blocking middleware in the streaming chain");
+    }
+
+    [Test]
+    public async Task Streaming_inner_agent_without_middleware_stays_incremental()
+    {
+        var client = new ScriptedChatClient();
+        client.EnqueueStream([
+            new ChatResponseUpdate(ChatRole.Assistant, "Hel"),
+            new ChatResponseUpdate(null, "lo"),
+        ]);
+
+        using var provider = new ServiceCollection().BuildServiceProvider();
+        var session = await CreateSessionAsync(provider, client, []);
+
+        var chunkCount = 0;
+        await foreach (var _ in session.InvokeStreamingAsync([AgentMessage.FromText("user", "hi")]))
+            chunkCount++;
+
+        Assert.That(chunkCount, Is.EqualTo(2),
+            "with no middleware the stream must stay token-incremental");
     }
 
     // ── 2. Guardrails must not be bypassable on the streaming path ──
@@ -160,6 +171,54 @@ public sealed class StreamingPipelineTests
         Assert.That(emitted, Is.EqualTo("blocked by policy"),
             "the caller must receive the policy's replacement, not the leaked text");
     }
+
+    [Test]
+    public void Fold_merges_consecutive_same_role_fragments_into_one_message()
+    {
+        var chunks = new List<AgentTurnResult>
+        {
+            Chunk("assistant", "Hel", TimeSpan.FromMilliseconds(10), toolCalls: 1),
+            Chunk("assistant", "lo, ", TimeSpan.FromMilliseconds(20), toolCalls: 1),
+            Chunk("assistant", "world!", TimeSpan.FromMilliseconds(30), toolCalls: 1),
+        };
+
+        var folded = AgentOutputAccumulator.Fold(chunks);
+
+        Assert.That(folded, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(folded!.Output, Has.Count.EqualTo(1),
+                "fragments of one turn must not become separate messages");
+            Assert.That(folded.Output[0].Content, Is.EqualTo("Hello, world!"));
+            Assert.That(folded.Telemetry.TurnDuration, Is.EqualTo(TimeSpan.FromMilliseconds(30)),
+                "duration is cumulative, so the final chunk wins");
+            Assert.That(folded.Telemetry.ToolCalls, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public void Fold_keeps_distinct_roles_apart()
+    {
+        var chunks = new List<AgentTurnResult>
+        {
+            Chunk("assistant", "answer", TimeSpan.Zero, toolCalls: 0),
+            Chunk("tool", "result", TimeSpan.Zero, toolCalls: 0),
+        };
+
+        var folded = AgentOutputAccumulator.Fold(chunks);
+
+        Assert.That(folded!.Output, Has.Count.EqualTo(2),
+            "a role change starts a new message");
+    }
+
+    [Test]
+    public void Fold_returns_null_for_an_empty_stream()
+    {
+        Assert.That(AgentOutputAccumulator.Fold([]), Is.Null);
+    }
+
+    private static AgentTurnResult Chunk(string role, string text, TimeSpan duration, int toolCalls)
+        => new([AgentMessage.FromText(role, text)], new AgentTurnTelemetry(duration, toolCalls));
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
