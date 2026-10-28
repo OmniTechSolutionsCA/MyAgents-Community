@@ -299,8 +299,8 @@ public sealed class DefaultAdaptationPolicy : IAdaptationPolicy
     }
 
     private static void AddHint(
-        ICollection<AdaptationHint> hints,
-        ISet<string> dedupe,
+        List<AdaptationHint> hints,
+        HashSet<string> dedupe,
         AdaptationHint hint)
     {
         var key = $"{hint.GoalId ?? string.Empty}|{hint.Kind}";
@@ -320,13 +320,13 @@ public sealed class DefaultAdaptationPolicy : IAdaptationPolicy
 /// </summary>
 public sealed class CompositeAdaptationPolicy : IAdaptationPolicy
 {
-    private readonly IReadOnlyList<IAdaptationPolicy> _policies;
+    private readonly IAdaptationPolicy[] _policies;
 
     public CompositeAdaptationPolicy(params IAdaptationPolicy[] policies)
     {
         ArgumentNullException.ThrowIfNull(policies);
         _policies = policies.ToArray();
-        if (_policies.Count == 0)
+        if (_policies.Length == 0)
             throw new ArgumentException("At least one adaptation policy must be provided.", nameof(policies));
     }
 
@@ -624,7 +624,7 @@ public sealed record RoutingPolicyEntry(
 /// </summary>
 public sealed class CompositeModelRoutingPolicy : IModelRoutingPolicy
 {
-    private readonly IReadOnlyList<RoutingPolicyEntry> _policies;
+    private readonly RoutingPolicyEntry[] _policies;
 
     public CompositeModelRoutingPolicy(params IModelRoutingPolicy[] policies)
         : this(policies.Select(static policy => new RoutingPolicyEntry(policy)).ToArray())
@@ -635,7 +635,7 @@ public sealed class CompositeModelRoutingPolicy : IModelRoutingPolicy
     {
         ArgumentNullException.ThrowIfNull(policies);
         _policies = policies.ToArray();
-        if (_policies.Count == 0)
+        if (_policies.Length == 0)
             throw new ArgumentException("At least one routing policy must be provided.", nameof(policies));
 
         if (_policies.Any(static entry => entry.Weight < 0))
@@ -651,7 +651,7 @@ public sealed class CompositeModelRoutingPolicy : IModelRoutingPolicy
         ArgumentNullException.ThrowIfNull(context);
 
         var score = 0.0;
-        var reasons = new List<string>(_policies.Count);
+        var reasons = new List<string>(_policies.Length);
         foreach (var entry in _policies)
         {
             cancellationToken.ThrowIfCancellationRequested();

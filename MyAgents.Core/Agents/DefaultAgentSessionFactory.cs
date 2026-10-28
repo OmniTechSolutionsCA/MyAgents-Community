@@ -88,7 +88,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
 
     // ── Inner helpers ───────────────────────────────────────────────────────────
     /// <summary>Merges definition-level + feature-contributed capabilities, deduplicating by Id.</summary>
-    private static IReadOnlyList<IAgentCapability> MergeCapabilities(
+    private static List<IAgentCapability> MergeCapabilities(
         IReadOnlyList<IAgentCapability>? definitionCaps,
         List<IAgentCapability> assemblyCaps)
     {

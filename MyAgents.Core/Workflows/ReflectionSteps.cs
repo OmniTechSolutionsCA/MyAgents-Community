@@ -143,7 +143,7 @@ public static class ReflectionSteps
             .ToArray();
     }
 
-    private static IReadOnlyList<AgentMessage> BuildCritiqueMessages(
+    private static AgentMessage[] BuildCritiqueMessages(
         IReadOnlyList<AgentMessage> initialMessages,
         AgentTurnResult candidate,
         int iteration)

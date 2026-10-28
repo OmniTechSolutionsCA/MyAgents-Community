@@ -188,7 +188,7 @@ public static class OrchestratorSteps
         return new OrchestratorResult(plan, results.AsReadOnly(), finalResult);
     }
 
-    private static async ValueTask<IReadOnlyList<OrchestratorStepModel>> RequestPlanAsync<TState>(
+    private static async ValueTask<OrchestratorStepModel[]> RequestPlanAsync<TState>(
         IWorkflowSession<TState> session,
         OrchestratorOptions options,
         IReadOnlyList<AgentMessage> initialMessages,
@@ -286,15 +286,15 @@ public static class OrchestratorSteps
         }
     }
 
-    private static IReadOnlyList<OrchestratorStepModel> ValidatePlan(
-        IReadOnlyList<OrchestratorStepModel> steps,
+    private static OrchestratorStepModel[] ValidatePlan(
+        OrchestratorStepModel[] steps,
         OrchestratorOptions options)
     {
-        if (steps.Count == 0)
+        if (steps.Length == 0)
             throw new InvalidOperationException("Planner returned an empty orchestration plan.");
 
-        if (steps.Count > options.MaxSteps)
-            throw new InvalidOperationException($"Planner returned {steps.Count} steps, which exceeds the configured limit of {options.MaxSteps}.");
+        if (steps.Length > options.MaxSteps)
+            throw new InvalidOperationException($"Planner returned {steps.Length} steps, which exceeds the configured limit of {options.MaxSteps}.");
 
         var duplicateName = steps
             .GroupBy(static step => step.Name, StringComparer.OrdinalIgnoreCase)

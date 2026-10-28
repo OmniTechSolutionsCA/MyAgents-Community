@@ -9,7 +9,7 @@ namespace MyAgents.Core;
 /// recovery to an <see cref="IFallbackPolicy"/>.
 /// Place this at (or near) the outermost edge of the pipeline.
 /// </summary>
-public sealed class FallbackMiddleware : IAgentMiddleware
+public sealed partial class FallbackMiddleware : IAgentMiddleware
 {
     private static readonly Meter s_meter = new("MyAgents.Core.Fallback", "1.0.0");
     private static readonly Counter<long> s_invoked =
@@ -39,11 +39,15 @@ public sealed class FallbackMiddleware : IAgentMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
-                "Fallback policy invoked for SessionId={SessionId}. Exception: {ExceptionType}",
-                context.SessionId, ex.GetType().Name);
+            LogFallbackInvoked(_logger, ex, context.SessionId, ex.GetType().Name);
             s_invoked.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
             return await _policy.HandleAsync(ex, context, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Error,
+        Message = "Fallback policy invoked for SessionId={SessionId}. Exception: {ExceptionType}")]
+    private static partial void LogFallbackInvoked(ILogger logger, Exception ex, string sessionId, string exceptionType);
 }

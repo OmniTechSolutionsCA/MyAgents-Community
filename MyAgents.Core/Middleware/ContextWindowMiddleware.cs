@@ -106,7 +106,7 @@ public sealed class SlidingWindowTrimmer : IContextWindowTrimmer
 /// </code>
 /// </example>
 /// </remarks>
-public sealed class ContextWindowMiddleware : IAgentMiddleware
+public sealed partial class ContextWindowMiddleware : IAgentMiddleware
 {
     private readonly IContextWindowTrimmer _trimmer;
     private readonly ILogger _logger;
@@ -131,9 +131,7 @@ public sealed class ContextWindowMiddleware : IAgentMiddleware
 
         if (!ReferenceEquals(trimmed, context.Messages))
         {
-            _logger.LogDebug(
-                "Context window trimmed from {Original} to {Trimmed} messages. SessionId={SessionId}",
-                context.Messages.Count, trimmed.Count, context.SessionId);
+            LogWindowTrimmed(_logger, context.Messages.Count, trimmed.Count, context.SessionId);
         }
 
         var effectiveContext = ReferenceEquals(trimmed, context.Messages)
@@ -152,9 +150,7 @@ public sealed class ContextWindowMiddleware : IAgentMiddleware
 
         if (!ReferenceEquals(trimmed, context.Messages))
         {
-            _logger.LogDebug(
-                "Context window trimmed from {Original} to {Trimmed} messages (streaming). SessionId={SessionId}",
-                context.Messages.Count, trimmed.Count, context.SessionId);
+            LogWindowTrimmedStreaming(_logger, context.Messages.Count, trimmed.Count, context.SessionId);
         }
 
         var effectiveContext = ReferenceEquals(trimmed, context.Messages)
@@ -164,6 +160,18 @@ public sealed class ContextWindowMiddleware : IAgentMiddleware
         await foreach (var chunk in next(effectiveContext, cancellationToken).ConfigureAwait(false))
             yield return chunk;
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Debug,
+        Message = "Context window trimmed from {Original} to {Trimmed} messages. SessionId={SessionId}")]
+    private static partial void LogWindowTrimmed(ILogger logger, int original, int trimmed, string sessionId);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Debug,
+        Message = "Context window trimmed from {Original} to {Trimmed} messages (streaming). SessionId={SessionId}")]
+    private static partial void LogWindowTrimmedStreaming(ILogger logger, int original, int trimmed, string sessionId);
 }
     // ----------------------------------------------------------
     // Token-budget trimmer implementation
@@ -191,8 +199,7 @@ public sealed class ContextWindowMiddleware : IAgentMiddleware
     {
         public int CountTokens(string text)
         {
-            if (text is null)
-                throw new ArgumentNullException(nameof(text));
+            ArgumentNullException.ThrowIfNull(text);
             return Math.Max(1, (int)Math.Ceiling(text.Length / 4.0));
         }
     }
@@ -229,8 +236,7 @@ public sealed class ContextWindowMiddleware : IAgentMiddleware
             IReadOnlyList<AgentMessage> messages,
             CancellationToken cancellationToken = default)
         {
-            if (messages is null)
-                throw new ArgumentNullException(nameof(messages));
+            ArgumentNullException.ThrowIfNull(messages);
 
             // calculate total tokens across all messages (system + non-system)
             int total = 0;
