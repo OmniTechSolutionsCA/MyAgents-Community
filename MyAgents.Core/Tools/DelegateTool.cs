@@ -302,7 +302,7 @@ public sealed class DelegateTool : ITool
 
             var method = typeof(DelegateTool).GetMethod(nameof(FormatGenericTaskResult), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(resultType);
-            return (ResultFormatter)method.CreateDelegate(typeof(ResultFormatter));
+            return method.CreateDelegate<ResultFormatter>();
         }
 
         if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ValueTask<>))
@@ -320,7 +320,7 @@ public sealed class DelegateTool : ITool
 
             var method = typeof(DelegateTool).GetMethod(nameof(FormatGenericValueTaskResult), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(resultType);
-            return (ResultFormatter)method.CreateDelegate(typeof(ResultFormatter));
+            return method.CreateDelegate<ResultFormatter>();
         }
 
         return static (raw, options) =>

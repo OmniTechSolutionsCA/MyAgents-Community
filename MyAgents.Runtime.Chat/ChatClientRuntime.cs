@@ -62,7 +62,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
         IReadOnlyList<IToolCallObserver> observers,
         ChatClientRuntimeOptions options) : IAgent
     {
-        private readonly IReadOnlyList<AITool> _modelTools = tools
+        private readonly AITool[] _modelTools = tools
             .Select(static tool => (AITool)new ToolDeclaration(tool))
             .ToArray();
 
@@ -93,10 +93,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                     ?? throw new InvalidOperationException("The configured chat client returned no response message.");
                 history.Add(message);
 
-                var functionCalls = message.Contents
-                    .OfType<FunctionCallContent>()
-                    .Where(static call => !call.InformationalOnly)
-                    .ToArray();
+                var functionCalls = ExtractFunctionCalls(message);
                 if (functionCalls.Length == 0)
                 {
                     var output = ToAgentMessage(message);
@@ -172,10 +169,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                     history.Add(message);
                 }
 
-                var functionCalls = message?.Contents
-                    .OfType<FunctionCallContent>()
-                    .Where(static call => !call.InformationalOnly)
-                    .ToArray() ?? Array.Empty<FunctionCallContent>();
+                var functionCalls = ExtractFunctionCalls(message);
 
                 if (functionCalls.Length == 0)
                 {
@@ -198,13 +192,35 @@ public sealed class ChatClientRuntime : IAgentRuntime
         {
         }
 
+        private static FunctionCallContent[] ExtractFunctionCalls(ChatMessage? message)
+        {
+            if (message?.Contents is null || message.Contents.Count == 0)
+                return [];
+
+            List<FunctionCallContent>? calls = null;
+            for (var i = 0; i < message.Contents.Count; i++)
+            {
+                if (message.Contents[i] is FunctionCallContent call && !call.InformationalOnly)
+                {
+                    calls ??= new List<FunctionCallContent>();
+                    calls.Add(call);
+                }
+            }
+
+            return calls is null ? [] : calls.ToArray();
+        }
+
         private List<ChatMessage> BuildMessages(IReadOnlyList<AgentMessage> messages)
         {
-            var history = new List<ChatMessage>(messages.Count + 1);
-            if (!string.IsNullOrWhiteSpace(systemPrompt))
+            var hasSystemPrompt = !string.IsNullOrWhiteSpace(systemPrompt);
+            var history = new List<ChatMessage>(messages.Count + (hasSystemPrompt ? 1 : 0));
+            if (hasSystemPrompt)
                 history.Add(new ChatMessage(ChatRole.System, systemPrompt));
 
-            history.AddRange(messages.Select(ToChatMessage));
+            for (var i = 0; i < messages.Count; i++)
+            {
+                history.Add(ToChatMessage(messages[i]));
+            }
             return history;
         }
 
@@ -231,7 +247,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
                 ModelId = modelId,
                 Temperature = options.Temperature,
                 MaxOutputTokens = options.MaxOutputTokens,
-                Tools = _modelTools.Count == 0 ? null : (IList<AITool>)_modelTools,
+                Tools = _modelTools.Length == 0 ? null : _modelTools,
                 ResponseFormat = responseFormat,
             };
         }
@@ -314,7 +330,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
             if (string.IsNullOrWhiteSpace(call.CallId))
                 throw new InvalidOperationException($"The model returned tool '{call.Name}' without a call ID.");
 
-            var arguments = JsonSerializer.Serialize(call.Arguments ?? new Dictionary<string, object?>());
+            var arguments = (call.Arguments is null || call.Arguments.Count == 0) ? "{}" : JsonSerializer.Serialize(call.Arguments);
             var result = await InvokeToolAsync(context, tool, call, arguments, cancellationToken)
                 .ConfigureAwait(false);
             return (call.CallId, result);
@@ -382,19 +398,25 @@ public sealed class ChatClientRuntime : IAgentRuntime
             if (message.ContentParts is not { Count: > 0 } parts)
                 return new ChatMessage(role, message.Content);
 
-            var contents = parts.Select(static part => part switch
+            var contents = new List<AIContent>(parts.Count);
+            for (var i = 0; i < parts.Count; i++)
             {
-                TextAgentContent text => (AIContent)new TextContent(text.Text),
-                ImageAgentContent image => new DataContent(image.Data, image.MediaType),
-                DataAgentContent data => new DataContent(data.Data, data.MediaType),
-                AudioAgentContent audio => new DataContent(audio.Data, audio.MediaType),
-                VideoAgentContent video => new DataContent(video.Data, video.MediaType),
-                DocumentAgentContent document => new DataContent(document.Data, document.MediaType),
-                UriImageAgentContent uriImage => new TextContent(uriImage.Uri.ToString()),
-                _ => new TextContent(part.ToString() ?? string.Empty),
-            });
-            return new ChatMessage(role, contents.ToList());
+                contents.Add(MapPartToAIContent(parts[i]));
+            }
+            return new ChatMessage(role, contents);
         }
+
+        private static AIContent MapPartToAIContent(AgentContent part) => part switch
+        {
+            TextAgentContent text => new TextContent(text.Text),
+            ImageAgentContent image => new DataContent(image.Data, image.MediaType),
+            DataAgentContent data => new DataContent(data.Data, data.MediaType),
+            AudioAgentContent audio => new DataContent(audio.Data, audio.MediaType),
+            VideoAgentContent video => new DataContent(video.Data, video.MediaType),
+            DocumentAgentContent document => new DataContent(document.Data, document.MediaType),
+            UriImageAgentContent uriImage => new TextContent(uriImage.Uri.ToString()),
+            _ => new TextContent(part.ToString() ?? string.Empty),
+        };
 
         private static AgentMessage ToAgentMessage(ChatMessage message)
             => AgentMessage.FromText(

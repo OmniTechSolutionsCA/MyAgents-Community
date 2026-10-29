@@ -9,7 +9,7 @@ namespace MyAgents.Core;
 /// </summary>
 public sealed class ToolCatalog
 {
-    private readonly IReadOnlyDictionary<string, ITool> _toolsByName;
+    private readonly Dictionary<string, ITool> _toolsByName;
 
     public ToolCatalog(IEnumerable<ITool> tools)
     {

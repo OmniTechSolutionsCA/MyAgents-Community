@@ -1,7 +1,8 @@
-using MyAgents.Core;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MyAgents.Core;
 
 namespace MyAgents.Agents;
 
@@ -38,10 +39,25 @@ public sealed record CapabilityRouterResult(
 /// <remarks>
 /// Scope: single-hop only — no multi-hop, no ensemble, no confidence scoring.
 /// </remarks>
-public sealed class CapabilityRouter
+public sealed partial class CapabilityRouter
 {
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Single agent registered; skipping LLM routing call.")]
+    private static partial void LogSingleAgentSkipping(ILogger logger);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Routing task via LLM. Candidates: {Count}")]
+    private static partial void LogRoutingViaLlm(ILogger logger, int count);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "CapabilityRouter could not match LLM response '{Response}' to any agent. Using configured fallback agent '{Fallback}'.")]
+    private static partial void LogUnmatchedUsingFallback(ILogger logger, string response, string fallback);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "CapabilityRouter could not match LLM response '{Response}' to any registered agent. Configure a fallback agent via the 'fallbackAgentName' constructor parameter to opt in to silent fallback.")]
+    private static partial void LogUnmatchedNoFallback(ILogger logger, string response);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Debug, Message = "CapabilityRouter selected agent '{Name}'.")]
+    private static partial void LogAgentSelected(ILogger logger, string name);
+
     private readonly IChatClient _chatClient;
-    private readonly IReadOnlyList<AgentDefinition> _agents;
+    private readonly ReadOnlyCollection<AgentDefinition> _agents;
     private readonly ILogger<CapabilityRouter> _logger;
     private readonly string? _fallbackAgentName;
 
@@ -96,13 +112,13 @@ public sealed class CapabilityRouter
         // Fast path: only one candidate.
         if (_agents.Count == 1)
         {
-            _logger.LogDebug("Single agent registered; skipping LLM routing call.");
+            LogSingleAgentSkipping(_logger);
             return new CapabilityRouterResult(_agents[0], null);
         }
 
         var prompt = BuildPrompt(taskDescription);
 
-        _logger.LogDebug("Routing task via LLM. Candidates: {Count}", _agents.Count);
+        LogRoutingViaLlm(_logger, _agents.Count);
 
         ChatResponse response = await _chatClient.GetResponseAsync(
             [new ChatMessage(ChatRole.User, prompt)],
@@ -127,24 +143,18 @@ public sealed class CapabilityRouter
                 selected = _agents.First(
                     a => string.Equals(a.Name, _fallbackAgentName, StringComparison.OrdinalIgnoreCase));
 
-                _logger.LogWarning(
-                    "CapabilityRouter could not match LLM response '{Response}' to any agent. " +
-                    "Using configured fallback agent '{Fallback}'.",
-                    responseLine, selected.Name);
+                LogUnmatchedUsingFallback(_logger, responseLine, selected.Name);
             }
             else
             {
-                _logger.LogError(
-                    "CapabilityRouter could not match LLM response '{Response}' to any registered agent. " +
-                    "Configure a fallback agent via the 'fallbackAgentName' constructor parameter to opt in to silent fallback.",
-                    responseLine);
+                LogUnmatchedNoFallback(_logger, responseLine);
 
                 throw new RoutingException(responseLine);
             }
         }
         else
         {
-            _logger.LogDebug("CapabilityRouter selected agent '{Name}'.", selected.Name);
+            LogAgentSelected(_logger, selected.Name);
         }
 
         // Capture any reasoning the LLM returned beyond the first line.

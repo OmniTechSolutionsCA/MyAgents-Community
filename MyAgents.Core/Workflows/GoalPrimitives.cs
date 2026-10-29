@@ -266,7 +266,7 @@ public sealed record GoalPrioritizationPolicyEntry(
 /// </summary>
 public sealed class CompositeGoalPrioritizationPolicy : IGoalPrioritizationPolicy
 {
-    private readonly IReadOnlyList<GoalPrioritizationPolicyEntry> _policies;
+    private readonly GoalPrioritizationPolicyEntry[] _policies;
 
     public CompositeGoalPrioritizationPolicy(params IGoalPrioritizationPolicy[] policies)
         : this(policies.Select(static policy => new GoalPrioritizationPolicyEntry(policy)).ToArray())
@@ -277,7 +277,7 @@ public sealed class CompositeGoalPrioritizationPolicy : IGoalPrioritizationPolic
     {
         ArgumentNullException.ThrowIfNull(policies);
         _policies = policies.ToArray();
-        if (_policies.Count == 0)
+        if (_policies.Length == 0)
             throw new ArgumentException("At least one prioritization policy must be provided.", nameof(policies));
 
         if (_policies.Any(static entry => entry.Weight < 0))
@@ -293,7 +293,7 @@ public sealed class CompositeGoalPrioritizationPolicy : IGoalPrioritizationPolic
         ArgumentNullException.ThrowIfNull(context);
 
         var score = 0.0;
-        var reasons = new List<string>(_policies.Count);
+        var reasons = new List<string>(_policies.Length);
         foreach (var entry in _policies)
         {
             cancellationToken.ThrowIfCancellationRequested();

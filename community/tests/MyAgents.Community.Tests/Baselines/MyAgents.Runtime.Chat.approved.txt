@@ -1,0 +1,12 @@
+TYPE class MyAgents.Runtime.Chat.ChatClientRuntime
+  CTOR ChatClientRuntime(Microsoft.Extensions.AI.IChatClient chatClient, Microsoft.Extensions.Options.IOptions<MyAgents.Runtime.Chat.ChatClientRuntimeOptions> options)
+  METHOD MyAgents.Core.IAgent CreateAgent(MyAgents.Core.AgentDefinition definition, MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Runtime.Chat.ChatClientRuntimeOptions
+  CTOR ChatClientRuntimeOptions()
+  PROP string DefaultModelId { get; set; }
+  PROP System.Nullable<int> MaxOutputTokens { get; set; }
+  PROP int MaxParallelToolCalls { get; set; }
+  PROP int MaxToolRoundTrips { get; set; }
+  PROP System.Nullable<float> Temperature { get; set; }
+TYPE class MyAgents.Runtime.Chat.ChatClientRuntimeServiceCollectionExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgentsChatRuntime(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<MyAgents.Runtime.Chat.ChatClientRuntimeOptions> configure)

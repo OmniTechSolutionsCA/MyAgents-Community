@@ -1,0 +1,233 @@
+TYPE class MyAgents.Memory.BM25Index
+  CTOR BM25Index(double k1, double b)
+  PROP int DocumentCount { get; }
+  METHOD System.Collections.Generic.IReadOnlyList<System.ValueTuple<string, double>> Search(string query, int maxResults)
+  METHOD bool Remove(string docId)
+  METHOD void AddOrUpdate(string docId, string content)
+  METHOD void Clear()
+TYPE class MyAgents.Memory.DefaultMemoryRetriever
+  CTOR DefaultMemoryRetriever(MyAgents.Core.Memory.IMemoryStore store, MyAgents.Memory.IVectorMemoryStore vectorStore, MyAgents.Memory.IMemoryTelemetrySink telemetrySink)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.MemorySearchResult>> SearchAsync(string ns, MyAgents.Memory.MemoryQuery query, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.EpisodicMemoryEntry
+  CTOR EpisodicMemoryEntry(string EpisodeId, string SessionId, string Summary, System.Collections.Generic.IReadOnlyList<string> KeyFacts, System.Collections.Generic.IReadOnlyList<string> Entities, System.DateTimeOffset Timestamp, double Salience, System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata)
+  PROP System.Collections.Generic.IReadOnlyList<string> Entities { get; set; }
+  PROP string EpisodeId { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> KeyFacts { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata { get; set; }
+  PROP double Salience { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string Summary { get; set; }
+  PROP System.DateTimeOffset Timestamp { get; set; }
+  METHOD MyAgents.Memory.EpisodicMemoryEntry <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.EpisodicMemoryEntry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& EpisodeId, string& SessionId, string& Summary, System.Collections.Generic.IReadOnlyList<string>& KeyFacts, System.Collections.Generic.IReadOnlyList<string>& Entities, System.DateTimeOffset& Timestamp, double& Salience, System.Collections.Generic.IReadOnlyDictionary<string, string>& Metadata)
+TYPE class MyAgents.Memory.EpisodicMemoryFeature
+  CTOR EpisodicMemoryFeature(MyAgents.Memory.IEpisodicMemoryStore store)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Memory.EpisodicMemoryStore
+  CTOR EpisodicMemoryStore(MyAgents.Core.Memory.IMemoryStore underlyingStore, MyAgents.Memory.IHybridMemoryRetriever retriever, string ns)
+  FIELD string DefaultNamespace
+  METHOD System.Threading.Tasks.ValueTask ConsolidateEpisodesAsync(string sessionId, System.TimeSpan olderThan, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveEpisodeAsync(MyAgents.Memory.EpisodicMemoryEntry episode, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> GetSessionEpisodesAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> RecallEpisodesAsync(MyAgents.Memory.EpisodicRecallQuery query, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.EpisodicRecallQuery
+  CTOR EpisodicRecallQuery(string Query, string SessionIdFilter, int MaxEpisodes, double MinSalience, System.Nullable<System.TimeSpan> MaxAge)
+  PROP System.Nullable<System.TimeSpan> MaxAge { get; set; }
+  PROP int MaxEpisodes { get; set; }
+  PROP double MinSalience { get; set; }
+  PROP string Query { get; set; }
+  PROP string SessionIdFilter { get; set; }
+  METHOD MyAgents.Memory.EpisodicRecallQuery <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.EpisodicRecallQuery other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Query, string& SessionIdFilter, int& MaxEpisodes, double& MinSalience, System.Nullable<System.TimeSpan>& MaxAge)
+TYPE class MyAgents.Memory.HybridMemoryQuery
+  CTOR HybridMemoryQuery(string QueryText, int MaxResults, double DenseWeight, double SparseWeight, int RrfK, MyAgents.Memory.HybridRankingMode RankingMode, double MinScore, System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters)
+  PROP double DenseWeight { get; set; }
+  PROP int MaxResults { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters { get; set; }
+  PROP double MinScore { get; set; }
+  PROP string QueryText { get; set; }
+  PROP MyAgents.Memory.HybridRankingMode RankingMode { get; set; }
+  PROP int RrfK { get; set; }
+  PROP double SparseWeight { get; set; }
+  METHOD MyAgents.Memory.HybridMemoryQuery <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.HybridMemoryQuery other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& QueryText, int& MaxResults, double& DenseWeight, double& SparseWeight, int& RrfK, MyAgents.Memory.HybridRankingMode& RankingMode, double& MinScore, System.Collections.Generic.IReadOnlyDictionary<string, string>& MetadataFilters)
+TYPE class MyAgents.Memory.HybridMemoryRetriever
+  CTOR HybridMemoryRetriever(MyAgents.Core.Memory.IMemoryStore store, MyAgents.Memory.IVectorMemoryStore vectorStore, MyAgents.Memory.IMemoryTelemetrySink telemetrySink)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.HybridMemorySearchResult>> SearchHybridAsync(string ns, MyAgents.Memory.HybridMemoryQuery query, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.MemorySearchResult>> SearchAsync(string ns, MyAgents.Memory.MemoryQuery query, System.Threading.CancellationToken cancellationToken)
+  METHOD void IndexLexicalEntry(string ns, MyAgents.Core.Memory.MemoryEntry entry)
+  METHOD void RemoveLexicalEntry(string ns, string key)
+TYPE class MyAgents.Memory.HybridMemorySearchResult
+  CTOR HybridMemorySearchResult(MyAgents.Core.Memory.MemoryEntry Entry, double FusedScore, System.Nullable<int> DenseRank, System.Nullable<float> DenseSimilarity, System.Nullable<int> SparseRank, System.Nullable<double> SparseScore)
+  PROP System.Nullable<int> DenseRank { get; set; }
+  PROP System.Nullable<float> DenseSimilarity { get; set; }
+  PROP MyAgents.Core.Memory.MemoryEntry Entry { get; set; }
+  PROP double FusedScore { get; set; }
+  PROP System.Nullable<int> SparseRank { get; set; }
+  PROP System.Nullable<double> SparseScore { get; set; }
+  METHOD MyAgents.Memory.HybridMemorySearchResult <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.HybridMemorySearchResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Memory.MemoryEntry& Entry, double& FusedScore, System.Nullable<int>& DenseRank, System.Nullable<float>& DenseSimilarity, System.Nullable<int>& SparseRank, System.Nullable<double>& SparseScore)
+TYPE enum MyAgents.Memory.HybridRankingMode
+  FIELD MyAgents.Memory.HybridRankingMode ReciprocalRankFusion
+  FIELD MyAgents.Memory.HybridRankingMode WeightedLinearCombination
+TYPE interface MyAgents.Memory.IEpisodicMemoryStore
+  METHOD System.Threading.Tasks.ValueTask ConsolidateEpisodesAsync(string sessionId, System.TimeSpan olderThan, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveEpisodeAsync(MyAgents.Memory.EpisodicMemoryEntry episode, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> GetSessionEpisodesAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> RecallEpisodesAsync(MyAgents.Memory.EpisodicRecallQuery query, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Memory.IHybridMemoryRetriever
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.HybridMemorySearchResult>> SearchHybridAsync(string ns, MyAgents.Memory.HybridMemoryQuery query, System.Threading.CancellationToken cancellationToken)
+  METHOD void IndexLexicalEntry(string ns, MyAgents.Core.Memory.MemoryEntry entry)
+  METHOD void RemoveLexicalEntry(string ns, string key)
+TYPE interface MyAgents.Memory.IMemoryRetriever
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.MemorySearchResult>> SearchAsync(string ns, MyAgents.Memory.MemoryQuery query, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Memory.IMemorySummaryGenerator
+  METHOD System.Threading.Tasks.ValueTask<string> GenerateAsync(string ns, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Memory.MemoryEntry> entries, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Memory.IMemoryTelemetrySink
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Memory.MemoryRetrievalTelemetry telemetry, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Memory.IVectorMemoryStore
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.VectorSearchResult>> VectorSearchAsync(string ns, string query, int maxResults, float minScore, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.MemoryQuery
+  CTOR MemoryQuery(string Text, int MaxResults, double SemanticWeight, double RecencyWeight, double ImportanceWeight, double KeywordWeight, double MinScore, System.Nullable<System.TimeSpan> RecencyHalfLife, System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters)
+  PROP double ImportanceWeight { get; set; }
+  PROP double KeywordWeight { get; set; }
+  PROP int MaxResults { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters { get; set; }
+  PROP double MinScore { get; set; }
+  PROP System.Nullable<System.TimeSpan> RecencyHalfLife { get; set; }
+  PROP double RecencyWeight { get; set; }
+  PROP double SemanticWeight { get; set; }
+  PROP string Text { get; set; }
+  METHOD MyAgents.Memory.MemoryQuery <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.MemoryQuery other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Text, int& MaxResults, double& SemanticWeight, double& RecencyWeight, double& ImportanceWeight, double& KeywordWeight, double& MinScore, System.Nullable<System.TimeSpan>& RecencyHalfLife, System.Collections.Generic.IReadOnlyDictionary<string, string>& MetadataFilters)
+TYPE class MyAgents.Memory.MemoryRetentionPolicy
+  CTOR MemoryRetentionPolicy(int MaxEntries, System.Nullable<System.TimeSpan> MaxAge, bool SummarizeTrimmedEntries, string SummaryKeyPrefix, int SummarySourceCount)
+  PROP System.Nullable<System.TimeSpan> MaxAge { get; set; }
+  PROP int MaxEntries { get; set; }
+  PROP bool SummarizeTrimmedEntries { get; set; }
+  PROP string SummaryKeyPrefix { get; set; }
+  PROP int SummarySourceCount { get; set; }
+  METHOD MyAgents.Memory.MemoryRetentionPolicy <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.MemoryRetentionPolicy other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(int& MaxEntries, System.Nullable<System.TimeSpan>& MaxAge, bool& SummarizeTrimmedEntries, string& SummaryKeyPrefix, int& SummarySourceCount)
+TYPE class MyAgents.Memory.MemoryRetentionResult
+  CTOR MemoryRetentionResult(int DeletedCount, int SummarizedCount, MyAgents.Core.Memory.MemoryEntry SummaryEntry)
+  PROP int DeletedCount { get; set; }
+  PROP int SummarizedCount { get; set; }
+  PROP MyAgents.Core.Memory.MemoryEntry SummaryEntry { get; set; }
+  METHOD MyAgents.Memory.MemoryRetentionResult <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.MemoryRetentionResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(int& DeletedCount, int& SummarizedCount, MyAgents.Core.Memory.MemoryEntry& SummaryEntry)
+TYPE class MyAgents.Memory.MemoryRetentionService
+  CTOR MemoryRetentionService(MyAgents.Core.Memory.IMemoryStore store, MyAgents.Memory.IMemorySummaryGenerator summaryGenerator)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Memory.MemoryRetentionResult> ApplyAsync(string ns, MyAgents.Memory.MemoryRetentionPolicy policy, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.MemoryRetrievalTelemetry
+  CTOR MemoryRetrievalTelemetry(string Namespace, string QueryText, int CandidateCount, int ResultCount, string TopResultKey, double TopResultScore, double AverageScore, System.DateTimeOffset RecordedAt, System.Collections.Generic.IReadOnlyList<string> ResultKeys)
+  PROP double AverageScore { get; set; }
+  PROP int CandidateCount { get; set; }
+  PROP string Namespace { get; set; }
+  PROP string QueryText { get; set; }
+  PROP System.DateTimeOffset RecordedAt { get; set; }
+  PROP int ResultCount { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> ResultKeys { get; set; }
+  PROP string TopResultKey { get; set; }
+  PROP double TopResultScore { get; set; }
+  METHOD MyAgents.Memory.MemoryRetrievalTelemetry <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.MemoryRetrievalTelemetry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Namespace, string& QueryText, int& CandidateCount, int& ResultCount, string& TopResultKey, double& TopResultScore, double& AverageScore, System.DateTimeOffset& RecordedAt, System.Collections.Generic.IReadOnlyList<string>& ResultKeys)
+TYPE class MyAgents.Memory.MemorySearchResult
+  CTOR MemorySearchResult(MyAgents.Core.Memory.MemoryEntry Entry, double Score, double SemanticScore, double KeywordScore, double RecencyScore, double ImportanceScore)
+  PROP MyAgents.Core.Memory.MemoryEntry Entry { get; set; }
+  PROP double ImportanceScore { get; set; }
+  PROP double KeywordScore { get; set; }
+  PROP double RecencyScore { get; set; }
+  PROP double Score { get; set; }
+  PROP double SemanticScore { get; set; }
+  METHOD MyAgents.Memory.MemorySearchResult <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.MemorySearchResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Memory.MemoryEntry& Entry, double& Score, double& SemanticScore, double& KeywordScore, double& RecencyScore, double& ImportanceScore)
+TYPE class MyAgents.Memory.MemoryServiceExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddEpisodicMemory(Microsoft.Extensions.DependencyInjection.IServiceCollection services, string ns)
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddHybridMemoryRetrieval(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMemoryRetrieval(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+TYPE class MyAgents.Memory.RecallEpisodicMemoriesTool
+  CTOR RecallEpisodicMemoriesTool(MyAgents.Memory.IEpisodicMemoryStore store)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.RetrievalAugmentationFeature
+  CTOR RetrievalAugmentationFeature(MyAgents.Memory.RetrievalAugmentationOptions options)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Memory.RetrievalAugmentationOptions
+  CTOR RetrievalAugmentationOptions(string Namespace, int MaxResults, double MinScore, System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters, string Instruction)
+  PROP string Instruction { get; set; }
+  PROP int MaxResults { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> MetadataFilters { get; set; }
+  PROP double MinScore { get; set; }
+  PROP string Namespace { get; set; }
+  METHOD MyAgents.Memory.RetrievalAugmentationOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.RetrievalAugmentationOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Namespace, int& MaxResults, double& MinScore, System.Collections.Generic.IReadOnlyDictionary<string, string>& MetadataFilters, string& Instruction)
+TYPE class MyAgents.Memory.SaveEpisodicFactTool
+  CTOR SaveEpisodicFactTool(MyAgents.Memory.IEpisodicMemoryStore store)
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.VectorMemoryFeature
+  CTOR VectorMemoryFeature(Microsoft.Extensions.AI.IEmbeddingGenerator<string, Microsoft.Extensions.AI.Embedding<float>> embedder)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Memory.VectorMemoryStore
+  CTOR VectorMemoryStore(Microsoft.Extensions.AI.IEmbeddingGenerator<string, Microsoft.Extensions.AI.Embedding<float>> embedder)
+  METHOD System.Threading.Tasks.ValueTask ClearAsync(string ns, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SetAsync(MyAgents.Core.Memory.MemoryEntry entry, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Memory.MemoryEntry> GetAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Memory.MemoryEntry>> SearchAsync(string ns, string query, int maxResults, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.VectorSearchResult>> VectorSearchAsync(string ns, string query, int maxResults, float minScore, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Memory.VectorSearchResult
+  CTOR VectorSearchResult(MyAgents.Core.Memory.MemoryEntry Entry, float Score)
+  PROP MyAgents.Core.Memory.MemoryEntry Entry { get; set; }
+  PROP float Score { get; set; }
+  METHOD MyAgents.Memory.VectorSearchResult <Clone>$()
+  METHOD bool Equals(MyAgents.Memory.VectorSearchResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Memory.MemoryEntry& Entry, float& Score)

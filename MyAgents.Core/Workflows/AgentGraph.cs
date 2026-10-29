@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -660,35 +661,35 @@ public sealed class AgentGraph<TState>
     public string ToMermaid(string direction = "TD")
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"graph {direction}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"graph {direction}");
 
         // Nodes
         foreach (var name in _nodes.Keys)
         {
             if (_subgraphNodes.Contains(name))
-                sb.AppendLine($"    {Sanitize(name)}[[\"{name}\"]]");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(name)}[[\"{name}\"]]");
             else
-                sb.AppendLine($"    {Sanitize(name)}[\"{name}\"]");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(name)}[\"{name}\"]");
         }
 
-        sb.AppendLine($"    {Sanitize(End)}([\"END\"])");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(End)}([\"END\"])");
 
         // Unconditional edges
         foreach (var (from, to) in _edges)
-            sb.AppendLine($"    {Sanitize(from)} --> {Sanitize(to)}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(from)} --> {Sanitize(to)}");
 
         // Conditional edges
         foreach (var (from, _) in _conditionalEdges)
-            sb.AppendLine($"    {Sanitize(from)} -.->|condition| {Sanitize(from)}_router{{\"router\"}}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(from)} -.->|condition| {Sanitize(from)}_router{{\"router\"}}");
 
         // Fan-out edges
         foreach (var (from, targets) in _fanOutEdges)
             foreach (var target in targets)
-                sb.AppendLine($"    {Sanitize(from)} ==>|fan-out| {Sanitize(target)}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(from)} ==>|fan-out| {Sanitize(target)}");
 
         // Send edges
         foreach (var (from, _) in _sendEdges)
-            sb.AppendLine($"    {Sanitize(from)} -.->|send| {Sanitize(from)}_send{{\"dynamic\"}}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    {Sanitize(from)} -.->|send| {Sanitize(from)}_send{{\"dynamic\"}}");
 
         return sb.ToString().TrimEnd();
     }
@@ -701,44 +702,44 @@ public sealed class AgentGraph<TState>
     public string ToDot(string graphName = "AgentGraph")
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"digraph {graphName} {{");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"digraph {graphName} {{");
         sb.AppendLine("    rankdir=TB;");
 
         // Nodes
         foreach (var name in _nodes.Keys)
         {
             var shape = _subgraphNodes.Contains(name) ? "doubleoctagon" : "box";
-            sb.AppendLine($"    \"{name}\" [shape={shape}];");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    \"{name}\" [shape={shape}];");
         }
 
-        sb.AppendLine($"    \"END\" [shape=doublecircle];");
+        sb.AppendLine("    \"END\" [shape=doublecircle];");
 
         // Unconditional edges
         foreach (var (from, to) in _edges)
         {
             var target = to == End ? "END" : to;
-            sb.AppendLine($"    \"{from}\" -> \"{target}\";");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    \"{from}\" -> \"{target}\";");
         }
 
         // Conditional edges
         foreach (var (from, _) in _conditionalEdges)
-            sb.AppendLine($"    \"{from}\" -> \"{from}_router\" [style=dashed, label=\"condition\"];");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    \"{from}\" -> \"{from}_router\" [style=dashed, label=\"condition\"];");
 
         // Fan-out edges
         foreach (var (from, targets) in _fanOutEdges)
             foreach (var target in targets)
-                sb.AppendLine($"    \"{from}\" -> \"{target}\" [style=bold, label=\"fan-out\"];");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    \"{from}\" -> \"{target}\" [style=bold, label=\"fan-out\"];");
 
         // Send edges
         foreach (var (from, _) in _sendEdges)
-            sb.AppendLine($"    \"{from}\" -> \"{from}_send\" [style=dashed, label=\"send\"];");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"    \"{from}\" -> \"{from}_send\" [style=dashed, label=\"send\"];");
 
         sb.AppendLine("}");
         return sb.ToString().TrimEnd();
     }
 
     private static string Sanitize(string name) =>
-        name.Replace(" ", "_").Replace("-", "_").Replace(".", "_");
+        name.Replace(' ', '_').Replace('-', '_').Replace('.', '_');
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 

@@ -159,6 +159,39 @@ public sealed class PerformanceOptimizationTests
         Assert.That(executionLog, Is.EqualTo(new[] { "mw1-before", "mw2-before", "inner-agent", "mw2-after", "mw1-after" }));
     }
 
+    // =========================================================================
+    // 6. BM25Index Zero-Allocation EnumerateMatches Tokenization & Search Tests
+    // =========================================================================
+
+    [Test]
+    public void BM25Index_EnumerateMatches_handles_punctuation_and_complex_tokens()
+    {
+        var index = new BM25Index();
+        index.AddOrUpdate("doc1", "High-performance .NET 10 micro-services with C# and async/await architecture.");
+        index.AddOrUpdate("doc2", "Distributed systems, consensus protocols, and raft algorithms.");
+        index.AddOrUpdate("doc3", "Legacy monolithic application with standard relational database.");
+
+        Assert.That(index.DocumentCount, Is.EqualTo(3));
+
+        // Exact hyphenated and dotted term search
+        var results = index.Search("micro-services", maxResults: 5);
+        Assert.That(results.Count, Is.GreaterThan(0));
+        Assert.That(results[0].DocId, Is.EqualTo("doc1"));
+
+        var dotResults = index.Search(".NET 10", maxResults: 5);
+        Assert.That(dotResults.Count, Is.GreaterThan(0));
+        Assert.That(dotResults[0].DocId, Is.EqualTo("doc1"));
+
+        // Case-insensitivity check
+        var caseResults = index.Search("DISTRIBUTED RAFT", maxResults: 5);
+        Assert.That(caseResults.Count, Is.GreaterThan(0));
+        Assert.That(caseResults[0].DocId, Is.EqualTo("doc2"));
+
+        // Edge case: Empty & whitespace queries
+        Assert.Throws<ArgumentException>(() => index.Search("   "));
+        Assert.That(index.Search("!@#$%^&*()"), Is.Empty);
+    }
+
     private sealed class LoggingMiddleware(string name, List<string> log) : IAgentMiddleware
     {
         public async ValueTask<AgentTurnResult> InvokeAsync(

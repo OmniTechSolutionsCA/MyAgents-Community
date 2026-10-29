@@ -1,0 +1,1359 @@
+TYPE class MyAgents.Core.AgentAssembly
+  CTOR AgentAssembly()
+  PROP System.Collections.Generic.List<MyAgents.Core.IAgentCapability> Capabilities { get; }
+  PROP MyAgents.Core.Messaging.IAgentChannel Channel { get; set; }
+  PROP MyAgents.Core.Memory.IMemoryStore Memory { get; set; }
+  PROP MyAgents.Core.PipelineBuilder Pipeline { get; }
+  PROP MyAgents.Core.Prompts.PromptRegistry PromptRegistry { get; set; }
+  PROP MyAgents.Core.PromptBuilder Prompts { get; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<System.Type, object> SessionServices { get; }
+  PROP System.Collections.Generic.List<MyAgents.Core.Tools.IToolCallObserver> ToolObservers { get; }
+  PROP MyAgents.Core.ToolCatalogBuilder Tools { get; }
+  METHOD void RegisterSessionService(TService service)
+TYPE class MyAgents.Core.AgentCapabilities
+  FIELD MyAgents.Core.IAgentCapability Channel
+  FIELD MyAgents.Core.IAgentCapability Memory
+  FIELD MyAgents.Core.IAgentCapability MultiModal
+  FIELD MyAgents.Core.IAgentCapability Streaming
+  FIELD MyAgents.Core.IAgentCapability StructuredOutput
+  FIELD MyAgents.Core.IAgentCapability Telemetry
+  FIELD MyAgents.Core.IAgentCapability Tools
+  FIELD MyAgents.Core.IAgentCapability Workflow
+TYPE class MyAgents.Core.AgentContent
+  METHOD MyAgents.Core.AgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.AgentDefinition
+  CTOR AgentDefinition(string Name, System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentFeature> Features, string Description, System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentCapability> Capabilities)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentCapability> Capabilities { get; set; }
+  PROP string Description { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentFeature> Features { get; set; }
+  PROP string Name { get; set; }
+  METHOD MyAgents.Core.AgentDefinition <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentDefinition other)
+  METHOD bool Equals(object obj)
+  METHOD bool HasCapability(MyAgents.Core.IAgentCapability capability)
+  METHOD bool HasCapability(string capabilityId)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentFeature>& Features, string& Description, System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentCapability>& Capabilities)
+TYPE class MyAgents.Core.AgentMessage
+  CTOR AgentMessage(string Role, string Content, string CorrelationId, string ThreadId, string SenderId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentContent> ContentParts)
+  PROP string Content { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentContent> ContentParts { get; set; }
+  PROP string CorrelationId { get; set; }
+  PROP bool IsMultiModal { get; }
+  PROP string Role { get; set; }
+  PROP string SenderId { get; set; }
+  PROP string ThreadId { get; set; }
+  METHOD MyAgents.Core.AgentMessage <Clone>$()
+  METHOD MyAgents.Core.AgentMessage FromParts(string role, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentContent> parts, string textSummary, string correlationId, string threadId, string senderId)
+  METHOD MyAgents.Core.AgentMessage FromText(string role, string text, string correlationId, string threadId, string senderId)
+  METHOD bool Equals(MyAgents.Core.AgentMessage other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Role, string& Content, string& CorrelationId, string& ThreadId, string& SenderId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentContent>& ContentParts)
+TYPE class MyAgents.Core.AgentModelCapability
+  CTOR AgentModelCapability(string ModelId)
+  PROP string Description { get; }
+  PROP string Id { get; }
+  PROP string ModelId { get; set; }
+  METHOD MyAgents.Core.AgentModelCapability <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentModelCapability other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ModelId)
+TYPE class MyAgents.Core.AgentOutputAccumulator
+  METHOD MyAgents.Core.AgentTurnResult Fold(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult> chunks)
+TYPE class MyAgents.Core.AgentPipeline
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.IAgent agent, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> BuildStreamingChain(MyAgents.Core.IAgent agent)
+  METHOD System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> BuildChain(MyAgents.Core.IAgent agent)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.IAgent agent, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.AgentResponseFormat
+  PROP MyAgents.Core.AgentResponseFormat JsonObject { get; }
+  PROP MyAgents.Core.AgentResponseFormat Text { get; }
+  METHOD MyAgents.Core.AgentResponseFormat <Clone>$()
+  METHOD MyAgents.Core.AgentResponseFormat ForJsonSchema(string schemaName, string schemaJson, string schemaDescription, System.Nullable<bool> strict)
+  METHOD MyAgents.Core.AgentResponseFormat ForType(System.Type type, string schemaName, string schemaDescription, System.Text.Json.JsonSerializerOptions options, System.Nullable<bool> strict)
+  METHOD MyAgents.Core.AgentResponseFormat ForType(string schemaName, string schemaDescription, System.Text.Json.JsonSerializerOptions options, System.Nullable<bool> strict)
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.AgentResponseFormat+JsonObjectFormat
+  CTOR JsonObjectFormat()
+  METHOD MyAgents.Core.AgentResponseFormat+JsonObjectFormat <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat other)
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat+JsonObjectFormat other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.AgentResponseFormat+JsonSchemaFormat
+  CTOR JsonSchemaFormat(string SchemaName, string SchemaJson, string SchemaDescription, System.Nullable<bool> Strict)
+  PROP System.Text.Json.JsonElement ParsedSchema { get; }
+  PROP string SchemaDescription { get; set; }
+  PROP string SchemaJson { get; set; }
+  PROP string SchemaName { get; set; }
+  PROP System.Nullable<bool> Strict { get; set; }
+  METHOD MyAgents.Core.AgentResponseFormat+JsonSchemaFormat <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat other)
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat+JsonSchemaFormat other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& SchemaName, string& SchemaJson, string& SchemaDescription, System.Nullable<bool>& Strict)
+TYPE class MyAgents.Core.AgentResponseFormat+TextFormat
+  CTOR TextFormat()
+  METHOD MyAgents.Core.AgentResponseFormat+TextFormat <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat other)
+  METHOD bool Equals(MyAgents.Core.AgentResponseFormat+TextFormat other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.AgentSessionStructuredExtensions
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentStructuredTurnResult<T>> InvokeAsync(MyAgents.Core.IAgentSession session, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Text.Json.JsonSerializerOptions jsonSerializerOptions, System.Nullable<bool> strict, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.AgentStructuredTurnResult<T>
+  CTOR AgentStructuredTurnResult`1(T Value, MyAgents.Core.AgentTurnResult TurnResult)
+  PROP MyAgents.Core.AgentTurnResult TurnResult { get; set; }
+  PROP T Value { get; set; }
+  METHOD MyAgents.Core.AgentStructuredTurnResult<T> <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentStructuredTurnResult<T> other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(T& Value, MyAgents.Core.AgentTurnResult& TurnResult)
+TYPE class MyAgents.Core.AgentTurnContext
+  CTOR AgentTurnContext(string SessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages, MyAgents.Core.AgentTurnServices Services)
+  PROP MyAgents.Core.TurnCapabilities Capabilities { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages { get; set; }
+  PROP MyAgents.Core.AgentTurnServices Services { get; set; }
+  PROP string SessionId { get; set; }
+  METHOD MyAgents.Core.AgentTurnContext <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentTurnContext other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& SessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Messages, MyAgents.Core.AgentTurnServices& Services)
+TYPE class MyAgents.Core.AgentTurnResult
+  CTOR AgentTurnResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Output, MyAgents.Core.AgentTurnTelemetry Telemetry)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Output { get; set; }
+  PROP MyAgents.Core.AgentTurnTelemetry Telemetry { get; set; }
+  METHOD MyAgents.Core.AgentTurnResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentTurnResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Output, MyAgents.Core.AgentTurnTelemetry& Telemetry)
+TYPE class MyAgents.Core.AgentTurnServices
+  CTOR AgentTurnServices(System.IServiceProvider rootProvider)
+  METHOD T GetRequiredService()
+  METHOD T GetService()
+TYPE class MyAgents.Core.AgentTurnTelemetry
+  CTOR AgentTurnTelemetry(System.TimeSpan TurnDuration, int ToolCalls, System.Nullable<int> PromptTokens, System.Nullable<int> CompletionTokens, string ModelId)
+  PROP System.Nullable<int> CompletionTokens { get; set; }
+  PROP string ModelId { get; set; }
+  PROP System.Nullable<int> PromptTokens { get; set; }
+  PROP int ToolCalls { get; set; }
+  PROP System.Nullable<int> TotalTokens { get; }
+  PROP System.TimeSpan TurnDuration { get; set; }
+  METHOD MyAgents.Core.AgentTurnTelemetry <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentTurnTelemetry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.TimeSpan& TurnDuration, int& ToolCalls, System.Nullable<int>& PromptTokens, System.Nullable<int>& CompletionTokens, string& ModelId)
+TYPE class MyAgents.Core.AllowAllToolApprovalPolicy
+  CTOR AllowAllToolApprovalPolicy()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> DecideAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE enum MyAgents.Core.ApprovalScope
+  FIELD MyAgents.Core.ApprovalScope Once
+  FIELD MyAgents.Core.ApprovalScope SessionAlways
+  FIELD MyAgents.Core.ApprovalScope SessionCall
+  FIELD MyAgents.Core.ApprovalScope SessionTool
+TYPE class MyAgents.Core.AsyncSignalApprovalGate
+  CTOR AsyncSignalApprovalGate(System.Nullable<System.TimeSpan> defaultTimeout)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.ToolApprovalRequest> PendingRequests { get; }
+  EVENT System.Action<MyAgents.Core.ToolApprovalRequest, MyAgents.Core.ToolApprovalDecision> OnApprovalRequested
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateOrPromptAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision pendingDecision, System.Threading.CancellationToken cancellationToken)
+  METHOD bool TrySubmitDecision(string approvalId, MyAgents.Core.ToolApprovalDecision decision)
+TYPE class MyAgents.Core.AudioAgentContent
+  CTOR AudioAgentContent(System.ReadOnlyMemory<System.Byte> Data, string MediaType, System.Nullable<System.TimeSpan> Duration, string Language)
+  PROP System.ReadOnlyMemory<System.Byte> Data { get; set; }
+  PROP System.Nullable<System.TimeSpan> Duration { get; set; }
+  PROP string Language { get; set; }
+  PROP string MediaType { get; set; }
+  METHOD MyAgents.Core.AudioAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.AudioAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType, System.Nullable<System.TimeSpan>& Duration, string& Language)
+TYPE class MyAgents.Core.CallbackToolApprovalGate
+  CTOR CallbackToolApprovalGate(System.Func<MyAgents.Core.ToolApprovalRequest, MyAgents.Core.ToolApprovalDecision, MyAgents.Core.ToolApprovalDecision> syncHandler)
+  CTOR CallbackToolApprovalGate(System.Func<MyAgents.Core.ToolApprovalRequest, MyAgents.Core.ToolApprovalDecision, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision>> handler)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateOrPromptAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision pendingDecision, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.CharacterTokenCounter
+  CTOR CharacterTokenCounter()
+  METHOD int CountTokens(string text)
+TYPE class MyAgents.Core.CircuitBreakerMiddleware
+  CTOR CircuitBreakerMiddleware(Microsoft.Extensions.Options.IOptions<MyAgents.Core.CircuitBreakerOptions> options, MyAgents.Core.ITransientErrorClassifier classifier, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.CircuitBreakerMiddleware> logger)
+  CTOR CircuitBreakerMiddleware(int failureThreshold, System.Nullable<System.TimeSpan> openDuration, MyAgents.Core.ITransientErrorClassifier classifier, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.CircuitBreakerMiddleware> logger)
+  PROP MyAgents.Core.CircuitState State { get; }
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD void Reset()
+TYPE class MyAgents.Core.CircuitBreakerOpenException
+  CTOR CircuitBreakerOpenException()
+  CTOR CircuitBreakerOpenException(string message)
+TYPE class MyAgents.Core.CircuitBreakerOptions
+  CTOR CircuitBreakerOptions()
+  PROP int FailureThreshold { get; set; }
+  PROP System.TimeSpan OpenDuration { get; set; }
+TYPE enum MyAgents.Core.CircuitState
+  FIELD MyAgents.Core.CircuitState Closed
+  FIELD MyAgents.Core.CircuitState HalfOpen
+  FIELD MyAgents.Core.CircuitState Open
+TYPE class MyAgents.Core.ConsolePromptApprovalGate
+  CTOR ConsolePromptApprovalGate(System.IO.TextReader reader, System.IO.TextWriter writer, bool autoApproveNonInteractive)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateOrPromptAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision pendingDecision, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.ContextWindowMiddleware
+  CTOR ContextWindowMiddleware(MyAgents.Core.IContextWindowTrimmer trimmer, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.ContextWindowMiddleware> logger)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.DataAgentContent
+  CTOR DataAgentContent(System.ReadOnlyMemory<System.Byte> Data, string MediaType)
+  PROP System.ReadOnlyMemory<System.Byte> Data { get; set; }
+  PROP string MediaType { get; set; }
+  METHOD MyAgents.Core.DataAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.DataAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType)
+TYPE class MyAgents.Core.DeadLetter
+  CTOR DeadLetter(string SessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages, System.Exception Exception, System.DateTimeOffset FailedAt)
+  PROP System.Exception Exception { get; set; }
+  PROP System.DateTimeOffset FailedAt { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages { get; set; }
+  PROP string SessionId { get; set; }
+  METHOD MyAgents.Core.DeadLetter <Clone>$()
+  METHOD bool Equals(MyAgents.Core.DeadLetter other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& SessionId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Messages, System.Exception& Exception, System.DateTimeOffset& FailedAt)
+TYPE class MyAgents.Core.DeadLetterFallbackPolicy
+  CTOR DeadLetterFallbackPolicy(MyAgents.Core.IDeadLetterQueue queue, string fallbackMessage)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> HandleAsync(System.Exception ex, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.DefaultAgentSessionFactory
+  CTOR DefaultAgentSessionFactory(MyAgents.Core.IAgentRuntime runtime, System.IServiceProvider rootProvider)
+  METHOD MyAgents.Core.IAgentSession CreateSession(string sessionId, MyAgents.Core.AgentDefinition definition)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.IAgentSession> CreateSessionAsync(string sessionId, MyAgents.Core.AgentDefinition definition, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.DefaultTransientErrorClassifier
+  CTOR DefaultTransientErrorClassifier()
+  METHOD bool IsTransient(System.Exception exception)
+TYPE class MyAgents.Core.DocumentAgentContent
+  CTOR DocumentAgentContent(System.ReadOnlyMemory<System.Byte> Data, string MediaType, string FileName)
+  PROP System.ReadOnlyMemory<System.Byte> Data { get; set; }
+  PROP string FileName { get; set; }
+  PROP string MediaType { get; set; }
+  METHOD MyAgents.Core.DocumentAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.DocumentAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType, string& FileName)
+TYPE class MyAgents.Core.FallbackMiddleware
+  CTOR FallbackMiddleware(MyAgents.Core.IFallbackPolicy policy, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.FallbackMiddleware> logger)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.FunctionCallingMiddleware
+  CTOR FunctionCallingMiddleware(int maxToolRoundTrips)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.GuardrailViolation
+  CTOR GuardrailViolation(string PolicyName, string Reason, string ReplacementMessage)
+  PROP string PolicyName { get; set; }
+  PROP string Reason { get; set; }
+  PROP string ReplacementMessage { get; set; }
+  METHOD MyAgents.Core.GuardrailViolation <Clone>$()
+  METHOD bool Equals(MyAgents.Core.GuardrailViolation other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& PolicyName, string& Reason, string& ReplacementMessage)
+TYPE interface MyAgents.Core.IAgent
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IAgentCapability
+  PROP string Description { get; }
+  PROP string Id { get; }
+TYPE interface MyAgents.Core.IAgentFeature
+  METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE interface MyAgents.Core.IAgentMiddleware
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IAgentRuntime
+  METHOD MyAgents.Core.IAgent CreateAgent(MyAgents.Core.AgentDefinition definition, MyAgents.Core.AgentAssembly assembly)
+TYPE interface MyAgents.Core.IAgentSession
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentCapability> Capabilities { get; }
+  PROP string SessionId { get; }
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Action<MyAgents.Core.AgentTurnContext> configureContext, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IAgentSessionFactory
+  METHOD MyAgents.Core.IAgentSession CreateSession(string sessionId, MyAgents.Core.AgentDefinition definition)
+TYPE interface MyAgents.Core.IContextWindowTrimmer
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IDeadLetterQueue
+  METHOD System.Threading.Tasks.ValueTask EnqueueAsync(MyAgents.Core.DeadLetter entry, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IFallbackPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> HandleAsync(System.Exception ex, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IGuardrailPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IRunTraceCatalog
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListRunIdsAsync(System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IRunTraceSink
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.RunTraceRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.RunTraceRecord>> ListAsync(string runId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.ISessionApprovalMemory
+  METHOD System.Threading.Tasks.ValueTask ClearSessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask RecordDecisionAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision decision, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> TryGetGrantedDecisionAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.ITerminationCondition
+  METHOD MyAgents.Core.ITerminationCondition All(MyAgents.Core.ITerminationCondition[] conditions)
+  METHOD MyAgents.Core.ITerminationCondition Any(MyAgents.Core.ITerminationCondition[] conditions)
+  METHOD bool ShouldTerminate(MyAgents.Core.AgentTurnResult result, int turnsCompleted)
+  METHOD void Reset()
+TYPE interface MyAgents.Core.ITokenCounter
+  METHOD int CountTokens(string text)
+TYPE interface MyAgents.Core.IToolApprovalAuditSink
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.ToolApprovalAuditRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.ToolApprovalAuditRecord>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.ToolApprovalAuditRecord>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IToolApprovalGate
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateOrPromptAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision pendingDecision, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IToolApprovalInbox
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.PendingToolApproval>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IToolApprovalPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> DecideAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.IToolApprovalStore
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.PendingToolApproval approval, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.PendingToolApproval> GetAsync(string approvalId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.PendingToolApproval>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.ITransientErrorClassifier
+  METHOD bool IsTransient(System.Exception exception)
+TYPE class MyAgents.Core.ImageAgentContent
+  CTOR ImageAgentContent(System.ReadOnlyMemory<System.Byte> Data, string MediaType)
+  PROP System.ReadOnlyMemory<System.Byte> Data { get; set; }
+  PROP string MediaType { get; set; }
+  METHOD MyAgents.Core.ImageAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.ImageAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType)
+TYPE class MyAgents.Core.InMemoryDeadLetterQueue
+  CTOR InMemoryDeadLetterQueue()
+  PROP System.Collections.Generic.IReadOnlyCollection<MyAgents.Core.DeadLetter> Items { get; }
+  METHOD System.Threading.Tasks.ValueTask EnqueueAsync(MyAgents.Core.DeadLetter entry, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.InMemoryRunTraceSink
+  CTOR InMemoryRunTraceSink()
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.RunTraceRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.RunTraceRecord>> ListAsync(string runId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListRunIdsAsync(System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.InMemorySessionApprovalMemory
+  CTOR InMemorySessionApprovalMemory()
+  METHOD System.Threading.Tasks.ValueTask ClearSessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask RecordDecisionAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision decision, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> TryGetGrantedDecisionAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.InMemoryToolApprovalAuditSink
+  CTOR InMemoryToolApprovalAuditSink()
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.ToolApprovalAuditRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.ToolApprovalAuditRecord>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.ToolApprovalAuditRecord>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.InMemoryToolApprovalStore
+  CTOR InMemoryToolApprovalStore()
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.PendingToolApproval approval, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.PendingToolApproval> GetAsync(string approvalId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.PendingToolApproval>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.PendingToolApproval>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.MaxTurnsTermination
+  CTOR MaxTurnsTermination(int maxTurns)
+  METHOD bool ShouldTerminate(MyAgents.Core.AgentTurnResult result, int turnsCompleted)
+TYPE interface MyAgents.Core.Memory.IMemoryStore
+  METHOD System.Threading.Tasks.ValueTask ClearAsync(string ns, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SetAsync(MyAgents.Core.Memory.MemoryEntry entry, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Memory.MemoryEntry> GetAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Memory.MemoryEntry>> SearchAsync(string ns, string query, int maxResults, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Memory.InMemoryMemoryStore
+  CTOR InMemoryMemoryStore()
+  PROP int Count { get; }
+  METHOD System.Threading.Tasks.ValueTask ClearAsync(string ns, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SetAsync(MyAgents.Core.Memory.MemoryEntry entry, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Memory.MemoryEntry> GetAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Memory.MemoryEntry>> SearchAsync(string ns, string query, int maxResults, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Memory.MemoryEntry
+  CTOR MemoryEntry(string Key, string Namespace, string Content, System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata, System.Nullable<System.DateTimeOffset> CreatedAt)
+  PROP string Content { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> CreatedAt { get; set; }
+  PROP string Key { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata { get; set; }
+  PROP string Namespace { get; set; }
+  METHOD MyAgents.Core.Memory.MemoryEntry <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Memory.MemoryEntry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Key, string& Namespace, string& Content, System.Collections.Generic.IReadOnlyDictionary<string, string>& Metadata, System.Nullable<System.DateTimeOffset>& CreatedAt)
+TYPE class MyAgents.Core.Messaging.ChannelEnvelope
+  CTOR ChannelEnvelope(MyAgents.Core.AgentMessage Message, string SenderAgentName, string TargetAgentName, System.Nullable<System.DateTimeOffset> PublishedAt)
+  PROP MyAgents.Core.AgentMessage Message { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> PublishedAt { get; set; }
+  PROP string SenderAgentName { get; set; }
+  PROP string TargetAgentName { get; set; }
+  METHOD MyAgents.Core.Messaging.ChannelEnvelope <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Messaging.ChannelEnvelope other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.AgentMessage& Message, string& SenderAgentName, string& TargetAgentName, System.Nullable<System.DateTimeOffset>& PublishedAt)
+TYPE interface MyAgents.Core.Messaging.IAgentChannel
+  METHOD MyAgents.Core.Messaging.IChannelSubscription Subscribe()
+  METHOD System.Threading.Tasks.ValueTask PublishAsync(MyAgents.Core.Messaging.ChannelEnvelope envelope, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Messaging.IChannelSubscription
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.Messaging.ChannelEnvelope> ReadAllAsync(System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Messaging.InMemoryAgentChannel
+  CTOR InMemoryAgentChannel(int capacity)
+  PROP long DroppedMessages { get; }
+  EVENT System.Action<MyAgents.Core.Messaging.ChannelEnvelope> MessageDropped
+  METHOD MyAgents.Core.Messaging.IChannelSubscription Subscribe()
+  METHOD System.Threading.Tasks.ValueTask PublishAsync(MyAgents.Core.Messaging.ChannelEnvelope envelope, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()
+TYPE class MyAgents.Core.MyAgentsServiceExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgents(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgents(Microsoft.Extensions.DependencyInjection.IServiceCollection services, MyAgents.Core.IAgentRuntime runtime)
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgents(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, MyAgents.Core.IAgentRuntime> runtimeFactory)
+TYPE class MyAgents.Core.MyAgentsTelemetry
+  FIELD System.Diagnostics.ActivitySource ActivitySource
+  FIELD string ActivitySourceName
+  FIELD System.Diagnostics.Metrics.Meter Meter
+  FIELD string MeterName
+  FIELD string Version
+TYPE class MyAgents.Core.PendingToolApproval
+  CTOR PendingToolApproval(string ApprovalId, MyAgents.Core.ToolApprovalRequest Request, MyAgents.Core.ToolApprovalDecision Decision)
+  PROP string ApprovalId { get; set; }
+  PROP MyAgents.Core.ToolApprovalDecision Decision { get; set; }
+  PROP MyAgents.Core.ToolApprovalRequest Request { get; set; }
+  METHOD MyAgents.Core.PendingToolApproval <Clone>$()
+  METHOD bool Equals(MyAgents.Core.PendingToolApproval other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ApprovalId, MyAgents.Core.ToolApprovalRequest& Request, MyAgents.Core.ToolApprovalDecision& Decision)
+TYPE class MyAgents.Core.PipelineBuilder
+  CTOR PipelineBuilder()
+  METHOD MyAgents.Core.AgentPipeline Build()
+  METHOD MyAgents.Core.PipelineBuilder Use(MyAgents.Core.IAgentMiddleware middleware)
+TYPE class MyAgents.Core.PromptBuilder
+  CTOR PromptBuilder()
+  METHOD MyAgents.Core.PromptBuilder AddSystem(string prompt)
+  METHOD string Build()
+TYPE interface MyAgents.Core.Prompts.IPromptTemplate
+  PROP string Name { get; }
+  PROP string Version { get; }
+  METHOD string Render(System.Collections.Generic.IReadOnlyDictionary<string, string> variables)
+TYPE class MyAgents.Core.Prompts.PromptRegistry
+  CTOR PromptRegistry()
+  METHOD MyAgents.Core.Prompts.IPromptTemplate Get(string name, string version)
+  METHOD MyAgents.Core.Prompts.IPromptTemplate GetLatest(string name)
+  METHOD MyAgents.Core.Prompts.PromptRegistry Register(MyAgents.Core.Prompts.PromptTemplateDefinition definition)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Prompts.IPromptTemplate> All()
+  METHOD bool Contains(string name, string version)
+TYPE class MyAgents.Core.Prompts.PromptTemplateDefinition
+  CTOR PromptTemplateDefinition(string Name, string Version, string Template, string Description)
+  PROP string Description { get; set; }
+  PROP string Name { get; set; }
+  PROP string Template { get; set; }
+  PROP string Version { get; set; }
+  METHOD MyAgents.Core.Prompts.PromptTemplateDefinition <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Prompts.PromptTemplateDefinition other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Version, string& Template, string& Description)
+TYPE class MyAgents.Core.RequireApprovalPolicy
+  CTOR RequireApprovalPolicy(string reason)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> DecideAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.ResilienceMiddleware
+  CTOR ResilienceMiddleware(Microsoft.Extensions.Options.IOptions<MyAgents.Core.ResilienceOptions> options, MyAgents.Core.ITransientErrorClassifier classifier, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.ResilienceMiddleware> logger)
+  CTOR ResilienceMiddleware(MyAgents.Core.ITransientErrorClassifier classifier, int maxRetries, System.Nullable<System.TimeSpan> baseDelay, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.ResilienceMiddleware> logger)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.ResilienceOptions
+  CTOR ResilienceOptions()
+  PROP System.TimeSpan BaseDelay { get; set; }
+  PROP int MaxRetries { get; set; }
+TYPE class MyAgents.Core.RuleBasedToolApprovalPolicy
+  CTOR RuleBasedToolApprovalPolicy()
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy AddArgumentPatternRule(string toolPattern, System.Text.RegularExpressions.Regex argumentRegex, MyAgents.Core.ToolApprovalDecision decision)
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy AddRule(System.Func<MyAgents.Core.ToolApprovalRequest, MyAgents.Core.ToolApprovalDecision> rule)
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy AllowTool(string toolPattern, string reason)
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy DenyTool(string toolPattern, string reason)
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy RequireApprovalForTool(string toolPattern, string reason)
+  METHOD MyAgents.Core.RuleBasedToolApprovalPolicy SetDefaultDecision(MyAgents.Core.ToolApprovalDecision decision)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> DecideAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+TYPE enum MyAgents.Core.RunEventKind
+  FIELD MyAgents.Core.RunEventKind AgentHandoff
+  FIELD MyAgents.Core.RunEventKind ApprovalDecided
+  FIELD MyAgents.Core.RunEventKind ApprovalRequested
+  FIELD MyAgents.Core.RunEventKind BranchCreated
+  FIELD MyAgents.Core.RunEventKind CredentialRouteResolved
+  FIELD MyAgents.Core.RunEventKind ExecutionOutput
+  FIELD MyAgents.Core.RunEventKind GatewayDeliveryCompleted
+  FIELD MyAgents.Core.RunEventKind GatewayDeliveryFailed
+  FIELD MyAgents.Core.RunEventKind GatewayDeliveryRetried
+  FIELD MyAgents.Core.RunEventKind GatewayMessageReceived
+  FIELD MyAgents.Core.RunEventKind GatewayMessageSent
+  FIELD MyAgents.Core.RunEventKind GatewayOwnershipRejected
+  FIELD MyAgents.Core.RunEventKind GatewayProcessingFailed
+  FIELD MyAgents.Core.RunEventKind GatewayRetryScheduled
+  FIELD MyAgents.Core.RunEventKind PolicyStopped
+  FIELD MyAgents.Core.RunEventKind RunResumed
+  FIELD MyAgents.Core.RunEventKind SnapshotSaved
+  FIELD MyAgents.Core.RunEventKind ToolCompleted
+  FIELD MyAgents.Core.RunEventKind ToolRequested
+  FIELD MyAgents.Core.RunEventKind TurnCompleted
+  FIELD MyAgents.Core.RunEventKind TurnStarted
+TYPE class MyAgents.Core.RunTraceRecord
+  CTOR RunTraceRecord(string RunId, string SessionId, MyAgents.Core.RunEventKind EventKind, System.DateTimeOffset RecordedAt, string WorkflowId, string NodeName, string ToolName, string CorrelationId, string PayloadJson, string RelatedId)
+  PROP string CorrelationId { get; set; }
+  PROP MyAgents.Core.RunEventKind EventKind { get; set; }
+  PROP string NodeName { get; set; }
+  PROP string PayloadJson { get; set; }
+  PROP System.DateTimeOffset RecordedAt { get; set; }
+  PROP string RelatedId { get; set; }
+  PROP string RunId { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string ToolName { get; set; }
+  PROP string WorkflowId { get; set; }
+  METHOD MyAgents.Core.RunTraceRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.RunTraceRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& RunId, string& SessionId, MyAgents.Core.RunEventKind& EventKind, System.DateTimeOffset& RecordedAt, string& WorkflowId, string& NodeName, string& ToolName, string& CorrelationId, string& PayloadJson, string& RelatedId)
+TYPE class MyAgents.Core.SlidingWindowTrimmer
+  CTOR SlidingWindowTrimmer(int maxMessages)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.StaticFallbackPolicy
+  CTOR StaticFallbackPolicy(string fallbackMessage)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> HandleAsync(System.Exception ex, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.TextAgentContent
+  CTOR TextAgentContent(string Text)
+  PROP string Text { get; set; }
+  METHOD MyAgents.Core.TextAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.TextAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Text)
+TYPE class MyAgents.Core.TextMentionTermination
+  CTOR TextMentionTermination(string phrase, System.StringComparison comparison)
+  METHOD bool ShouldTerminate(MyAgents.Core.AgentTurnResult result, int turnsCompleted)
+TYPE class MyAgents.Core.TokenBudgetTermination
+  CTOR TokenBudgetTermination(int maxTokens)
+  METHOD bool ShouldTerminate(MyAgents.Core.AgentTurnResult result, int turnsCompleted)
+  METHOD void Reset()
+TYPE class MyAgents.Core.TokenBudgetTrimmer
+  CTOR TokenBudgetTrimmer(int maxTokens, MyAgents.Core.ITokenCounter tokenCounter)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.ToolApprovalAuditRecord
+  CTOR ToolApprovalAuditRecord(string AuditId, string ApprovalId, string SessionId, string ToolName, string ArgumentsJson, MyAgents.Core.ToolApprovalDecision Decision, System.DateTimeOffset Timestamp, System.TimeSpan Duration, string GateType)
+  PROP string ApprovalId { get; set; }
+  PROP string ArgumentsJson { get; set; }
+  PROP string AuditId { get; set; }
+  PROP MyAgents.Core.ToolApprovalDecision Decision { get; set; }
+  PROP System.TimeSpan Duration { get; set; }
+  PROP string GateType { get; set; }
+  PROP string SessionId { get; set; }
+  PROP System.DateTimeOffset Timestamp { get; set; }
+  PROP string ToolName { get; set; }
+  METHOD MyAgents.Core.ToolApprovalAuditRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.ToolApprovalAuditRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& AuditId, string& ApprovalId, string& SessionId, string& ToolName, string& ArgumentsJson, MyAgents.Core.ToolApprovalDecision& Decision, System.DateTimeOffset& Timestamp, System.TimeSpan& Duration, string& GateType)
+TYPE class MyAgents.Core.ToolApprovalDecision
+  CTOR ToolApprovalDecision(MyAgents.Core.ToolApprovalStatus Status, System.DateTimeOffset DecidedAt, string DecidedBy, string Reason, MyAgents.Core.ApprovalScope Scope)
+  PROP System.DateTimeOffset DecidedAt { get; set; }
+  PROP string DecidedBy { get; set; }
+  PROP string Reason { get; set; }
+  PROP MyAgents.Core.ApprovalScope Scope { get; set; }
+  PROP MyAgents.Core.ToolApprovalStatus Status { get; set; }
+  METHOD MyAgents.Core.ToolApprovalDecision <Clone>$()
+  METHOD MyAgents.Core.ToolApprovalDecision Approve(string decidedBy, string reason, MyAgents.Core.ApprovalScope scope)
+  METHOD MyAgents.Core.ToolApprovalDecision Pending(string reason)
+  METHOD MyAgents.Core.ToolApprovalDecision Reject(string decidedBy, string reason)
+  METHOD bool Equals(MyAgents.Core.ToolApprovalDecision other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.ToolApprovalStatus& Status, System.DateTimeOffset& DecidedAt, string& DecidedBy, string& Reason, MyAgents.Core.ApprovalScope& Scope)
+TYPE class MyAgents.Core.ToolApprovalEvaluator
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.AgentTurnServices services, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ISessionApprovalMemory sessionMemory, MyAgents.Core.IToolApprovalStore approvalStore, MyAgents.Core.IToolApprovalPolicy policy, MyAgents.Core.IToolApprovalGate gate, MyAgents.Core.IToolApprovalAuditSink auditSink, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateAsync(MyAgents.Core.ToolApprovalRequest request, System.IServiceProvider services, System.Threading.CancellationToken cancellationToken)
+  METHOD string CreateApprovalId(string sessionId, string toolName, string argumentsJson, string callId)
+TYPE class MyAgents.Core.ToolApprovalRequest
+  CTOR ToolApprovalRequest(string ApprovalId, string SessionId, string ToolName, string ArgumentsJson, System.DateTimeOffset RequestedAt, string CallId, string WorkflowId, string AgentName, string Reason)
+  PROP string AgentName { get; set; }
+  PROP string ApprovalId { get; set; }
+  PROP string ArgumentsJson { get; set; }
+  PROP string CallId { get; set; }
+  PROP string Reason { get; set; }
+  PROP System.DateTimeOffset RequestedAt { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string ToolName { get; set; }
+  PROP string WorkflowId { get; set; }
+  METHOD MyAgents.Core.ToolApprovalRequest <Clone>$()
+  METHOD bool Equals(MyAgents.Core.ToolApprovalRequest other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ApprovalId, string& SessionId, string& ToolName, string& ArgumentsJson, System.DateTimeOffset& RequestedAt, string& CallId, string& WorkflowId, string& AgentName, string& Reason)
+TYPE class MyAgents.Core.ToolApprovalRequiredException
+  CTOR ToolApprovalRequiredException(MyAgents.Core.PendingToolApproval approval)
+  PROP MyAgents.Core.PendingToolApproval Approval { get; }
+TYPE enum MyAgents.Core.ToolApprovalStatus
+  FIELD MyAgents.Core.ToolApprovalStatus Approved
+  FIELD MyAgents.Core.ToolApprovalStatus Pending
+  FIELD MyAgents.Core.ToolApprovalStatus Rejected
+TYPE class MyAgents.Core.ToolCatalog
+  CTOR ToolCatalog(System.Collections.Generic.IEnumerable<MyAgents.Core.Tools.ITool> tools)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Tools.ITool> Tools { get; }
+  METHOD bool TryGet(string name, MyAgents.Core.Tools.ITool& tool)
+TYPE class MyAgents.Core.ToolCatalogBuilder
+  CTOR ToolCatalogBuilder()
+  METHOD MyAgents.Core.ToolCatalogBuilder Add(MyAgents.Core.Tools.ITool tool)
+  METHOD MyAgents.Core.ToolCatalogBuilder AddFunction(System.Delegate method, string name, string description, System.Text.Json.JsonSerializerOptions jsonSerializerOptions)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Tools.ITool> Build()
+TYPE class MyAgents.Core.Tools.AgentFunctionCall
+  CTOR AgentFunctionCall(string Name, string ArgumentsJson, string CallId)
+  PROP string ArgumentsJson { get; set; }
+  PROP string CallId { get; set; }
+  PROP string Name { get; set; }
+  METHOD MyAgents.Core.Tools.AgentFunctionCall <Clone>$()
+  METHOD MyAgents.Core.Tools.AgentFunctionCall Create(string name, TArguments arguments, string callId)
+  METHOD MyAgents.Core.Tools.AgentFunctionCall FromJson(string name, string argumentsJson, string callId)
+  METHOD bool Equals(MyAgents.Core.Tools.AgentFunctionCall other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& ArgumentsJson, string& CallId)
+TYPE class MyAgents.Core.Tools.AgentFunctionCallSerializer
+  METHOD bool TryParse(string content, MyAgents.Core.Tools.AgentFunctionCall& call)
+  METHOD string Serialize(MyAgents.Core.Tools.AgentFunctionCall call)
+TYPE class MyAgents.Core.Tools.DefaultProcessRunner
+  CTOR DefaultProcessRunner()
+  METHOD System.Threading.Tasks.Task<MyAgents.Core.Tools.ProcessResult> RunAsync(string fileName, System.Collections.Generic.IEnumerable<string> args, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Tools.DelegateTool
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD MyAgents.Core.Tools.DelegateTool Create(System.Delegate method, string name, string description, System.Text.Json.JsonSerializerOptions jsonSerializerOptions)
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Tools.HandoffTool
+  CTOR HandoffTool()
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Tools.IProcessRunner
+  METHOD System.Threading.Tasks.Task<MyAgents.Core.Tools.ProcessResult> RunAsync(string fileName, System.Collections.Generic.IEnumerable<string> args, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Tools.ITool
+  PROP string Description { get; }
+  PROP string Name { get; }
+  PROP string ParametersSchemaJson { get; }
+  METHOD System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Tools.IToolCallObserver
+  METHOD System.Threading.Tasks.ValueTask OnToolCalledAsync(MyAgents.Core.Tools.ToolResultObservation result, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask OnToolCallingAsync(MyAgents.Core.Tools.ToolCallObservation call, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Tools.ProcessResult
+  CTOR ProcessResult(int ExitCode, string Stdout, string Stderr)
+  PROP int ExitCode { get; set; }
+  PROP string Stderr { get; set; }
+  PROP string Stdout { get; set; }
+  METHOD MyAgents.Core.Tools.ProcessResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Tools.ProcessResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(int& ExitCode, string& Stdout, string& Stderr)
+TYPE class MyAgents.Core.Tools.ToolCallObservation
+  CTOR ToolCallObservation(string ToolName, string Arguments, string CallId, string SessionId, System.DateTimeOffset OccurredAt)
+  PROP string Arguments { get; set; }
+  PROP string CallId { get; set; }
+  PROP System.DateTimeOffset OccurredAt { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string ToolName { get; set; }
+  METHOD MyAgents.Core.Tools.ToolCallObservation <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Tools.ToolCallObservation other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& ToolName, string& Arguments, string& CallId, string& SessionId, System.DateTimeOffset& OccurredAt)
+TYPE class MyAgents.Core.Tools.ToolResultObservation
+  CTOR ToolResultObservation(MyAgents.Core.Tools.ToolCallObservation Call, string Result, System.Exception Exception, System.TimeSpan Duration)
+  PROP MyAgents.Core.Tools.ToolCallObservation Call { get; set; }
+  PROP System.TimeSpan Duration { get; set; }
+  PROP System.Exception Exception { get; set; }
+  PROP string Result { get; set; }
+  METHOD MyAgents.Core.Tools.ToolResultObservation <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Tools.ToolResultObservation other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Tools.ToolCallObservation& Call, string& Result, System.Exception& Exception, System.TimeSpan& Duration)
+TYPE class MyAgents.Core.TurnCapabilities
+  CTOR TurnCapabilities()
+  METHOD bool TryGet(T& value)
+  METHOD void Set(T value)
+TYPE class MyAgents.Core.UriImageAgentContent
+  CTOR UriImageAgentContent(System.Uri Uri, string MediaType)
+  PROP string MediaType { get; set; }
+  PROP System.Uri Uri { get; set; }
+  METHOD MyAgents.Core.UriImageAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.UriImageAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Uri& Uri, string& MediaType)
+TYPE class MyAgents.Core.VideoAgentContent
+  CTOR VideoAgentContent(System.ReadOnlyMemory<System.Byte> Data, string MediaType, System.Nullable<System.TimeSpan> Duration, System.Nullable<int> Width, System.Nullable<int> Height)
+  PROP System.ReadOnlyMemory<System.Byte> Data { get; set; }
+  PROP System.Nullable<System.TimeSpan> Duration { get; set; }
+  PROP System.Nullable<int> Height { get; set; }
+  PROP string MediaType { get; set; }
+  PROP System.Nullable<int> Width { get; set; }
+  METHOD MyAgents.Core.VideoAgentContent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.AgentContent other)
+  METHOD bool Equals(MyAgents.Core.VideoAgentContent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType, System.Nullable<System.TimeSpan>& Duration, System.Nullable<int>& Width, System.Nullable<int>& Height)
+TYPE class MyAgents.Core.Workflows.AdaptationContext
+  CTOR AdaptationContext(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OutcomeRecord> Outcomes, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.FeedbackRecord> Feedback, MyAgents.Core.Workflows.GoalCollection Goals, System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.FeedbackRecord> Feedback { get; set; }
+  PROP MyAgents.Core.Workflows.GoalCollection Goals { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OutcomeRecord> Outcomes { get; set; }
+  METHOD MyAgents.Core.Workflows.AdaptationContext <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.AdaptationContext other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OutcomeRecord>& Outcomes, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.FeedbackRecord>& Feedback, MyAgents.Core.Workflows.GoalCollection& Goals, System.Collections.Generic.IReadOnlyDictionary<string, object>& Metadata)
+TYPE class MyAgents.Core.Workflows.AdaptationHint
+  CTOR AdaptationHint(MyAgents.Core.Workflows.AdaptationHintKind kind, string content, string goalId, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  PROP string Content { get; set; }
+  PROP string GoalId { get; set; }
+  PROP MyAgents.Core.Workflows.AdaptationHintKind Kind { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  METHOD MyAgents.Core.Workflows.AdaptationHint <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.AdaptationHint other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE enum MyAgents.Core.Workflows.AdaptationHintKind
+  FIELD MyAgents.Core.Workflows.AdaptationHintKind Goal
+  FIELD MyAgents.Core.Workflows.AdaptationHintKind Planner
+  FIELD MyAgents.Core.Workflows.AdaptationHintKind Prompt
+TYPE class MyAgents.Core.Workflows.AdaptationResult
+  CTOR AdaptationResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.AdaptationHint> Hints, string Reason)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.AdaptationHint> Hints { get; set; }
+  PROP string Reason { get; set; }
+  METHOD MyAgents.Core.Workflows.AdaptationResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.AdaptationResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.AdaptationHint>& Hints, string& Reason)
+TYPE class MyAgents.Core.Workflows.AdaptationSteps
+  METHOD MyAgents.Core.Workflows.FeedbackRecord RecordFeedback(System.Collections.Generic.ICollection<MyAgents.Core.Workflows.FeedbackRecord> feedback, MyAgents.Core.Workflows.FeedbackKind kind, string summary, System.Nullable<double> score, string goalId, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  METHOD MyAgents.Core.Workflows.OutcomeRecord RecordOutcome(System.Collections.Generic.ICollection<MyAgents.Core.Workflows.OutcomeRecord> outcomes, string name, MyAgents.Core.Workflows.OutcomeStatus status, string summary, string goalId, System.Nullable<double> score, System.Nullable<System.TimeSpan> duration, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> BuildAdaptationMessages(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.AdaptationHint> hints, string additionalInstruction)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AdaptationResult> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OutcomeRecord> outcomes, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.FeedbackRecord> feedback, MyAgents.Core.Workflows.GoalCollection goals, MyAgents.Core.Workflows.IAdaptationPolicy policy, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.AgentGraph<TState>
+  CTOR AgentGraph`1(MyAgents.Core.IAgentSessionFactory sessionFactory, System.Collections.Generic.IEnumerable<MyAgents.Core.AgentDefinition> agentDefinitions, System.Func<TState, TState, TState> merge, int maxIterations, MyAgents.Core.Workflows.IWorkflowCheckpointer checkpointer, MyAgents.Core.Workflows.IGraphHistoryStore historyStore)
+  FIELD string End
+  FIELD string Start
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddConditionalEdge(string fromNode, System.Func<TState, string> router)
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddEdge(string fromNode, string toNode)
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddFanOutEdge(string fromNode, string[] parallelNodes)
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddNode(string nodeName, MyAgents.Core.Workflows.GraphNodeDelegate<TState> node)
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddSendEdge(string fromNode, MyAgents.Core.Workflows.SendRouter<TState> router)
+  METHOD MyAgents.Core.Workflows.AgentGraph<TState> AddSubgraph(string nodeName, MyAgents.Core.Workflows.AgentGraph<TInnerState> subgraph, string subgraphStartNode, System.Func<TState, TInnerState> mapIn, System.Func<TState, TInnerState, TState> mapOut, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.Workflows.GraphStreamEvent<TState>> RunStreamingAsync(string startNode, TState initialState, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, string graphSessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GraphRunResult<TState>> ResumeFromSnapshotAsync(string snapshotId, string startNode, string newSessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GraphRunResult<TState>> RunAsync(string startNode, TState initialState, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, string graphSessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD string ToDot(string graphName)
+  METHOD string ToMermaid(string direction)
+TYPE class MyAgents.Core.Workflows.AgentLoop
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AgentLoopResult<TState>> RunAsync(MyAgents.Core.IAgentSession session, TState initialState, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Func<TState, MyAgents.Core.AgentTurnResult, TState> reducer, MyAgents.Core.ITerminationCondition termination, int maxTurns, System.Action<TState, MyAgents.Core.AgentTurnResult, int> onTurnCompleted, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AgentLoopResult> RunAsync(MyAgents.Core.IAgentSession session, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, MyAgents.Core.ITerminationCondition termination, int maxTurns, System.Action<MyAgents.Core.AgentTurnResult, int> onTurnCompleted, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.AgentLoopResult
+  CTOR AgentLoopResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult> AllResults, MyAgents.Core.AgentTurnResult FinalResult, MyAgents.Core.Workflows.AgentLoopTerminationReason Reason, int TurnsCompleted)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult> AllResults { get; set; }
+  PROP MyAgents.Core.AgentTurnResult FinalResult { get; set; }
+  PROP MyAgents.Core.Workflows.AgentLoopTerminationReason Reason { get; set; }
+  PROP int TurnsCompleted { get; set; }
+  METHOD MyAgents.Core.Workflows.AgentLoopResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.AgentLoopResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult>& AllResults, MyAgents.Core.AgentTurnResult& FinalResult, MyAgents.Core.Workflows.AgentLoopTerminationReason& Reason, int& TurnsCompleted)
+TYPE class MyAgents.Core.Workflows.AgentLoopResult<TState>
+  CTOR AgentLoopResult`1(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult> AllResults, MyAgents.Core.AgentTurnResult FinalResult, TState FinalState, MyAgents.Core.Workflows.AgentLoopTerminationReason Reason, int TurnsCompleted)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult> AllResults { get; set; }
+  PROP MyAgents.Core.AgentTurnResult FinalResult { get; set; }
+  PROP TState FinalState { get; set; }
+  PROP MyAgents.Core.Workflows.AgentLoopTerminationReason Reason { get; set; }
+  PROP int TurnsCompleted { get; set; }
+  METHOD MyAgents.Core.Workflows.AgentLoopResult<TState> <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.AgentLoopResult<TState> other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult>& AllResults, MyAgents.Core.AgentTurnResult& FinalResult, TState& FinalState, MyAgents.Core.Workflows.AgentLoopTerminationReason& Reason, int& TurnsCompleted)
+TYPE enum MyAgents.Core.Workflows.AgentLoopTerminationReason
+  FIELD MyAgents.Core.Workflows.AgentLoopTerminationReason ConditionMet
+  FIELD MyAgents.Core.Workflows.AgentLoopTerminationReason MaxTurnsReached
+TYPE class MyAgents.Core.Workflows.CompositeAdaptationPolicy
+  CTOR CompositeAdaptationPolicy(MyAgents.Core.Workflows.IAdaptationPolicy[] policies)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AdaptationResult> EvaluateAsync(MyAgents.Core.Workflows.AdaptationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.CompositeGoalPrioritizationPolicy
+  CTOR CompositeGoalPrioritizationPolicy(MyAgents.Core.Workflows.IGoalPrioritizationPolicy[] policies)
+  CTOR CompositeGoalPrioritizationPolicy(System.Collections.Generic.IEnumerable<MyAgents.Core.Workflows.GoalPrioritizationPolicyEntry> policies)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GoalPrioritizationResult> ScoreAsync(MyAgents.Core.Workflows.GoalRecord goal, MyAgents.Core.Workflows.GoalPrioritizationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.CompositeModelRoutingPolicy
+  CTOR CompositeModelRoutingPolicy(MyAgents.Core.Workflows.IModelRoutingPolicy[] policies)
+  CTOR CompositeModelRoutingPolicy(System.Collections.Generic.IEnumerable<MyAgents.Core.Workflows.RoutingPolicyEntry> policies)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.RoutingScoreResult> ScoreAsync(MyAgents.Core.Workflows.RoutingCandidate candidate, MyAgents.Core.Workflows.RoutingContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.ConsensusCandidate
+  CTOR ConsensusCandidate(string SourceAgentName, MyAgents.Core.AgentTurnResult Result, string Choice)
+  PROP string Choice { get; set; }
+  PROP MyAgents.Core.AgentTurnResult Result { get; set; }
+  PROP string SourceAgentName { get; set; }
+  METHOD MyAgents.Core.Workflows.ConsensusCandidate <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.ConsensusCandidate other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& SourceAgentName, MyAgents.Core.AgentTurnResult& Result, string& Choice)
+TYPE class MyAgents.Core.Workflows.ConsensusResult
+  CTOR ConsensusResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate> Candidates, string WinningChoice, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate> WinningCandidates, bool TieBroken)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate> Candidates { get; set; }
+  PROP bool TieBroken { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate> WinningCandidates { get; set; }
+  PROP string WinningChoice { get; set; }
+  METHOD MyAgents.Core.Workflows.ConsensusResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.ConsensusResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate>& Candidates, string& WinningChoice, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate>& WinningCandidates, bool& TieBroken)
+TYPE class MyAgents.Core.Workflows.ConsensusSteps
+  METHOD MyAgents.Core.Workflows.ConsensusResult ReduceMajority(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate> candidates, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate>, MyAgents.Core.Workflows.ConsensusCandidate> tieBreaker)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.ConsensusResult> RunMajorityVoteAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, System.Collections.Generic.IReadOnlyList<string> agentNames, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Func<MyAgents.Core.AgentTurnResult, string> choiceSelector, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ConsensusCandidate>, MyAgents.Core.Workflows.ConsensusCandidate> tieBreaker, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.DefaultAdaptationPolicy
+  CTOR DefaultAdaptationPolicy(double lowScoreThreshold, int maxHints)
+  PROP double LowScoreThreshold { get; }
+  PROP int MaxHints { get; }
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AdaptationResult> EvaluateAsync(MyAgents.Core.Workflows.AdaptationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.DefaultGoalPrioritizationPolicy
+  CTOR DefaultGoalPrioritizationPolicy()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GoalPrioritizationResult> ScoreAsync(MyAgents.Core.Workflows.GoalRecord goal, MyAgents.Core.Workflows.GoalPrioritizationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.DefaultModelRoutingPolicy
+  CTOR DefaultModelRoutingPolicy()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.RoutingScoreResult> ScoreAsync(MyAgents.Core.Workflows.RoutingCandidate candidate, MyAgents.Core.Workflows.RoutingContext context, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.DistributedCacheCheckpointer
+  CTOR DistributedCacheCheckpointer(Microsoft.Extensions.Caching.Distributed.IDistributedCache cache, Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions cacheOptions, string keyPrefix)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.Workflows.WorkflowSnapshot snapshot, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.WorkflowSnapshot> LoadAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE enum MyAgents.Core.Workflows.FeedbackKind
+  FIELD MyAgents.Core.Workflows.FeedbackKind Evaluation
+  FIELD MyAgents.Core.Workflows.FeedbackKind Human
+  FIELD MyAgents.Core.Workflows.FeedbackKind System
+  FIELD MyAgents.Core.Workflows.FeedbackKind Tooling
+TYPE class MyAgents.Core.Workflows.FeedbackRecord
+  CTOR FeedbackRecord(MyAgents.Core.Workflows.FeedbackKind kind, string summary, System.Nullable<double> score, string goalId, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  PROP string GoalId { get; set; }
+  PROP MyAgents.Core.Workflows.FeedbackKind Kind { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP System.Nullable<double> Score { get; set; }
+  PROP string Summary { get; set; }
+  METHOD MyAgents.Core.Workflows.FeedbackRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.FeedbackRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.Workflows.FileSystemCheckpointer
+  CTOR FileSystemCheckpointer(string directory)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.Workflows.WorkflowSnapshot snapshot, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.WorkflowSnapshot> LoadAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.FileSystemGraphHistoryStore
+  CTOR FileSystemGraphHistoryStore(string directory)
+  METHOD System.Threading.Tasks.ValueTask SaveSnapshotAsync(MyAgents.Core.Workflows.GraphSnapshot snapshot, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GraphSnapshot> GetSnapshotAsync(string snapshotId, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GraphSnapshot>> ListSnapshotsAsync(string sessionId, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListSessionIdsAsync(System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.GoalCollection
+  CTOR GoalCollection()
+  PROP System.Collections.Generic.List<MyAgents.Core.Workflows.GoalRecord> Goals { get; }
+  METHOD MyAgents.Core.Workflows.GoalRecord Add(MyAgents.Core.Workflows.GoalDefinition definition, string goalId, MyAgents.Core.Workflows.GoalStatus status, string parentGoalId, string statusReason, System.Nullable<System.DateTimeOffset> createdAt)
+  METHOD MyAgents.Core.Workflows.GoalRecord Get(string goalId)
+  METHOD MyAgents.Core.Workflows.GoalRecord Register(MyAgents.Core.Workflows.GoalRecord goal)
+  METHOD MyAgents.Core.Workflows.GoalRecord UpdateStatus(string goalId, MyAgents.Core.Workflows.GoalStatus status, string reason, System.Nullable<System.DateTimeOffset> updatedAt)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GoalRecord> Active()
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GoalRecord> ListByStatus(MyAgents.Core.Workflows.GoalStatus[] statuses)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GoalRecord> Ready()
+TYPE class MyAgents.Core.Workflows.GoalDefinition
+  CTOR GoalDefinition(string name, string objective, MyAgents.Core.Workflows.GoalPriority priority, System.Collections.Generic.IReadOnlyList<string> successCriteria, System.Collections.Generic.IReadOnlyDictionary<string, string> metadata)
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata { get; set; }
+  PROP string Name { get; set; }
+  PROP string Objective { get; set; }
+  PROP MyAgents.Core.Workflows.GoalPriority Priority { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> SuccessCriteria { get; set; }
+  METHOD MyAgents.Core.Workflows.GoalDefinition <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GoalDefinition other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.Workflows.GoalPrioritizationContext
+  CTOR GoalPrioritizationContext(MyAgents.Core.Workflows.GoalCollection Goals, System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata)
+  PROP MyAgents.Core.Workflows.GoalCollection Goals { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  METHOD MyAgents.Core.Workflows.GoalPrioritizationContext <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GoalPrioritizationContext other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.GoalCollection& Goals, System.Collections.Generic.IReadOnlyDictionary<string, object>& Metadata)
+TYPE class MyAgents.Core.Workflows.GoalPrioritizationPolicyEntry
+  CTOR GoalPrioritizationPolicyEntry(MyAgents.Core.Workflows.IGoalPrioritizationPolicy Policy, double Weight)
+  PROP MyAgents.Core.Workflows.IGoalPrioritizationPolicy Policy { get; set; }
+  PROP double Weight { get; set; }
+  METHOD MyAgents.Core.Workflows.GoalPrioritizationPolicyEntry <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GoalPrioritizationPolicyEntry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.IGoalPrioritizationPolicy& Policy, double& Weight)
+TYPE class MyAgents.Core.Workflows.GoalPrioritizationResult
+  CTOR GoalPrioritizationResult(double Score, string Reason)
+  PROP string Reason { get; set; }
+  PROP double Score { get; set; }
+  METHOD MyAgents.Core.Workflows.GoalPrioritizationResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GoalPrioritizationResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(double& Score, string& Reason)
+TYPE enum MyAgents.Core.Workflows.GoalPriority
+  FIELD MyAgents.Core.Workflows.GoalPriority Critical
+  FIELD MyAgents.Core.Workflows.GoalPriority High
+  FIELD MyAgents.Core.Workflows.GoalPriority Low
+  FIELD MyAgents.Core.Workflows.GoalPriority Normal
+TYPE class MyAgents.Core.Workflows.GoalRecord
+  CTOR GoalRecord(string goalId, MyAgents.Core.Workflows.GoalDefinition definition, MyAgents.Core.Workflows.GoalStatus status, System.Nullable<System.DateTimeOffset> createdAt, System.Nullable<System.DateTimeOffset> updatedAt, string parentGoalId, string statusReason)
+  PROP System.DateTimeOffset CreatedAt { get; set; }
+  PROP MyAgents.Core.Workflows.GoalDefinition Definition { get; set; }
+  PROP string GoalId { get; set; }
+  PROP string ParentGoalId { get; set; }
+  PROP MyAgents.Core.Workflows.GoalStatus Status { get; set; }
+  PROP string StatusReason { get; set; }
+  PROP System.DateTimeOffset UpdatedAt { get; set; }
+  METHOD MyAgents.Core.Workflows.GoalRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GoalRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE enum MyAgents.Core.Workflows.GoalStatus
+  FIELD MyAgents.Core.Workflows.GoalStatus Active
+  FIELD MyAgents.Core.Workflows.GoalStatus Blocked
+  FIELD MyAgents.Core.Workflows.GoalStatus Cancelled
+  FIELD MyAgents.Core.Workflows.GoalStatus Completed
+  FIELD MyAgents.Core.Workflows.GoalStatus Failed
+  FIELD MyAgents.Core.Workflows.GoalStatus Proposed
+  FIELD MyAgents.Core.Workflows.GoalStatus Ready
+TYPE class MyAgents.Core.Workflows.GoalSteps
+  METHOD MyAgents.Core.Workflows.GoalRecord MarkBlocked(MyAgents.Core.Workflows.GoalCollection goals, string goalId, string reason)
+  METHOD MyAgents.Core.Workflows.GoalRecord MarkCompleted(MyAgents.Core.Workflows.GoalCollection goals, string goalId, string reason)
+  METHOD MyAgents.Core.Workflows.GoalRecord MarkFailed(MyAgents.Core.Workflows.GoalCollection goals, string goalId, string reason)
+  METHOD MyAgents.Core.Workflows.GoalRecord MarkReady(MyAgents.Core.Workflows.GoalCollection goals, string goalId, string reason)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> BuildGoalMessages(MyAgents.Core.Workflows.GoalRecord goal, string additionalInstruction)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GoalRecord> SelectNextAsync(MyAgents.Core.Workflows.GoalCollection goals, MyAgents.Core.Workflows.IGoalPrioritizationPolicy policy, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.GraphNodeDelegate<TState>
+  CTOR GraphNodeDelegate`1(object object, System.IntPtr method)
+  METHOD System.IAsyncResult BeginInvoke(TState state, MyAgents.Core.IAgentSession session, System.Threading.CancellationToken cancellationToken, System.AsyncCallback callback, object object)
+  METHOD System.Threading.Tasks.ValueTask<TState> EndInvoke(System.IAsyncResult result)
+  METHOD System.Threading.Tasks.ValueTask<TState> Invoke(TState state, MyAgents.Core.IAgentSession session, System.Threading.CancellationToken cancellationToken)
+TYPE enum MyAgents.Core.Workflows.GraphRunReason
+  FIELD MyAgents.Core.Workflows.GraphRunReason Completed
+  FIELD MyAgents.Core.Workflows.GraphRunReason MaxIterationsReached
+TYPE class MyAgents.Core.Workflows.GraphRunResult<TState>
+  CTOR GraphRunResult`1(TState FinalState, MyAgents.Core.Workflows.GraphRunReason Reason, int IterationsExecuted)
+  PROP TState FinalState { get; set; }
+  PROP int IterationsExecuted { get; set; }
+  PROP MyAgents.Core.Workflows.GraphRunReason Reason { get; set; }
+  METHOD MyAgents.Core.Workflows.GraphRunResult<TState> <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GraphRunResult<TState> other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(TState& FinalState, MyAgents.Core.Workflows.GraphRunReason& Reason, int& IterationsExecuted)
+TYPE class MyAgents.Core.Workflows.GraphSnapshot
+  CTOR GraphSnapshot(string SnapshotId, string SessionId, string WorkflowId, string NodeName, int StateVersion, string StateJson, System.DateTimeOffset CreatedAt, string ParentSnapshotId, string BranchedFromSessionId)
+  PROP string BranchLabel { get; set; }
+  PROP string BranchedFromSessionId { get; set; }
+  PROP System.DateTimeOffset CreatedAt { get; set; }
+  PROP string NodeName { get; set; }
+  PROP string ParentSnapshotId { get; set; }
+  PROP string ReplayedFromSnapshotId { get; set; }
+  PROP string ResumeFromNode { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string SnapshotId { get; set; }
+  PROP string StateJson { get; set; }
+  PROP int StateVersion { get; set; }
+  PROP string WorkflowId { get; set; }
+  METHOD MyAgents.Core.Workflows.GraphSnapshot <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GraphSnapshot other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& SnapshotId, string& SessionId, string& WorkflowId, string& NodeName, int& StateVersion, string& StateJson, System.DateTimeOffset& CreatedAt, string& ParentSnapshotId, string& BranchedFromSessionId)
+TYPE class MyAgents.Core.Workflows.GraphStreamEvent<TState>
+  CTOR GraphStreamEvent`1(string NodeName, TState StateAfterNode, bool IsFinal, System.Nullable<MyAgents.Core.Workflows.GraphRunReason> Reason, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> NodeOutput)
+  PROP bool IsFinal { get; set; }
+  PROP string NodeName { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> NodeOutput { get; set; }
+  PROP System.Nullable<MyAgents.Core.Workflows.GraphRunReason> Reason { get; set; }
+  PROP TState StateAfterNode { get; set; }
+  METHOD MyAgents.Core.Workflows.GraphStreamEvent<TState> <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.GraphStreamEvent<TState> other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& NodeName, TState& StateAfterNode, bool& IsFinal, System.Nullable<MyAgents.Core.Workflows.GraphRunReason>& Reason, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& NodeOutput)
+TYPE class MyAgents.Core.Workflows.HumanInputRequest
+  CTOR HumanInputRequest(string StepId, string Prompt, string Reply)
+  PROP string Prompt { get; set; }
+  PROP string Reply { get; set; }
+  PROP string StepId { get; set; }
+  METHOD MyAgents.Core.Workflows.HumanInputRequest <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.HumanInputRequest other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& StepId, string& Prompt, string& Reply)
+TYPE class MyAgents.Core.Workflows.HumanInputRequiredException
+  CTOR HumanInputRequiredException(MyAgents.Core.Workflows.WorkflowSnapshot snapshot)
+  PROP MyAgents.Core.Workflows.WorkflowSnapshot Snapshot { get; }
+TYPE interface MyAgents.Core.Workflows.IAdaptationPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.AdaptationResult> EvaluateAsync(MyAgents.Core.Workflows.AdaptationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IGoalPrioritizationPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GoalPrioritizationResult> ScoreAsync(MyAgents.Core.Workflows.GoalRecord goal, MyAgents.Core.Workflows.GoalPrioritizationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IGraphHistoryCatalog
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListSessionIdsAsync(System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IGraphHistoryStore
+  METHOD System.Threading.Tasks.ValueTask SaveSnapshotAsync(MyAgents.Core.Workflows.GraphSnapshot snapshot, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GraphSnapshot> GetSnapshotAsync(string snapshotId, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GraphSnapshot>> ListSnapshotsAsync(string sessionId, System.Threading.CancellationToken ct)
+TYPE interface MyAgents.Core.Workflows.IModelRoutingPolicy
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.RoutingScoreResult> ScoreAsync(MyAgents.Core.Workflows.RoutingCandidate candidate, MyAgents.Core.Workflows.RoutingContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IWorkflowApprovalContext
+  METHOD MyAgents.Core.PendingToolApproval GetPendingToolApproval()
+TYPE interface MyAgents.Core.Workflows.IWorkflowCheckpointer
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.Workflows.WorkflowSnapshot snapshot, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.WorkflowSnapshot> LoadAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IWorkflowSession<TState>
+  PROP string SessionId { get; }
+  PROP TState State { get; set; }
+  METHOD MyAgents.Core.Workflows.HumanInputRequest GetPendingHumanInput()
+  METHOD MyAgents.Core.Workflows.WorkflowSnapshot CreateSnapshot()
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> CallAgentStreamingAsync(string agentName, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> CallAgentAsync(string agentName, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Workflows.IWorkflow<TState>
+  PROP string Id { get; }
+  PROP int StateVersion { get; }
+  METHOD System.Threading.Tasks.ValueTask RunAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.InMemoryGraphHistoryStore
+  CTOR InMemoryGraphHistoryStore(int maxSnapshotsPerSession)
+  METHOD System.Threading.Tasks.ValueTask SaveSnapshotAsync(MyAgents.Core.Workflows.GraphSnapshot snapshot, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.GraphSnapshot> GetSnapshotAsync(string snapshotId, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.GraphSnapshot>> ListSnapshotsAsync(string sessionId, System.Threading.CancellationToken ct)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListSessionIdsAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD void Clear()
+  METHOD void ClearSession(string sessionId)
+TYPE class MyAgents.Core.Workflows.OrchestratorOptions
+  CTOR OrchestratorOptions(string PlannerAgentName, System.Collections.Generic.IReadOnlyList<string> WorkerAgentNames, string SynthesizerAgentName, int MaxSteps, int MaxRepairAttempts, bool AllowParallelExecution, string AdditionalInstructions)
+  PROP string AdditionalInstructions { get; set; }
+  PROP bool AllowParallelExecution { get; set; }
+  PROP string EffectiveSynthesizerAgentName { get; }
+  PROP int MaxRepairAttempts { get; set; }
+  PROP int MaxSteps { get; set; }
+  PROP string PlannerAgentName { get; set; }
+  PROP string SynthesizerAgentName { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> WorkerAgentNames { get; set; }
+  METHOD MyAgents.Core.Workflows.OrchestratorOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OrchestratorOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& PlannerAgentName, System.Collections.Generic.IReadOnlyList<string>& WorkerAgentNames, string& SynthesizerAgentName, int& MaxSteps, int& MaxRepairAttempts, bool& AllowParallelExecution, string& AdditionalInstructions)
+TYPE class MyAgents.Core.Workflows.OrchestratorPlan
+  CTOR OrchestratorPlan(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepModel> Steps)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepModel> Steps { get; set; }
+  METHOD MyAgents.Core.Workflows.OrchestratorPlan <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OrchestratorPlan other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepModel>& Steps)
+TYPE class MyAgents.Core.Workflows.OrchestratorResult
+  CTOR OrchestratorResult(MyAgents.Core.Workflows.OrchestratorPlan Plan, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepResult> StepResults, MyAgents.Core.AgentTurnResult FinalResult)
+  PROP MyAgents.Core.AgentTurnResult FinalResult { get; set; }
+  PROP MyAgents.Core.Workflows.OrchestratorPlan Plan { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepResult> StepResults { get; set; }
+  METHOD MyAgents.Core.Workflows.OrchestratorResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OrchestratorResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.OrchestratorPlan& Plan, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.OrchestratorStepResult>& StepResults, MyAgents.Core.AgentTurnResult& FinalResult)
+TYPE class MyAgents.Core.Workflows.OrchestratorStepModel
+  CTOR OrchestratorStepModel(string Name, string Instruction, string WorkerAgentName, bool CanRunInParallel)
+  PROP bool CanRunInParallel { get; set; }
+  PROP string Instruction { get; set; }
+  PROP string Name { get; set; }
+  PROP string WorkerAgentName { get; set; }
+  METHOD MyAgents.Core.Workflows.OrchestratorStepModel <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OrchestratorStepModel other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Name, string& Instruction, string& WorkerAgentName, bool& CanRunInParallel)
+TYPE class MyAgents.Core.Workflows.OrchestratorStepResult
+  CTOR OrchestratorStepResult(MyAgents.Core.Workflows.OrchestratorStepModel Step, string WorkerAgentName, MyAgents.Core.AgentTurnResult Result, int BatchNumber)
+  PROP int BatchNumber { get; set; }
+  PROP MyAgents.Core.AgentTurnResult Result { get; set; }
+  PROP MyAgents.Core.Workflows.OrchestratorStepModel Step { get; set; }
+  PROP string WorkerAgentName { get; set; }
+  METHOD MyAgents.Core.Workflows.OrchestratorStepResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OrchestratorStepResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.OrchestratorStepModel& Step, string& WorkerAgentName, MyAgents.Core.AgentTurnResult& Result, int& BatchNumber)
+TYPE class MyAgents.Core.Workflows.OrchestratorSteps
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.OrchestratorResult> RunAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, MyAgents.Core.Workflows.OrchestratorOptions options, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.OutcomeRecord
+  CTOR OutcomeRecord(string name, MyAgents.Core.Workflows.OutcomeStatus status, string summary, string goalId, System.Nullable<double> score, System.Nullable<System.TimeSpan> duration, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  PROP System.Nullable<System.TimeSpan> Duration { get; set; }
+  PROP string GoalId { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP string Name { get; set; }
+  PROP System.Nullable<double> Score { get; set; }
+  PROP MyAgents.Core.Workflows.OutcomeStatus Status { get; set; }
+  PROP string Summary { get; set; }
+  METHOD MyAgents.Core.Workflows.OutcomeRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.OutcomeRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE enum MyAgents.Core.Workflows.OutcomeStatus
+  FIELD MyAgents.Core.Workflows.OutcomeStatus Blocked
+  FIELD MyAgents.Core.Workflows.OutcomeStatus Failed
+  FIELD MyAgents.Core.Workflows.OutcomeStatus PartiallySucceeded
+  FIELD MyAgents.Core.Workflows.OutcomeStatus Succeeded
+TYPE class MyAgents.Core.Workflows.ReflectionIteration
+  CTOR ReflectionIteration(int IterationNumber, MyAgents.Core.AgentTurnResult CandidateResult, MyAgents.Core.AgentTurnResult CritiqueResult, bool Approved)
+  PROP bool Approved { get; set; }
+  PROP MyAgents.Core.AgentTurnResult CandidateResult { get; set; }
+  PROP MyAgents.Core.AgentTurnResult CritiqueResult { get; set; }
+  PROP int IterationNumber { get; set; }
+  METHOD MyAgents.Core.Workflows.ReflectionIteration <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.ReflectionIteration other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(int& IterationNumber, MyAgents.Core.AgentTurnResult& CandidateResult, MyAgents.Core.AgentTurnResult& CritiqueResult, bool& Approved)
+TYPE class MyAgents.Core.Workflows.ReflectionOptions
+  CTOR ReflectionOptions(string GeneratorAgentName, string CriticAgentName, int MaxIterations, System.Func<MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, bool> ApprovalPredicate, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>, MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> BuildRefinementMessages)
+  PROP System.Func<MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, bool> ApprovalPredicate { get; set; }
+  PROP System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>, MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> BuildRefinementMessages { get; set; }
+  PROP string CriticAgentName { get; set; }
+  PROP string GeneratorAgentName { get; set; }
+  PROP int MaxIterations { get; set; }
+  METHOD MyAgents.Core.Workflows.ReflectionOptions <Clone>$()
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> BuildMessages(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, MyAgents.Core.AgentTurnResult candidate, MyAgents.Core.AgentTurnResult critique, int iteration)
+  METHOD bool Equals(MyAgents.Core.Workflows.ReflectionOptions other)
+  METHOD bool Equals(object obj)
+  METHOD bool IsApproved(MyAgents.Core.AgentTurnResult candidate, MyAgents.Core.AgentTurnResult critique, int iteration)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& GeneratorAgentName, string& CriticAgentName, int& MaxIterations, System.Func<MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, bool>& ApprovalPredicate, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>, MyAgents.Core.AgentTurnResult, MyAgents.Core.AgentTurnResult, int, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>>& BuildRefinementMessages)
+TYPE class MyAgents.Core.Workflows.ReflectionResult
+  CTOR ReflectionResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ReflectionIteration> Iterations, MyAgents.Core.AgentTurnResult FinalCandidate, MyAgents.Core.AgentTurnResult FinalCritique, bool Approved, int IterationsCompleted)
+  PROP bool Approved { get; set; }
+  PROP MyAgents.Core.AgentTurnResult FinalCandidate { get; set; }
+  PROP MyAgents.Core.AgentTurnResult FinalCritique { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ReflectionIteration> Iterations { get; set; }
+  PROP int IterationsCompleted { get; set; }
+  METHOD MyAgents.Core.Workflows.ReflectionResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.ReflectionResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.ReflectionIteration>& Iterations, MyAgents.Core.AgentTurnResult& FinalCandidate, MyAgents.Core.AgentTurnResult& FinalCritique, bool& Approved, int& IterationsCompleted)
+TYPE class MyAgents.Core.Workflows.ReflectionSteps
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> BuildDefaultRefinementMessages(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, MyAgents.Core.AgentTurnResult candidate, MyAgents.Core.AgentTurnResult critique, int iteration)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.ReflectionResult> RunAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, MyAgents.Core.Workflows.ReflectionOptions options, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Threading.CancellationToken cancellationToken)
+  METHOD bool ContainsApprovedCritique(MyAgents.Core.AgentTurnResult candidate, MyAgents.Core.AgentTurnResult critique, int iteration)
+TYPE class MyAgents.Core.Workflows.RoutingCandidate
+  CTOR RoutingCandidate(string candidateId, string target, System.Nullable<double> estimatedCost, System.Nullable<System.TimeSpan> estimatedLatency, System.Nullable<int> maxInputTokens, System.Collections.Generic.IReadOnlyList<string> capabilities, System.Collections.Generic.IReadOnlyDictionary<string, object> metadata)
+  PROP string CandidateId { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<string> Capabilities { get; set; }
+  PROP System.Nullable<double> EstimatedCost { get; set; }
+  PROP System.Nullable<System.TimeSpan> EstimatedLatency { get; set; }
+  PROP System.Nullable<int> MaxInputTokens { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP string Target { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingCandidate <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingCandidate other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.Workflows.RoutingCapabilityRequirement
+  CTOR RoutingCapabilityRequirement(string capabilityId)
+  PROP string CapabilityId { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingCapabilityRequirement <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingCapabilityRequirement other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+TYPE class MyAgents.Core.Workflows.RoutingContext
+  CTOR RoutingContext(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCandidate> Candidates, System.Nullable<int> EstimatedInputTokens, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCapabilityRequirement> RequiredCapabilities, MyAgents.Core.Workflows.GoalRecord Goal, System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCandidate> Candidates { get; set; }
+  PROP System.Nullable<int> EstimatedInputTokens { get; set; }
+  PROP MyAgents.Core.Workflows.GoalRecord Goal { get; set; }
+  PROP System.Collections.Generic.IReadOnlyDictionary<string, object> Metadata { get; set; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCapabilityRequirement> RequiredCapabilities { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingContext <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingContext other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCandidate>& Candidates, System.Nullable<int>& EstimatedInputTokens, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.RoutingCapabilityRequirement>& RequiredCapabilities, MyAgents.Core.Workflows.GoalRecord& Goal, System.Collections.Generic.IReadOnlyDictionary<string, object>& Metadata)
+TYPE class MyAgents.Core.Workflows.RoutingDecision
+  CTOR RoutingDecision(MyAgents.Core.Workflows.RoutingCandidate Candidate, double Score, string Reason)
+  PROP MyAgents.Core.Workflows.RoutingCandidate Candidate { get; set; }
+  PROP string Reason { get; set; }
+  PROP double Score { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingDecision <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingDecision other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.RoutingCandidate& Candidate, double& Score, string& Reason)
+TYPE class MyAgents.Core.Workflows.RoutingPolicyEntry
+  CTOR RoutingPolicyEntry(MyAgents.Core.Workflows.IModelRoutingPolicy Policy, double Weight)
+  PROP MyAgents.Core.Workflows.IModelRoutingPolicy Policy { get; set; }
+  PROP double Weight { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingPolicyEntry <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingPolicyEntry other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Workflows.IModelRoutingPolicy& Policy, double& Weight)
+TYPE class MyAgents.Core.Workflows.RoutingScoreResult
+  CTOR RoutingScoreResult(double Score, string Reason)
+  PROP string Reason { get; set; }
+  PROP double Score { get; set; }
+  METHOD MyAgents.Core.Workflows.RoutingScoreResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.RoutingScoreResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(double& Score, string& Reason)
+TYPE class MyAgents.Core.Workflows.RoutingSteps
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.RoutingDecision> SelectAsync(MyAgents.Core.Workflows.RoutingContext context, MyAgents.Core.Workflows.IModelRoutingPolicy policy, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.SendPacket<TState>
+  CTOR SendPacket`1(string NodeName, TState State)
+  PROP string NodeName { get; set; }
+  PROP TState State { get; set; }
+  METHOD MyAgents.Core.Workflows.SendPacket<TState> <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.SendPacket<TState> other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& NodeName, TState& State)
+TYPE class MyAgents.Core.Workflows.SendRouter<TState>
+  CTOR SendRouter`1(object object, System.IntPtr method)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.SendPacket<TState>> EndInvoke(System.IAsyncResult result)
+  METHOD System.Collections.Generic.IReadOnlyList<MyAgents.Core.Workflows.SendPacket<TState>> Invoke(TState state)
+  METHOD System.IAsyncResult BeginInvoke(TState state, System.AsyncCallback callback, object object)
+TYPE class MyAgents.Core.Workflows.SqliteCheckpointer
+  CTOR SqliteCheckpointer(string databasePath, string tableName)
+  METHOD System.Threading.Tasks.ValueTask DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask SaveAsync(MyAgents.Core.Workflows.WorkflowSnapshot snapshot, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Workflows.WorkflowSnapshot> LoadAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()
+TYPE class MyAgents.Core.Workflows.WorkflowHost
+  CTOR WorkflowHost(MyAgents.Core.IAgentSessionFactory sessionFactory)
+  METHOD MyAgents.Core.Workflows.WorkflowHost RegisterAgent(string agentName, MyAgents.Core.AgentDefinition definition)
+  METHOD System.Threading.Tasks.ValueTask<TState> ResumeAsync(MyAgents.Core.Workflows.IWorkflow<TState> workflow, MyAgents.Core.Workflows.WorkflowSnapshot snapshot, System.Text.Json.JsonSerializerOptions jsonOptions, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<TState> ResumeWithInputAsync(MyAgents.Core.Workflows.IWorkflow<TState> workflow, MyAgents.Core.Workflows.WorkflowSnapshot snapshot, string humanReply, System.Text.Json.JsonSerializerOptions jsonOptions, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<TState> ResumeWithToolApprovalAsync(MyAgents.Core.Workflows.IWorkflow<TState> workflow, MyAgents.Core.Workflows.WorkflowSnapshot snapshot, MyAgents.Core.ToolApprovalDecision decision, System.Text.Json.JsonSerializerOptions jsonOptions, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<TState> RunAsync(MyAgents.Core.Workflows.IWorkflow<TState> workflow, TState initialState, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Workflows.WorkflowSnapshot
+  CTOR WorkflowSnapshot(string WorkflowId, int StateVersion, string SessionId, string StateJson, MyAgents.Core.Workflows.HumanInputRequest PendingHumanInput)
+  PROP MyAgents.Core.Workflows.HumanInputRequest PendingHumanInput { get; set; }
+  PROP MyAgents.Core.PendingToolApproval PendingToolApproval { get; set; }
+  PROP string SessionId { get; set; }
+  PROP string StateJson { get; set; }
+  PROP int StateVersion { get; set; }
+  PROP string WorkflowId { get; set; }
+  METHOD MyAgents.Core.Workflows.WorkflowSnapshot <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Workflows.WorkflowSnapshot other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& WorkflowId, int& StateVersion, string& SessionId, string& StateJson, MyAgents.Core.Workflows.HumanInputRequest& PendingHumanInput)
+TYPE class MyAgents.Core.Workflows.WorkflowSteps
+  METHOD System.Threading.Tasks.ValueTask RequestHumanInputAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, string stepId, string prompt, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask RequestToolApprovalAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, MyAgents.Core.PendingToolApproval approval, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> RunHandoffAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, string firstAgentName, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Func<MyAgents.Core.AgentTurnResult, int, string> nextAgentSelector, MyAgents.Core.ITerminationCondition termination, int maxHops, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> RunSequentialAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, System.Collections.Generic.IReadOnlyList<string> agentNames, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> RunSequentialAsync(MyAgents.Core.Workflows.IWorkflowSession<object> session, System.Collections.Generic.IReadOnlyList<string> agentNames, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> RunStreamingBridgeAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, string sourceAgentName, System.Collections.Generic.IReadOnlyList<string> downstreamAgentNames, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> initialMessages, System.Action<MyAgents.Core.AgentTurnResult> onChunk, System.Func<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>, MyAgents.Core.AgentMessage> compact, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnResult>> RunConcurrentAsync(MyAgents.Core.Workflows.IWorkflowSession<TState> session, System.Collections.Generic.IReadOnlyList<string> agentNames, System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)

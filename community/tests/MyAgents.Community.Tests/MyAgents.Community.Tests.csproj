@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <AnalysisMode>Default</AnalysisMode>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../../MyAgents.Core/MyAgents.Core.csproj" />
@@ -21,5 +22,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Baselines/*.approved.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

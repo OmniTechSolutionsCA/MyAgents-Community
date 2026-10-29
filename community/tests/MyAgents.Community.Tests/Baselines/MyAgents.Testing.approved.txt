@@ -1,0 +1,37 @@
+TYPE class MyAgents.Testing.FakeAgentSession
+  PROP MyAgents.Testing.InMemoryAgent Agent { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.IAgentCapability> Capabilities { get; }
+  PROP int InvocationCount { get; }
+  PROP System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> ReceivedMessages { get; }
+  PROP string SessionId { get; }
+  METHOD MyAgents.Testing.FakeAgentSession Create(string sessionId)
+  METHOD MyAgents.Testing.FakeAgentSession CreateWithMiddleware(string sessionId, MyAgents.Core.IAgentMiddleware[] middlewares)
+  METHOD MyAgents.Testing.FakeAgentSession EnqueueResponse(string content, System.Nullable<int> promptTokens, System.Nullable<int> completionTokens)
+  METHOD MyAgents.Testing.FakeAgentSession EnqueueResult(MyAgents.Core.AgentTurnResult result)
+  METHOD MyAgents.Testing.FakeAgentSession WithFallbackResponse(string content)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask DisposeAsync()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Action<MyAgents.Core.AgentTurnContext> configureContext, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()
+TYPE class MyAgents.Testing.InMemoryAgent
+  CTOR InMemoryAgent(string name)
+  PROP int InvocationCount { get; }
+  PROP string Name { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentTurnContext> ReceivedContexts { get; }
+  METHOD MyAgents.Testing.InMemoryAgent EnqueueResponse(string content, System.Nullable<int> promptTokens, System.Nullable<int> completionTokens)
+  METHOD MyAgents.Testing.InMemoryAgent EnqueueResult(MyAgents.Core.AgentTurnResult result)
+  METHOD MyAgents.Testing.InMemoryAgent WithFallback(MyAgents.Core.AgentTurnResult fallback)
+  METHOD MyAgents.Testing.InMemoryAgent WithFallbackResponse(string content)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.AgentTurnResult> InvokeStreamingAsync(MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()
+  METHOD void Reset()
+TYPE class MyAgents.Testing.InMemoryAgentRuntime
+  CTOR InMemoryAgentRuntime()
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Testing.InMemoryAgent> CreatedAgents { get; }
+  METHOD MyAgents.Core.IAgent CreateAgent(MyAgents.Core.AgentDefinition definition, MyAgents.Core.AgentAssembly assembly)
+  METHOD MyAgents.Testing.InMemoryAgent GetAgent(string agentName)
+  METHOD MyAgents.Testing.InMemoryAgent TryGetAgent(string agentName)
+  METHOD MyAgents.Testing.InMemoryAgentRuntime ForAgent(string agentName, System.Action<MyAgents.Testing.InMemoryAgent> configure)
+  METHOD void ResetAll()

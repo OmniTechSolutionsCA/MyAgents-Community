@@ -13,3 +13,14 @@ indent_size = 4
 [*.{json,yml,yaml,xml,props,targets,csproj,slnx}]
 indent_style = space
 indent_size = 2
+
+[*.cs]
+# CA1711: Identifiers should not have incorrect suffix
+# Domain abstractions such as IDeadLetterQueue, InMemoryDeadLetterQueue, GoalCollection, and GraphNodeDelegate
+# represent domain concepts and idioms. Renaming would break public API contracts and baseline signatures.
+dotnet_diagnostic.CA1711.severity = none
+
+# CA1716: Identifiers should not match keywords
+# Standard delegate and middleware parameters ('next', 'call') match domain patterns across .NET pipelines.
+# Renaming interface parameters is a breaking change for external implementations.
+dotnet_diagnostic.CA1716.severity = none

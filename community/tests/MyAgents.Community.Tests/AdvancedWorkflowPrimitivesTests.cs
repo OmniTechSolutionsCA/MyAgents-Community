@@ -249,6 +249,61 @@ public sealed class AdvancedWorkflowPrimitivesTests
     }
 
     [Test]
+    public async Task OrchestratorSteps_ExtractsPlan_FromMarkdownFencedJsonAndCommentary()
+    {
+        var session = new TestWorkflowSession<int>(0, (agent, msgs) =>
+        {
+            if (agent == "planner")
+            {
+                var response = """
+                    Here is the planned sequence of operations for the workers:
+                    ```json
+                    [
+                      {
+                        "name": "step1",
+                        "instruction": "Fetch market data",
+                        "workerAgentName": "worker1",
+                        "canRunInParallel": false
+                      }
+                    ]
+                    ```
+                    Please proceed accordingly.
+                    """;
+                return new AgentTurnResult(
+                    [new AgentMessage("assistant", response)],
+                    new AgentTurnTelemetry(TimeSpan.FromMilliseconds(10)));
+            }
+            if (agent == "worker1")
+            {
+                return new AgentTurnResult(
+                    [new AgentMessage("assistant", "Market data: AAPL is up 2%")],
+                    new AgentTurnTelemetry(TimeSpan.FromMilliseconds(10)));
+            }
+            if (agent == "synthesizer")
+            {
+                return new AgentTurnResult(
+                    [new AgentMessage("assistant", "Executive Summary: AAPL is bullish.")],
+                    new AgentTurnTelemetry(TimeSpan.FromMilliseconds(10)));
+            }
+            throw new InvalidOperationException($"Unknown agent: {agent}");
+        });
+
+        var options = new OrchestratorOptions(
+            PlannerAgentName: "planner",
+            WorkerAgentNames: ["worker1"],
+            SynthesizerAgentName: "synthesizer");
+
+        var initial = new[] { new AgentMessage("user", "Analyze AAPL") };
+        var result = await OrchestratorSteps.RunAsync(session, options, initial);
+
+        Assert.That(result.Plan.Steps.Count, Is.EqualTo(1));
+        Assert.That(result.Plan.Steps[0].Name, Is.EqualTo("step1"));
+        Assert.That(result.StepResults.Count, Is.EqualTo(1));
+        Assert.That(result.StepResults[0].Result.Output[0].Content, Contains.Substring("AAPL is up 2%"));
+        Assert.That(result.FinalResult.Output[0].Content, Contains.Substring("Executive Summary"));
+    }
+
+    [Test]
     public async Task GoalPrimitives_ManageStatuses_AndSelectHighestPriorityReady()
     {
         var goals = new GoalCollection();

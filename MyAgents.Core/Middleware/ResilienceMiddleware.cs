@@ -21,7 +21,7 @@ public sealed class ResilienceOptions
 /// Middleware that provides retry resilience with exponential backoff and jitter.
 /// This should be placed at the outermost edge of the pipeline.
 /// </summary>
-public sealed class ResilienceMiddleware : IAgentMiddleware
+public sealed partial class ResilienceMiddleware : IAgentMiddleware
 {
     private static readonly Meter s_meter = new("MyAgents.Core.Resilience", "1.0.0");
     private static readonly Counter<long> s_retryCount =
@@ -70,17 +70,13 @@ public sealed class ResilienceMiddleware : IAgentMiddleware
             {
                 var jitterMs = Random.Shared.Next(0, 100);
                 var delay = TimeSpan.FromMilliseconds(_baseDelay.TotalMilliseconds * Math.Pow(2, attempt) + jitterMs);
-                _logger.LogWarning(ex,
-                    "Transient error on attempt {Attempt}/{MaxRetries}. Retrying in {DelayMs}ms. SessionId={SessionId}",
-                    attempt + 1, _maxRetries, delay.TotalMilliseconds, context.SessionId);
+                LogTransientError(_logger, ex, attempt + 1, _maxRetries, delay.TotalMilliseconds, context.SessionId);
                 s_retryCount.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
                 await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (attempt >= _maxRetries && _classifier.IsTransient(ex))
             {
-                _logger.LogError(ex,
-                    "Retry exhausted after {MaxRetries} attempts. SessionId={SessionId}",
-                    _maxRetries, context.SessionId);
+                LogRetryExhausted(_logger, ex, _maxRetries, context.SessionId);
                 s_retryExhausted.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
                 throw;
             }
@@ -131,9 +127,7 @@ public sealed class ResilienceMiddleware : IAgentMiddleware
                     }
                     catch (Exception ex) when (!yieldedAny && attempt < _maxRetries && _classifier.IsTransient(ex))
                     {
-                        _logger.LogWarning(ex,
-                            "Transient error during streaming on attempt {Attempt}/{MaxRetries}. SessionId={SessionId}",
-                            attempt + 1, _maxRetries, context.SessionId);
+                        LogStreamingTransientError(_logger, ex, attempt + 1, _maxRetries, context.SessionId);
                         s_retryCount.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
                         needsRetry = true;
                         break;
@@ -153,4 +147,22 @@ public sealed class ResilienceMiddleware : IAgentMiddleware
             await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Warning,
+        Message = "Transient error on attempt {Attempt}/{MaxRetries}. Retrying in {DelayMs}ms. SessionId={SessionId}")]
+    private static partial void LogTransientError(ILogger logger, Exception ex, int attempt, int maxRetries, double delayMs, string sessionId);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Error,
+        Message = "Retry exhausted after {MaxRetries} attempts. SessionId={SessionId}")]
+    private static partial void LogRetryExhausted(ILogger logger, Exception ex, int maxRetries, string sessionId);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Warning,
+        Message = "Transient error during streaming on attempt {Attempt}/{MaxRetries}. SessionId={SessionId}")]
+    private static partial void LogStreamingTransientError(ILogger logger, Exception ex, int attempt, int maxRetries, string sessionId);
 }

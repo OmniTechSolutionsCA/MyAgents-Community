@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -187,7 +188,7 @@ public static class OrchestratorSteps
         return new OrchestratorResult(plan, results.AsReadOnly(), finalResult);
     }
 
-    private static async ValueTask<IReadOnlyList<OrchestratorStepModel>> RequestPlanAsync<TState>(
+    private static async ValueTask<OrchestratorStepModel[]> RequestPlanAsync<TState>(
         IWorkflowSession<TState> session,
         OrchestratorOptions options,
         IReadOnlyList<AgentMessage> initialMessages,
@@ -236,9 +237,9 @@ public static class OrchestratorSteps
         var builder = new StringBuilder();
         builder.AppendLine("Create an orchestration plan as a JSON array.");
         builder.AppendLine("Return ONLY JSON.");
-        builder.AppendLine($"Allowed worker agents: {string.Join(", ", options.WorkerAgentNames)}");
-        builder.AppendLine($"Limit the plan to at most {options.MaxSteps} steps.");
-        builder.AppendLine($"Parallel execution enabled: {options.AllowParallelExecution}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Allowed worker agents: {string.Join(", ", options.WorkerAgentNames)}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Limit the plan to at most {options.MaxSteps} steps.");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Parallel execution enabled: {options.AllowParallelExecution}");
         builder.AppendLine("""
             JSON schema:
             [
@@ -285,15 +286,15 @@ public static class OrchestratorSteps
         }
     }
 
-    private static IReadOnlyList<OrchestratorStepModel> ValidatePlan(
-        IReadOnlyList<OrchestratorStepModel> steps,
+    private static OrchestratorStepModel[] ValidatePlan(
+        OrchestratorStepModel[] steps,
         OrchestratorOptions options)
     {
-        if (steps.Count == 0)
+        if (steps.Length == 0)
             throw new InvalidOperationException("Planner returned an empty orchestration plan.");
 
-        if (steps.Count > options.MaxSteps)
-            throw new InvalidOperationException($"Planner returned {steps.Count} steps, which exceeds the configured limit of {options.MaxSteps}.");
+        if (steps.Length > options.MaxSteps)
+            throw new InvalidOperationException($"Planner returned {steps.Length} steps, which exceeds the configured limit of {options.MaxSteps}.");
 
         var duplicateName = steps
             .GroupBy(static step => step.Name, StringComparer.OrdinalIgnoreCase)
@@ -360,9 +361,9 @@ public static class OrchestratorSteps
         IReadOnlyList<OrchestratorStepResult> priorResults)
     {
         var builder = new StringBuilder();
-        builder.AppendLine($"Current orchestration step: {step.Name}");
-        builder.AppendLine($"Worker agent: {step.WorkerAgentName}");
-        builder.AppendLine($"Instruction: {step.Instruction}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Current orchestration step: {step.Name}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Worker agent: {step.WorkerAgentName}");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"Instruction: {step.Instruction}");
         builder.AppendLine();
         builder.AppendLine("Completed step summaries:");
 
@@ -374,7 +375,7 @@ public static class OrchestratorSteps
         {
             foreach (var prior in priorResults)
             {
-                builder.AppendLine($"- {prior.Step.Name} [{prior.WorkerAgentName}]: {FlattenMessages(prior.Result.Output)}");
+                builder.AppendLine(CultureInfo.InvariantCulture, $"- {prior.Step.Name} [{prior.WorkerAgentName}]: {FlattenMessages(prior.Result.Output)}");
             }
         }
 
@@ -395,15 +396,15 @@ public static class OrchestratorSteps
         builder.AppendLine("Plan:");
         foreach (var step in plan.Steps)
         {
-            builder.AppendLine($"- {step.Name} [{step.WorkerAgentName}] parallel={step.CanRunInParallel}: {step.Instruction}");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"- {step.Name} [{step.WorkerAgentName}] parallel={step.CanRunInParallel}: {step.Instruction}");
         }
 
         builder.AppendLine();
         builder.AppendLine("Step outputs:");
         foreach (var result in results)
         {
-            builder.AppendLine($"- Batch {result.BatchNumber} :: {result.Step.Name} [{result.WorkerAgentName}]");
-            builder.AppendLine($"  {FlattenMessages(result.Result.Output)}");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"- Batch {result.BatchNumber} :: {result.Step.Name} [{result.WorkerAgentName}]");
+            builder.AppendLine(CultureInfo.InvariantCulture, $"  {FlattenMessages(result.Result.Output)}");
         }
 
         return
@@ -418,7 +419,7 @@ public static class OrchestratorSteps
         var trimmed = payload.Trim();
         if (trimmed.StartsWith("```", StringComparison.Ordinal))
         {
-            var firstLineEnd = trimmed.IndexOf('\n');
+            var firstLineEnd = trimmed.IndexOf('\n', StringComparison.Ordinal);
             if (firstLineEnd >= 0)
                 trimmed = trimmed[(firstLineEnd + 1)..];
 
@@ -427,7 +428,7 @@ public static class OrchestratorSteps
                 trimmed = trimmed[..closingFence];
         }
 
-        var start = trimmed.IndexOf('[');
+        var start = trimmed.IndexOf('[', StringComparison.Ordinal);
         var end = trimmed.LastIndexOf(']');
         if (start < 0 || end < start)
             throw new InvalidOperationException("Planner response did not contain a JSON array.");
@@ -436,11 +437,20 @@ public static class OrchestratorSteps
     }
 
     private static string FlattenMessages(IReadOnlyList<AgentMessage> messages)
-        => string.Join(
-            Environment.NewLine,
-            messages
-                .Where(static message => !string.IsNullOrWhiteSpace(message.Content))
-                .Select(static message => $"[{message.Role}] {message.Content}"));
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < messages.Count; i++)
+        {
+            var msg = messages[i];
+            if (!string.IsNullOrWhiteSpace(msg.Content))
+            {
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append('[').Append(msg.Role).Append("] ").Append(msg.Content);
+            }
+        }
+        return sb.ToString();
+    }
 }
 
 /// <summary>

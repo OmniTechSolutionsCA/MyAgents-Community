@@ -9,6 +9,14 @@ namespace MyAgents.Core.Tools
     {
         public async Task<ProcessResult> RunAsync(string fileName, IEnumerable<string> args, CancellationToken cancellationToken = default)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+            ArgumentNullException.ThrowIfNull(args);
+
+            // Honour a cancellation that arrived before the child even started. Without this the
+            // process would be launched, killed by the registration below, and reported as a
+            // normal result — silently ignoring the caller's token.
+            cancellationToken.ThrowIfCancellationRequested();
+
             using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -27,36 +35,28 @@ namespace MyAgents.Core.Tools
                 process.StartInfo.ArgumentList.Add(arg);
             }
 
+            if (!process.Start())
+                throw new InvalidOperationException($"Failed to start process {fileName}");
 
-            try
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            linkedCts.Token.Register(static state =>
             {
-                if (!process.Start())
-                    throw new InvalidOperationException($"Failed to start process {fileName}");
+                var target = (Process)state!;
+                try { target.Kill(entireProcessTree: true); } catch { }
+            }, process);
 
+            // The reads must observe the token as well: killing the child does not necessarily
+            // close its redirected pipes, so an un-cancellable read can keep the runner alive
+            // long after the caller asked to stop.
+            var stdoutTask = process.StandardOutput.ReadToEndAsync(linkedCts.Token);
+            var stderrTask = process.StandardError.ReadToEndAsync(linkedCts.Token);
 
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                linkedCts.Token.Register(() =>
-                {
-                    try { process.Kill(entireProcessTree: true); } catch { }
-                });
+            await process.WaitForExitAsync(linkedCts.Token).ConfigureAwait(false);
 
-                // read streams asynchronously
-                var stdoutTask = process.StandardOutput.ReadToEndAsync();
-                var stderrTask = process.StandardError.ReadToEndAsync();
+            var stdout = await stdoutTask.ConfigureAwait(false);
+            var stderr = await stderrTask.ConfigureAwait(false);
 
-                await process.WaitForExitAsync(linkedCts.Token);
-
-                var stdout = await stdoutTask;
-                var stderr = await stderrTask;
-                var exitCode = process.ExitCode;
-
-                return new ProcessResult(exitCode, stdout, stderr);
-            }
-            catch (OperationCanceledException)
-            {
-                // propagate cancellation
-                throw;
-            }
+            return new ProcessResult(process.ExitCode, stdout, stderr);
         }
     }
 }

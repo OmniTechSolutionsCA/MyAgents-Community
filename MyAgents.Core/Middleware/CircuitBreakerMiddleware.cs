@@ -73,7 +73,7 @@ public sealed class CircuitBreakerOpenException : Exception
 /// is open.
 /// </para>
 /// </remarks>
-public sealed class CircuitBreakerMiddleware : IAgentMiddleware
+public sealed partial class CircuitBreakerMiddleware : IAgentMiddleware
 {
     private static readonly Meter s_meter = new("MyAgents.Core.CircuitBreaker", "1.0.0");
     private static readonly Counter<long> s_stateChanges =
@@ -206,7 +206,7 @@ public sealed class CircuitBreakerMiddleware : IAgentMiddleware
         {
             if (GetEffectiveState() == CircuitState.Open)
             {
-                _logger.LogWarning("Circuit breaker is open. Rejecting call.");
+                LogCircuitOpenRejecting(_logger);
                 s_rejected.Add(1);
                 throw new CircuitBreakerOpenException();
             }
@@ -222,7 +222,7 @@ public sealed class CircuitBreakerMiddleware : IAgentMiddleware
             _state = CircuitState.Closed;
             if (previous != CircuitState.Closed)
             {
-                _logger.LogInformation("Circuit breaker transitioned {From} -> Closed.", previous);
+                LogTransitionedClosed(_logger, previous);
                 s_stateChanges.Add(1,
                     new KeyValuePair<string, object?>("from", previous.ToString()),
                     new KeyValuePair<string, object?>("to", "Closed"));
@@ -240,9 +240,7 @@ public sealed class CircuitBreakerMiddleware : IAgentMiddleware
                 var previous = _state;
                 _state = CircuitState.Open;
                 _openedAt = DateTimeOffset.UtcNow;
-                _logger.LogError(
-                    "Circuit breaker opened after {Failures} consecutive failures. Was {From}.",
-                    _consecutiveFailures, previous);
+                LogCircuitOpened(_logger, _consecutiveFailures, previous);
                 s_stateChanges.Add(1,
                     new KeyValuePair<string, object?>("from", previous.ToString()),
                     new KeyValuePair<string, object?>("to", "Open"));
@@ -259,7 +257,7 @@ public sealed class CircuitBreakerMiddleware : IAgentMiddleware
         if (_state == CircuitState.Open &&
             DateTimeOffset.UtcNow - _openedAt >= _openDuration)
         {
-            _logger.LogInformation("Circuit breaker transitioned Open -> HalfOpen after {Duration}.", _openDuration);
+            LogTransitionedHalfOpen(_logger, _openDuration);
             s_stateChanges.Add(1,
                 new KeyValuePair<string, object?>("from", "Open"),
                 new KeyValuePair<string, object?>("to", "HalfOpen"));
@@ -269,4 +267,28 @@ public sealed class CircuitBreakerMiddleware : IAgentMiddleware
     }
 
     private static bool IsCancellation(Exception ex) => ex is OperationCanceledException;
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Warning,
+        Message = "Circuit breaker is open. Rejecting call.")]
+    private static partial void LogCircuitOpenRejecting(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Information,
+        Message = "Circuit breaker transitioned {From} -> Closed.")]
+    private static partial void LogTransitionedClosed(ILogger logger, CircuitState from);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = LogLevel.Error,
+        Message = "Circuit breaker opened after {Failures} consecutive failures. Was {From}.")]
+    private static partial void LogCircuitOpened(ILogger logger, int failures, CircuitState from);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = LogLevel.Information,
+        Message = "Circuit breaker transitioned Open -> HalfOpen after {Duration}.")]
+    private static partial void LogTransitionedHalfOpen(ILogger logger, TimeSpan duration);
 }

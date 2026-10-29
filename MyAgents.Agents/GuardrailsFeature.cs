@@ -105,8 +105,26 @@ public sealed class BlocklistGuardrailPolicy : IGuardrailPolicy
 /// the policy's <see cref="GuardrailViolation.ReplacementMessage"/> (or a generic
 /// fallback if none is supplied) and no further policies are evaluated.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Streaming is buffered, not incremental: the whole turn is accumulated, the policies are
+/// evaluated against it, and only then is the outcome yielded. This is required for
+/// correctness — text already handed to a caller cannot be retracted, and
+/// <see cref="IGuardrailPolicy"/> is a whole-turn contract (for example
+/// <see cref="MaxLengthGuardrailPolicy"/> needs the total length), so per-chunk vetoing cannot
+/// honour it. A violating turn therefore emits <i>only</i> the replacement message; the clean
+/// prefix that preceded the violation is never released.
+/// </para>
+/// <para>
+/// The cost is latency parity with the blocking path: an agent using guardrails receives no
+/// token-by-token streaming. That is the deliberate trade — a content-safety check that leaks
+/// because of a latency preference is the wrong default.
+/// </para>
+/// </remarks>
 public sealed class GuardrailMiddleware : IAgentMiddleware
 {
+    private const string GenericFallbackMessage = "I'm sorry, but I cannot provide a response to that request.";
+
     private readonly IReadOnlyList<IGuardrailPolicy> _policies;
 
     internal GuardrailMiddleware(IReadOnlyList<IGuardrailPolicy> policies)
@@ -128,21 +146,18 @@ public sealed class GuardrailMiddleware : IAgentMiddleware
         Func<AgentTurnContext, CancellationToken, IAsyncEnumerable<AgentTurnResult>> next,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        AgentTurnResult? lastChunk = null;
-
+        var chunks = new List<AgentTurnResult>();
         await foreach (var chunk in next(context, cancellationToken).ConfigureAwait(false))
-        {
-            lastChunk = chunk;
-            yield return chunk;
-        }
+            chunks.Add(chunk);
 
-        // Run guardrails on the final accumulated output after the stream ends.
-        if (lastChunk is not null)
-        {
-            var checked_ = await ApplyPoliciesAsync(lastChunk, cancellationToken).ConfigureAwait(false);
-            if (!ReferenceEquals(checked_, lastChunk))
-                yield return checked_;
-        }
+        // An empty stream carries nothing for policies to act on (EmptyResponseGuardrailPolicy
+        // would flag zero chunks where the blocking path flags a single empty message), so it is
+        // passed straight through rather than converted into a synthetic violation.
+        var accumulated = AgentOutputAccumulator.Fold(chunks);
+        if (accumulated is null)
+            yield break;
+
+        yield return await ApplyPoliciesAsync(accumulated, cancellationToken).ConfigureAwait(false);
     }
 
     private async ValueTask<AgentTurnResult> ApplyPoliciesAsync(
@@ -154,9 +169,10 @@ public sealed class GuardrailMiddleware : IAgentMiddleware
             var violation = await policy.EvaluateAsync(result.Output, cancellationToken).ConfigureAwait(false);
             if (violation is null) continue;
 
-            var replacement = violation.ReplacementMessage
-                ?? "I'm sorry, but I cannot provide a response to that request.";
+            var replacement = violation.ReplacementMessage ?? GenericFallbackMessage;
 
+            // Replace the turn's output outright. Appending to the violating output would deliver
+            // both the flagged text and the substitute to the caller.
             return result with
             {
                 Output = [new AgentMessage("assistant", replacement)]
