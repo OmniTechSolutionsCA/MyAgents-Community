@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using MyAgents.Agents;
@@ -170,18 +169,17 @@ public sealed class MultiModelRoutingAndAgentsTests
         var handle = await dispatcher.ForkAsync(forkTask);
         Assert.That(handle.TaskId, Is.EqualTo("task-fork"));
 
-        // Wait for the fork to reach a terminal state. The deadline is deliberately generous: a
-        // 1-second budget flaked on loaded CI machines, while a passing run still exits in milliseconds.
+        // Wait for background completion, stopping early on any terminal state so a failed fork
+        // is reported immediately rather than after the full poll budget.
         SubagentResult? forkResult = null;
-        var deadline = Stopwatch.StartNew();
-        while (deadline.Elapsed < TimeSpan.FromSeconds(30))
+        for (var i = 0; i < 20; i++)
         {
             forkResult = await dispatcher.GetTaskResultAsync("task-fork");
             if (forkResult?.Status is SubagentExecutionState.Completed
                 or SubagentExecutionState.Failed
                 or SubagentExecutionState.Canceled)
                 break;
-            await Task.Delay(10);
+            await Task.Delay(50);
         }
 
         Assert.That(forkResult, Is.Not.Null);
