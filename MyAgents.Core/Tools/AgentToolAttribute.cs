@@ -5,7 +5,8 @@ namespace MyAgents.Core.Tools;
 /// The generated tool embeds its JSON schema as a compile-time constant and binds primitive
 /// arguments (<see cref="string"/>, <see cref="bool"/>, <see cref="int"/>, <see cref="long"/>,
 /// <see cref="float"/>, <see cref="double"/>, <see cref="decimal"/>) without reflection or boxing.
-/// Other parameter and return types use reflection-based System.Text.Json serialization.
+/// Other parameter and return types use reflection-based System.Text.Json serialization unless
+/// <see cref="JsonContext"/> supplies source-generated serialization metadata.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 public sealed class AgentToolAttribute : Attribute
@@ -19,6 +20,17 @@ public sealed class AgentToolAttribute : Attribute
     /// Gets or sets the tool description.
     /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets a <see cref="System.Text.Json.Serialization.JsonSerializerContext"/> type that
+    /// provides source-generated serialization metadata for the tool's complex parameter and result
+    /// types. Every non-primitive argument and result type must be declared in the context via
+    /// <see cref="System.Text.Json.Serialization.JsonSerializableAttribute"/>; the generator reports a
+    /// compile-time error otherwise. When set, the generated tool binds arguments and serializes results
+    /// through <see cref="System.Text.Json.JsonTypeInfo"/> without reflection, making the tool
+    /// NativeAOT- and trimming-safe.
+    /// </summary>
+    public Type? JsonContext { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="AgentToolAttribute"/>.

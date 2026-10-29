@@ -13,8 +13,13 @@ public static class BindingContractTools
     public static string Describe(int count, string label, bool flag = false) =>
         $"{label}:{count}:{(flag ? "on" : "off")}";
 
+    // Deliberate reflection-fallback coverage: this tool intentionally has no JsonContext,
+    // so MYAG002 (reflection-based serialization) is suppressed here to pin the fallback
+    // binding contract under test.
+#pragma warning disable MYAG002
     [AgentTool(Name = "plot")]
     public static int Plot(BindingPoint point) => point.X + point.Y;
+#pragma warning restore MYAG002
 
     [AgentTool(Name = "ratio")]
     public static double Ratio(double value) => value / 2;

@@ -30,11 +30,25 @@ stable release.
 - **`MyAgents.Generators` Roslyn incremental source generator for `[AgentTool]`.** Generates an `ITool`
   implementation per annotated method, with the JSON schema emitted as a compile-time constant and
   `As{Method}Tool()` / `AsAgentTools()` registration helpers. Primitive arguments (`string`, `bool`, `int`,
-  `long`, `float`, `double`, `decimal`) are bound without reflection or boxing; other parameter and return
-  types use reflection-based `System.Text.Json`, so generated tools are not NativeAOT/trim safe in general.
-  Generated tools follow the same argument contract as `DelegateTool` (case-insensitive names,
-  `ArgumentException` for missing required arguments, `JsonException` for wrongly typed values,
-  invariant-culture results), enforced by `ToolArgumentBindingContractTests`.
+  `long`, `float`, `double`, `decimal`) are bound without reflection or boxing. Generated tools follow the
+  same argument contract as `DelegateTool` (case-insensitive names, `ArgumentException` for missing required
+  arguments, `JsonException` for wrongly typed values, invariant-culture results), enforced by
+  `ToolArgumentBindingContractTests`.
+- **NativeAOT-safe `[AgentTool]` authoring via `JsonContext`.** `AgentToolAttribute` gains a `JsonContext`
+  property pointing at a `JsonSerializerContext`. Generated tools then bind complex arguments and serialize
+  results through source-generated `JsonTypeInfo` metadata (`JsonSerializerContext.GetTypeInfo`), and advertise
+  exporter-accurate JSON schemas for complex parameters (nested properties, unions, defaults, required fields)
+  derived from that same metadata at first use — no reflection, NativeAOT/trimming safe. Missing
+  `[JsonSerializable]` registrations are reported as compile-time errors (MYAG001); complex types without a
+  context fall back to reflection-based serialization and produce a warning (MYAG002). Primitive binding,
+  argument contracts, and the constant-schema path for primitive-only tools are unchanged.
+- **`community/samples/NativeAotTools`.** Publishes with `PublishAot`/`IsAotCompatible` and runs the generated
+  tools as a standalone native executable (verified: `dotnet publish -c Release -r win-x64`, executed with exit
+  code 0 — schema advertisement, complex argument binding, complex async results, and missing/mistyped
+  argument rejection all pass without a JIT).
+- **`SourceGeneratedJsonContextToolTests`.** Deterministic contract coverage for the `JsonContext` path:
+  exporter-accurate schemas, complex/nullable/collection parameters, complex async results, cancellation,
+  malformed and missing arguments, and unchanged primitive-tool behavior.
 - **`eng/MyAgents.Benchmarks` BenchmarkDotNet suite.** 8 benchmark classes (21 benchmarks) with
   `[MemoryDiagnoser]` covering `DelegateTool`, `BM25Index`, `VectorMemoryStore`, `HybridMemoryRetriever`,
   `ChatClientRuntime`, `AgentPipeline`, `AgentGraph`, and `SqliteCheckpointer`.

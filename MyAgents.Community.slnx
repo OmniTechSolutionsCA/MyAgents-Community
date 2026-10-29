@@ -8,5 +8,6 @@
   <Project Path="MyAgents.Testing/MyAgents.Testing.csproj" />
   <Project Path="community/tests/MyAgents.Community.Tests/MyAgents.Community.Tests.csproj" />
   <Project Path="community/samples/ChatWithTools/ChatWithTools.csproj" />
+  <Project Path="community/samples/NativeAotTools/NativeAotTools.csproj" />
   <Project Path="eng/MyAgents.Benchmarks/MyAgents.Benchmarks.csproj" />
 </Solution>
