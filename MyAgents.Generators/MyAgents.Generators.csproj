@@ -23,8 +23,9 @@
   <PropertyGroup>
     <DevelopmentDependency>false</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- NU5128: generator packages ship no lib assembly by design; the DLL goes to analyzers/dotnet/cs. -->
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- NU5128/NU5017: generator packages ship no lib assembly and no dependencies by design;
+         the DLL goes to analyzers/dotnet/cs. -->
+    <NoWarn>$(NoWarn);NU5128;NU5017</NoWarn>
     <Description>MyAgents source generator: compile-time [AgentTool] ITool wrappers with JSON schema generation, reflection-free argument binding, and NativeAOT-safe JsonContext serialization.</Description>
   </PropertyGroup>
   <ItemGroup>
