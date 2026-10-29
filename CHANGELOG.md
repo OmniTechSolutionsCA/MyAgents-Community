@@ -27,6 +27,17 @@ stable release.
   did not forward the `cancellationToken` to feature `ContributeAsync` calls.
 
 ### Added
+- **`MyAgents.Generators` Roslyn incremental source generator for `[AgentTool]`.** Generates an `ITool`
+  implementation per annotated method, with the JSON schema emitted as a compile-time constant and
+  `As{Method}Tool()` / `AsAgentTools()` registration helpers. Primitive arguments (`string`, `bool`, `int`,
+  `long`, `float`, `double`, `decimal`) are bound without reflection or boxing; other parameter and return
+  types use reflection-based `System.Text.Json`, so generated tools are not NativeAOT/trim safe in general.
+  Generated tools follow the same argument contract as `DelegateTool` (case-insensitive names,
+  `ArgumentException` for missing required arguments, `JsonException` for wrongly typed values,
+  invariant-culture results), enforced by `ToolArgumentBindingContractTests`.
+- **`eng/MyAgents.Benchmarks` BenchmarkDotNet suite.** 8 benchmark classes (21 benchmarks) with
+  `[MemoryDiagnoser]` covering `DelegateTool`, `BM25Index`, `VectorMemoryStore`, `HybridMemoryRetriever`,
+  `ChatClientRuntime`, `AgentPipeline`, `AgentGraph`, and `SqliteCheckpointer`.
 - `AgentOutputAccumulator`: folds the chunks of a streamed turn into the single result a blocking
   turn would have produced. Exposed publicly because any middleware overriding
   `IAgentMiddleware.InvokeStreamingAsync` needs the same fold to reason about a complete turn.
@@ -49,11 +60,30 @@ stable release.
   with zero warnings and zero errors.
 
 ### Performance
+Figures below are BenchmarkDotNet default-job means, `main` vs this change, measured on one machine
+(AMD Ryzen AI 9 HX 370, .NET 10.0.14) pinned to a single logical CPU.
+
+- **Native `TensorPrimitives` `VectorMemoryStore`.** Replaced the preview `Microsoft.SemanticKernel.Connectors.InMemory`
+  dependency with an in-memory store using `TensorPrimitives.CosineSimilarity` and a bounded min-heap.
+  Search over 5,000 × 1,536-dim vectors: 698.8 µs → 478.6 µs (1.46x), 330.1 KB → 41.7 KB allocated.
+  Upsert with metadata: 298.8 ns → 69.9 ns (4.3x), 856 B → 312 B.
+- **`HybridMemoryRetriever` single-pass fusion.** One candidate dictionary via `CollectionsMarshal.GetValueRefOrAddDefault`
+  and a bounded heap instead of LINQ rank maps and sorts. RRF top-10: 1.214 ms → 177.7 µs (6.8x),
+  782 KB → 53.7 KB allocated; weighted linear top-10: 1.235 ms → 181.2 µs (6.8x).
+- **`DelegateTool` compiled direct parameter binding.** Removes the per-invocation `object?[]` and boxing for
+  primitive arguments. Primitive invocation: 379.5 ns → 186.7 ns (2.0x), 280 B → 72 B. `ValueTask<T>` invocation:
+  439.1 ns → 372.0 ns, 400 B → 296 B. The typed invoker is compiled lazily on first invocation, so
+  `DelegateTool.Create` drops from 178.6 µs to 1.1 µs; the first call to each tool pays ~3 ms for compilation.
+  Source-generated `[AgentTool]` tools have no compilation step.
+- **`BM25Index` array-indexed scoring.** Pooled `ArrayPool<double>` score accumulators, struct `Posting` lists, a
+  bounded min-heap for top-k, and `string.Create` lowercasing. Short query over 10,000 documents: 1,533.7 µs → 47.5 µs
+  (32x), 921 KB → 824 B allocated; long query: 3,833.6 µs → 129.7 µs (30x). Single-document `AddOrUpdate`:
+  1.76 µs → 1.40 µs, 4.69 KB → 3.5 KB.
+- **`SqliteCheckpointer` prepared command caching.** Save and load reuse prepared `SqliteCommand` instances with
+  pre-bound parameters under the existing gate. Save + load: 47.9 µs → 43.9 µs, 15.48 KB → 13.3 KB.
 - **Zero-allocation logging.** Replaced runtime reflection / dynamic logging across `ResilienceMiddleware`,
   `FallbackMiddleware`, `CircuitBreakerMiddleware`, `ContextWindowMiddleware`, `CapabilityRouter`, and
   `LoggingFeature` with source-generated `[LoggerMessage]` partial methods.
-- **BM25 regex tokenization.** Replaced heap-allocated `MatchCollection` in `BM25Index.Tokenize` with .NET 10
-  `EnumerateMatches` struct enumeration.
 - **Chat client runtime hot-loop optimization.** Eliminated LINQ and empty dictionary allocations during
   function call extraction in `ChatClientRuntime`.
 - **Internal collection devirtualization.** Devirtualized private/internal collections across Core, Agents,

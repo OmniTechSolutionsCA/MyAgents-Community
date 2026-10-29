@@ -169,12 +169,15 @@ public sealed class MultiModelRoutingAndAgentsTests
         var handle = await dispatcher.ForkAsync(forkTask);
         Assert.That(handle.TaskId, Is.EqualTo("task-fork"));
 
-        // Wait for background completion
+        // Wait for background completion, stopping early on any terminal state so a failed fork
+        // is reported immediately rather than after the full poll budget.
         SubagentResult? forkResult = null;
         for (var i = 0; i < 20; i++)
         {
             forkResult = await dispatcher.GetTaskResultAsync("task-fork");
-            if (forkResult?.Status == SubagentExecutionState.Completed)
+            if (forkResult?.Status is SubagentExecutionState.Completed
+                or SubagentExecutionState.Failed
+                or SubagentExecutionState.Canceled)
                 break;
             await Task.Delay(50);
         }

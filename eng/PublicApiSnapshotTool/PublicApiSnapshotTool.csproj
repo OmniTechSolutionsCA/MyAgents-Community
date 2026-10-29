@@ -4,5 +4,6 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <AssemblyName>PublicApiSnapshotTool</AssemblyName>
+    <NoWarn>$(NoWarn);CA1305</NoWarn>
   </PropertyGroup>
 </Project>

@@ -1,28 +1,19 @@
 using System.Collections.Concurrent;
+using System.Numerics.Tensors;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
-using Microsoft.SemanticKernel.Connectors.InMemory;
 using MyAgents.Core.Memory;
 
 namespace MyAgents.Memory;
 
 /// <summary>
 /// Vector-backed implementation of <see cref="IVectorMemoryStore"/> that stores
-/// <see cref="MemoryEntry"/> records with their embeddings in an
-/// <see cref="InMemoryCollection{TKey,TRecord}"/> and supports semantic search.
+/// <see cref="MemoryEntry"/> records with their embeddings in memory and supports
+/// high-performance semantic search powered by SIMD-accelerated <see cref="TensorPrimitives"/>.
 /// </summary>
-/// <remarks>
-/// <para>Embedding model: any <see cref="IEmbeddingGenerator{TInput,TEmbedding}"/>
-/// — swap to Azure OpenAI, Ollama, etc. at DI composition root.</para>
-/// <para>v1 scope: InMemory vector provider only. One collection per namespace,
-/// created on first access. No persistence across process restarts.</para>
-/// </remarks>
 public sealed class VectorMemoryStore : IVectorMemoryStore
 {
     private readonly IEmbeddingGenerator<string, Embedding<float>> _embedder;
-
-    // One SK InMemoryCollection per namespace, created lazily.
-    private readonly ConcurrentDictionary<string, InMemoryCollection<string, VectorRecord>> _collections = new();
+    private readonly ConcurrentDictionary<string, NamespaceCollection> _collections = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Creates a new <see cref="VectorMemoryStore"/>.
@@ -36,7 +27,7 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         _embedder = embedder ?? throw new ArgumentNullException(nameof(embedder));
     }
 
-    // ── IMemoryStore ──────────────────────────────────────────────────────────
+    // ── IMemoryStore ─────────────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public async ValueTask SetAsync(MemoryEntry entry, CancellationToken cancellationToken = default)
@@ -46,33 +37,34 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         ArgumentException.ThrowIfNullOrWhiteSpace(entry.Key);
 
         var embedding = await EmbedAsync(entry.Content, cancellationToken).ConfigureAwait(false);
-        var collection = GetOrCreateCollection(entry.Namespace);
-        await collection.EnsureCollectionExistsAsync(cancellationToken).ConfigureAwait(false);
+        var collection = _collections.GetOrAdd(entry.Namespace, static _ => new NamespaceCollection());
 
-        var record = new VectorRecord
+        var record = new MemoryEntryRecord
         {
             Key = entry.Key,
             Namespace = entry.Namespace,
             Content = entry.Content,
-            MetadataJson = entry.Metadata is null
-                ? null
-                : System.Text.Json.JsonSerializer.Serialize(entry.Metadata),
-            CreatedAt = (entry.CreatedAt ?? DateTimeOffset.UtcNow).ToString("O"),
+            Metadata = entry.Metadata,
+            CreatedAt = entry.CreatedAt ?? DateTimeOffset.UtcNow,
             Embedding = embedding,
         };
 
-        await collection.UpsertAsync(record, cancellationToken).ConfigureAwait(false);
+        collection.Entries[entry.Key] = record;
     }
 
     /// <inheritdoc/>
-    public async ValueTask<MemoryEntry?> GetAsync(string ns, string key, CancellationToken cancellationToken = default)
+    public ValueTask<MemoryEntry?> GetAsync(string ns, string key, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ns);
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
-        var collection = GetOrCreateCollection(ns);
-        var record = await collection.GetAsync(key, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return record is null ? null : ToEntry(record);
+        if (_collections.TryGetValue(ns, out var collection) &&
+            collection.Entries.TryGetValue(key, out var record))
+        {
+            return new ValueTask<MemoryEntry?>(record.ToEntry());
+        }
+
+        return new ValueTask<MemoryEntry?>((MemoryEntry?)null);
     }
 
     /// <inheritdoc/>
@@ -86,46 +78,57 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
 
         if (!string.IsNullOrWhiteSpace(query))
         {
-            // Delegate to vector search when a query is provided
             var vectorResults = await VectorSearchAsync(ns, query, maxResults, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            return vectorResults.Select(r => r.Entry).ToList();
+            var results = new MemoryEntry[vectorResults.Count];
+            for (var i = 0; i < vectorResults.Count; i++)
+            {
+                results[i] = vectorResults[i].Entry;
+            }
+            return results;
         }
 
-        // No query — return all records in the namespace via GetAsync with filter
-        var collection = GetOrCreateCollection(ns);
-        var results = new List<MemoryEntry>();
-        await foreach (var record in collection.GetAsync(
-            filter: r => r.Namespace == ns,
-            top: maxResults,
-            cancellationToken: cancellationToken).ConfigureAwait(false))
+        if (!_collections.TryGetValue(ns, out var collection))
         {
-            results.Add(ToEntry(record));
+            return Array.Empty<MemoryEntry>();
         }
-        return results;
+
+        var unranked = new List<MemoryEntry>(Math.Min(maxResults, collection.Entries.Count));
+        foreach (var record in collection.Entries.Values)
+        {
+            unranked.Add(record.ToEntry());
+            if (unranked.Count >= maxResults)
+            {
+                break;
+            }
+        }
+        return unranked;
     }
 
     /// <inheritdoc/>
-    public async ValueTask DeleteAsync(string ns, string key, CancellationToken cancellationToken = default)
+    public ValueTask DeleteAsync(string ns, string key, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ns);
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
-        var collection = GetOrCreateCollection(ns);
-        await collection.DeleteAsync(key, cancellationToken).ConfigureAwait(false);
+        if (_collections.TryGetValue(ns, out var collection))
+        {
+            collection.Entries.TryRemove(key, out _);
+        }
+
+        return default;
     }
 
     /// <inheritdoc/>
-    public async ValueTask ClearAsync(string ns, CancellationToken cancellationToken = default)
+    public ValueTask ClearAsync(string ns, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ns);
 
-        var collection = GetOrCreateCollection(ns);
-        await collection.EnsureCollectionDeletedAsync(cancellationToken).ConfigureAwait(false);
         _collections.TryRemove(ns, out _);
+        return default;
     }
 
-    // ── IVectorMemoryStore ────────────────────────────────────────────────────
+    // ── IVectorMemoryStore ───────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public async ValueTask<IReadOnlyList<VectorSearchResult>> VectorSearchAsync(
@@ -138,23 +141,54 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         ArgumentException.ThrowIfNullOrWhiteSpace(ns);
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
 
+        if (!_collections.TryGetValue(ns, out var collection) || collection.Entries.IsEmpty)
+        {
+            return Array.Empty<VectorSearchResult>();
+        }
+
         var queryEmbedding = await EmbedAsync(query, cancellationToken).ConfigureAwait(false);
-        var collection = GetOrCreateCollection(ns);
+        var querySpan = queryEmbedding.Span;
 
-        var searchResults = await collection.SearchAsync(
-            queryEmbedding,
-            top: maxResults,
-            cancellationToken: cancellationToken)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var topQueue = new PriorityQueue<MemoryEntryRecord, float>(maxResults);
 
-        return searchResults
-            .Where(r => r.Score >= minScore)
-            .Select(r => new VectorSearchResult(ToEntry(r.Record), (float)(r.Score ?? 0.0)))
-            .ToList();
+        foreach (var record in collection.Entries.Values)
+        {
+            var similarity = TensorPrimitives.CosineSimilarity(querySpan, record.Embedding.Span);
+            if (similarity < minScore)
+            {
+                continue;
+            }
+
+            if (topQueue.Count < maxResults)
+            {
+                topQueue.Enqueue(record, similarity);
+            }
+            else
+            {
+                topQueue.TryPeek(out _, out var lowestScore);
+                if (similarity > lowestScore)
+                {
+                    topQueue.DequeueEnqueue(record, similarity);
+                }
+            }
+        }
+
+        if (topQueue.Count == 0)
+        {
+            return Array.Empty<VectorSearchResult>();
+        }
+
+        var results = new VectorSearchResult[topQueue.Count];
+        for (var i = results.Length - 1; i >= 0; i--)
+        {
+            topQueue.TryDequeue(out var record, out var score);
+            results[i] = new VectorSearchResult(record!.ToEntry(), score);
+        }
+
+        return results;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────────────────
 
     private async ValueTask<ReadOnlyMemory<float>> EmbedAsync(string text, CancellationToken ct)
     {
@@ -162,59 +196,25 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         return result[0].Vector;
     }
 
-    private InMemoryCollection<string, VectorRecord> GetOrCreateCollection(string ns)
+    private sealed class NamespaceCollection
     {
-        return _collections.GetOrAdd(ns, name => new InMemoryCollection<string, VectorRecord>(name));
+        public readonly ConcurrentDictionary<string, MemoryEntryRecord> Entries = new(StringComparer.Ordinal);
     }
 
-    private static MemoryEntry ToEntry(VectorRecord record)
+    private sealed class MemoryEntryRecord
     {
-        IReadOnlyDictionary<string, string>? metadata = null;
-        if (!string.IsNullOrEmpty(record.MetadataJson))
-        {
-            metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(record.MetadataJson);
-        }
+        public required string Key { get; init; }
+        public required string Namespace { get; init; }
+        public required string Content { get; init; }
+        public IReadOnlyDictionary<string, string>? Metadata { get; init; }
+        public DateTimeOffset? CreatedAt { get; init; }
+        public ReadOnlyMemory<float> Embedding { get; init; }
 
-        DateTimeOffset? createdAt = null;
-        if (!string.IsNullOrEmpty(record.CreatedAt) &&
-            DateTimeOffset.TryParse(record.CreatedAt, out var parsed))
-        {
-            createdAt = parsed;
-        }
-
-        return new MemoryEntry(
-            Key: record.Key,
-            Namespace: record.Namespace,
-            Content: record.Content,
-            Metadata: metadata,
-            CreatedAt: createdAt);
+        public MemoryEntry ToEntry() => new(
+            Key: Key,
+            Namespace: Namespace,
+            Content: Content,
+            Metadata: Metadata,
+            CreatedAt: CreatedAt);
     }
-}
-
-// ── Internal record type ───────────────────────────────────────────────────────
-
-/// <summary>
-/// Internal record stored in the <see cref="InMemoryCollection{TKey,TRecord}"/>.
-/// Uses <see cref="VectorStoreKey"/>, <see cref="VectorStoreData"/>, and
-/// <see cref="VectorStoreVector"/> attributes for SK VectorData conventions.
-/// </summary>
-internal sealed class VectorRecord
-{
-    [VectorStoreKey]
-    public string Key { get; set; } = string.Empty;
-
-    [VectorStoreData]
-    public string Namespace { get; set; } = string.Empty;
-
-    [VectorStoreData]
-    public string Content { get; set; } = string.Empty;
-
-    [VectorStoreData]
-    public string? MetadataJson { get; set; }
-
-    [VectorStoreData]
-    public string? CreatedAt { get; set; }
-
-    [VectorStoreVector(Dimensions: 1536)]
-    public ReadOnlyMemory<float> Embedding { get; set; }
 }

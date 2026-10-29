@@ -6,8 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" />
+    <PackageReference Include="System.Numerics.Tensors" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -18,9 +17,6 @@
   <!-- MIT-licensed package (open-core). See LICENSE in this directory. -->
   <PropertyGroup>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <!-- Depends on Microsoft.SemanticKernel.Connectors.InMemory, still preview upstream; NuGet (NU5104)
-         disallows a stable package depending on a prerelease one, so this package's own version tracks
-         that until a stable connector release lands. -->
     <Version>0.2.0-preview.1</Version>
   </PropertyGroup>
   <ItemGroup>

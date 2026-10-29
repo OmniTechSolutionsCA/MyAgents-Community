@@ -22,6 +22,19 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
     private readonly string _tableName;
     private bool _disposed;
 
+    private readonly SqliteCommand _saveCommand;
+    private readonly SqliteParameter _saveSessionId;
+    private readonly SqliteParameter _saveWorkflowId;
+    private readonly SqliteParameter _saveStateVersion;
+    private readonly SqliteParameter _saveStateJson;
+    private readonly SqliteParameter _saveCreatedAt;
+
+    private readonly SqliteCommand _loadCommand;
+    private readonly SqliteParameter _loadSessionId;
+
+    private readonly SqliteCommand _deleteCommand;
+    private readonly SqliteParameter _deleteSessionId;
+
     /// <param name="databasePath">Path to the SQLite database file.</param>
     /// <param name="tableName">Table name for snapshots (default: "workflow_snapshots").</param>
     public SqliteCheckpointer(string databasePath, string tableName = "workflow_snapshots")
@@ -33,6 +46,32 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
         _tableName = tableName;
 
         InitializeTable();
+
+        _saveCommand = _connection.CreateCommand();
+        _saveCommand.CommandText = $"""
+            INSERT OR REPLACE INTO {_tableName} (session_id, workflow_id, state_version, state_json, created_at)
+            VALUES (@session_id, @workflow_id, @state_version, @state_json, @created_at)
+            """;
+        _saveSessionId = _saveCommand.Parameters.Add("@session_id", SqliteType.Text);
+        _saveWorkflowId = _saveCommand.Parameters.Add("@workflow_id", SqliteType.Text);
+        _saveStateVersion = _saveCommand.Parameters.Add("@state_version", SqliteType.Integer);
+        _saveStateJson = _saveCommand.Parameters.Add("@state_json", SqliteType.Text);
+        _saveCreatedAt = _saveCommand.Parameters.Add("@created_at", SqliteType.Text);
+        _saveCommand.Prepare();
+
+        _loadCommand = _connection.CreateCommand();
+        _loadCommand.CommandText = $"""
+            SELECT session_id, workflow_id, state_version, state_json, created_at
+            FROM {_tableName}
+            WHERE session_id = @session_id
+            """;
+        _loadSessionId = _loadCommand.Parameters.Add("@session_id", SqliteType.Text);
+        _loadCommand.Prepare();
+
+        _deleteCommand = _connection.CreateCommand();
+        _deleteCommand.CommandText = $"DELETE FROM {_tableName} WHERE session_id = @session_id";
+        _deleteSessionId = _deleteCommand.Parameters.Add("@session_id", SqliteType.Text);
+        _deleteCommand.Prepare();
     }
 
     private void InitializeTable()
@@ -60,19 +99,13 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = $"""
-                INSERT OR REPLACE INTO {_tableName} (session_id, workflow_id, state_version, state_json, created_at)
-                VALUES (@session_id, @workflow_id, @state_version, @state_json, @created_at)
-                """;
+            _saveSessionId.Value = snapshot.SessionId;
+            _saveWorkflowId.Value = snapshot.WorkflowId;
+            _saveStateVersion.Value = snapshot.StateVersion;
+            _saveStateJson.Value = snapshot.StateJson;
+            _saveCreatedAt.Value = DateTimeOffset.UtcNow.ToString("O");
 
-            cmd.Parameters.AddWithValue("@session_id", snapshot.SessionId);
-            cmd.Parameters.AddWithValue("@workflow_id", snapshot.WorkflowId);
-            cmd.Parameters.AddWithValue("@state_version", snapshot.StateVersion);
-            cmd.Parameters.AddWithValue("@state_json", snapshot.StateJson);
-            cmd.Parameters.AddWithValue("@created_at", DateTimeOffset.UtcNow.ToString("O"));
-
-            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await _saveCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -88,16 +121,9 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = $"""
-                SELECT session_id, workflow_id, state_version, state_json, created_at
-                FROM {_tableName}
-                WHERE session_id = @session_id
-                """;
+            _loadSessionId.Value = sessionId;
 
-            cmd.Parameters.AddWithValue("@session_id", sessionId);
-
-            using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            using var reader = await _loadCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
             if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 return new WorkflowSnapshot(
@@ -123,11 +149,9 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var cmd = _connection.CreateCommand();
-            cmd.CommandText = $"DELETE FROM {_tableName} WHERE session_id = @session_id";
-            cmd.Parameters.AddWithValue("@session_id", sessionId);
+            _deleteSessionId.Value = sessionId;
 
-            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await _deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -139,6 +163,9 @@ public sealed class SqliteCheckpointer : IWorkflowCheckpointer, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        _saveCommand.Dispose();
+        _loadCommand.Dispose();
+        _deleteCommand.Dispose();
         _gate.Dispose();
         _connection.Close();
         _connection.Dispose();
