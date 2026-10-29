@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CA1707;CA1305;CA1001;CA1822;CA1050;CA1515;CA1859;CA2007;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MyAgents.Core\MyAgents.Core.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Runtime.Chat\MyAgents.Runtime.Chat.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Agents\MyAgents.Agents.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Memory\MyAgents.Memory.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Mcp\MyAgents.Mcp.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Testing\MyAgents.Testing.csproj" />
+  </ItemGroup>
+</Project>

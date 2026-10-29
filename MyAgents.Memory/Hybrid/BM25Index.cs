@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text.RegularExpressions;
 
 namespace MyAgents.Memory;
@@ -8,6 +9,12 @@ namespace MyAgents.Memory;
 /// </summary>
 public sealed partial class BM25Index
 {
+    private readonly struct Posting(int docIndex, int freq)
+    {
+        public int DocIndex { get; } = docIndex;
+        public int Freq { get; } = freq;
+    }
+
     [GeneratedRegex(@"[a-zA-Z0-9_\-\.]{2,}")]
     private static partial Regex GetTokenRegex();
 
@@ -15,10 +22,14 @@ public sealed partial class BM25Index
     private readonly double _b;
     private readonly Lock _sync = new();
 
-    // docId -> list of tokens
-    private readonly Dictionary<string, string[]> _documents = new(StringComparer.OrdinalIgnoreCase);
-    // term -> (docId -> frequency)
-    private readonly Dictionary<string, Dictionary<string, int>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _docIndexMap = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<string> _docIds = [];
+    private readonly List<int> _docLengths = [];
+    private readonly List<bool> _docActive = [];
+    private readonly List<string[]> _docTokens = [];
+    private readonly Dictionary<string, List<Posting>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
+
+    private int _activeDocCount;
     private long _totalDocLength;
 
     public BM25Index(double k1 = 1.2, double b = 0.75)
@@ -36,7 +47,7 @@ public sealed partial class BM25Index
     {
         get
         {
-            lock (_sync) return _documents.Count;
+            lock (_sync) return _activeDocCount;
         }
     }
 
@@ -52,12 +63,18 @@ public sealed partial class BM25Index
 
         lock (_sync)
         {
-            if (_documents.TryGetValue(docId, out var existingTokens))
+            if (_docIndexMap.TryGetValue(docId, out var existingIdx))
             {
-                RemoveInternal(docId, existingTokens);
+                RemoveInternal(docId, existingIdx);
             }
 
-            _documents[docId] = tokens;
+            var docIdx = _docIds.Count;
+            _docIds.Add(docId);
+            _docLengths.Add(tokens.Length);
+            _docActive.Add(true);
+            _docTokens.Add(tokens);
+            _docIndexMap[docId] = docIdx;
+            _activeDocCount++;
             _totalDocLength += tokens.Length;
 
             // Compute term frequencies for this doc
@@ -71,10 +88,10 @@ public sealed partial class BM25Index
             {
                 if (!_invertedIndex.TryGetValue(term, out var postingList))
                 {
-                    postingList = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    postingList = [];
                     _invertedIndex[term] = postingList;
                 }
-                postingList[docId] = freq;
+                postingList.Add(new Posting(docIdx, freq));
             }
         }
     }
@@ -88,12 +105,12 @@ public sealed partial class BM25Index
 
         lock (_sync)
         {
-            if (!_documents.TryGetValue(docId, out var tokens))
+            if (!_docIndexMap.TryGetValue(docId, out var docIdx) || !_docActive[docIdx])
             {
                 return false;
             }
 
-            RemoveInternal(docId, tokens);
+            RemoveInternal(docId, docIdx);
             return true;
         }
     }
@@ -105,8 +122,13 @@ public sealed partial class BM25Index
     {
         lock (_sync)
         {
-            _documents.Clear();
+            _docIndexMap.Clear();
+            _docIds.Clear();
+            _docLengths.Clear();
+            _docActive.Clear();
+            _docTokens.Clear();
             _invertedIndex.Clear();
+            _activeDocCount = 0;
             _totalDocLength = 0;
         }
     }
@@ -130,102 +152,150 @@ public sealed partial class BM25Index
 
         lock (_sync)
         {
-            var nDocs = _documents.Count;
+            var nDocs = _activeDocCount;
             if (nDocs == 0 || _totalDocLength == 0)
             {
                 return [];
             }
 
             var avgDocLength = (double)_totalDocLength / nDocs;
-            var docScores = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            var maxDocIndex = _docIds.Count;
 
             // Deduplicate query terms for IDF
-            var distinctQueryTerms = queryTokens.Distinct(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var term in distinctQueryTerms)
+            var distinctTerms = new List<string>(queryTokens.Length);
+            for (var i = 0; i < queryTokens.Length; i++)
             {
-                if (!_invertedIndex.TryGetValue(term, out var postings))
+                var t = queryTokens[i];
+                var exists = false;
+                for (var j = 0; j < distinctTerms.Count; j++)
                 {
-                    continue;
-                }
-
-                var docFreq = postings.Count;
-                // Standard Robertson-Spärck Jones IDF with smoothing
-                var idf = Math.Log(1.0 + (nDocs - docFreq + 0.5) / (docFreq + 0.5));
-                if (idf <= 0.0)
-                {
-                    continue;
-                }
-
-                foreach (var (docId, freq) in postings)
-                {
-                    var docLen = _documents[docId].Length;
-                    var numerator = freq * (_k1 + 1.0);
-                    var denominator = freq + _k1 * (1.0 - _b + _b * (docLen / avgDocLength));
-                    var termScore = idf * (numerator / denominator);
-
-                    docScores[docId] = docScores.TryGetValue(docId, out var current)
-                        ? current + termScore
-                        : termScore;
-                }
-            }
-
-            if (docScores.Count == 0)
-            {
-                return [];
-            }
-
-            if (docScores.Count <= maxResults)
-            {
-                return docScores
-                    .OrderByDescending(kv => kv.Value)
-                    .Select(kv => (kv.Key, kv.Value))
-                    .ToArray();
-            }
-
-            var minHeap = new PriorityQueue<string, double>(maxResults);
-            foreach (var (docId, score) in docScores)
-            {
-                if (minHeap.Count < maxResults)
-                {
-                    minHeap.Enqueue(docId, score);
-                }
-                else
-                {
-                    minHeap.TryPeek(out _, out var minScore);
-                    if (score > minScore)
+                    if (string.Equals(distinctTerms[j], t, StringComparison.OrdinalIgnoreCase))
                     {
-                        minHeap.DequeueEnqueue(docId, score);
+                        exists = true;
+                        break;
                     }
                 }
+                if (!exists) distinctTerms.Add(t);
             }
 
-            var results = new (string DocId, double Score)[minHeap.Count];
-            for (var i = results.Length - 1; i >= 0; i--)
+            var scores = ArrayPool<double>.Shared.Rent(maxDocIndex);
+            Array.Clear(scores, 0, maxDocIndex);
+
+            try
             {
-                minHeap.TryDequeue(out var docId, out var score);
-                results[i] = (docId!, score);
+                var anyMatches = false;
+                var k1Factor = _k1 * (1.0 - _b);
+                var bFactor = _k1 * _b / avgDocLength;
+
+                for (var t = 0; t < distinctTerms.Count; t++)
+                {
+                    var term = distinctTerms[t];
+                    if (!_invertedIndex.TryGetValue(term, out var postings))
+                    {
+                        continue;
+                    }
+
+                    var docFreq = postings.Count;
+                    // Standard Robertson-Spärck Jones IDF with smoothing
+                    var idf = Math.Log(1.0 + (nDocs - docFreq + 0.5) / (docFreq + 0.5));
+                    if (idf <= 0.0)
+                    {
+                        continue;
+                    }
+
+                    var numeratorBase = idf * (_k1 + 1.0);
+
+                    for (var p = 0; p < postings.Count; p++)
+                    {
+                        var posting = postings[p];
+                        var docIdx = posting.DocIndex;
+                        if (!_docActive[docIdx])
+                        {
+                            continue;
+                        }
+
+                        var docLen = _docLengths[docIdx];
+                        var freq = posting.Freq;
+                        var denominator = freq + k1Factor + bFactor * docLen;
+                        scores[docIdx] += (numeratorBase * freq) / denominator;
+                        anyMatches = true;
+                    }
+                }
+
+                if (!anyMatches)
+                {
+                    return [];
+                }
+
+                var minHeap = new PriorityQueue<int, double>(maxResults);
+                for (var i = 0; i < maxDocIndex; i++)
+                {
+                    var s = scores[i];
+                    if (s <= 0.0) continue;
+
+                    if (minHeap.Count < maxResults)
+                    {
+                        minHeap.Enqueue(i, s);
+                    }
+                    else
+                    {
+                        minHeap.TryPeek(out _, out var minScore);
+                        if (s > minScore)
+                        {
+                            minHeap.DequeueEnqueue(i, s);
+                        }
+                    }
+                }
+
+                var results = new (string DocId, double Score)[minHeap.Count];
+                for (var i = results.Length - 1; i >= 0; i--)
+                {
+                    minHeap.TryDequeue(out var docIdx, out var score);
+                    results[i] = (_docIds[docIdx], score);
+                }
+                return results;
             }
-            return results;
+            finally
+            {
+                ArrayPool<double>.Shared.Return(scores);
+            }
         }
     }
 
-    private void RemoveInternal(string docId, string[] tokens)
+    private void RemoveInternal(string docId, int docIdx)
     {
-        _documents.Remove(docId);
-        _totalDocLength -= tokens.Length;
+        _docActive[docIdx] = false;
+        _totalDocLength -= _docLengths[docIdx];
+        _docLengths[docIdx] = 0;
+        _activeDocCount--;
+        _docIndexMap.Remove(docId);
+
+        var tokens = _docTokens[docIdx];
+        _docTokens[docIdx] = [];
 
         var distinctTerms = tokens.Distinct(StringComparer.OrdinalIgnoreCase);
         foreach (var term in distinctTerms)
         {
             if (_invertedIndex.TryGetValue(term, out var postings))
             {
-                postings.Remove(docId);
+                for (var i = postings.Count - 1; i >= 0; i--)
+                {
+                    if (postings[i].DocIndex == docIdx)
+                    {
+                        postings.RemoveAt(i);
+                        break;
+                    }
+                }
                 if (postings.Count == 0)
                 {
                     _invertedIndex.Remove(term);
                 }
             }
+        }
+
+        if (_activeDocCount == 0)
+        {
+            Clear();
         }
     }
 
@@ -239,7 +309,15 @@ public sealed partial class BM25Index
         var list = new List<string>();
         foreach (var match in matches)
         {
-            list.Add(text.Substring(match.Index, match.Length).ToLowerInvariant());
+            var token = string.Create(match.Length, (text, match.Index), static (span, state) =>
+            {
+                var src = state.text.AsSpan(state.Index, span.Length);
+                for (var i = 0; i < span.Length; i++)
+                {
+                    span[i] = char.ToLowerInvariant(src[i]);
+                }
+            });
+            list.Add(token);
         }
 
         return list.Count == 0 ? [] : list.ToArray();
