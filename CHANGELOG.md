@@ -6,7 +6,18 @@ stable release.
 
 ## [Unreleased]
 
+### Added
+- **NuGet publishing via Trusted Publishing (OIDC).** `publish-nuget.yml` workflow builds, tests, and packs
+  all packages with symbol packages (`snupkg`), Source Link, and deterministic builds, then pushes to
+  NuGet.org via `NuGet/login@v1` — no stored API key. `MyAgents.Generators` now ships as a proper Roslyn
+  analyzer package (`analyzers/dotnet/cs`) so NuGet consumers get `[AgentTool]` generation automatically.
+  Package metadata gains icon, project URL, and release-notes links across all packages.
+
 ### Fixed
+- **`[AgentTool]` classes in the global namespace crashed the source generator.** The generated file hint
+  name embedded the literal `"<global namespace>"` display string, which is an invalid hint name; the
+  generator silently stopped contributing source (tool registration extension missing). Global-namespace
+  tools now emit a `Global_` prefixed hint name. Caught by a NuGet-package consumer smoke test.
 - **Streaming content loss with blocking middleware.** `IAgentMiddleware`'s default
   streaming bridge accumulated the chunks of a turn and then yielded only the final one,
   so registering any middleware that implements just the blocking path silently truncated

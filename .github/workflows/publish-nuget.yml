@@ -1,0 +1,80 @@
+name: Publish NuGet packages
+
+# Publishes the MyAgents Community packages to NuGet.org using Trusted Publishing
+# (OIDC) — no stored API key. The NuGet.org publishing policy must match:
+#   Package Owner:   OmniTechSolutionsCA
+#   CI/CD Provider:  GitHub Actions
+#   Repository Owner: OmniTechSolutionsCA
+#   Repository:      MyAgents-Community
+#   Workflow File:   publish-nuget.yml
+# The NuGet account running this must have 2FA enabled.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-nuget
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Test, pack, and push to NuGet.org
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    permissions:
+      contents: read
+      id-token: write # Required for NuGet trusted publishing (OIDC exchange).
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore MyAgents.Community.slnx
+
+      - name: Build Release
+        run: dotnet build MyAgents.Community.slnx --no-restore -c Release
+
+      - name: Test Release
+        run: dotnet test MyAgents.Community.slnx --no-build --no-restore -c Release --logger "trx;LogFileName=publish.trx"
+
+      - name: Pack (with symbol packages)
+        run: >-
+          dotnet pack MyAgents.Community.slnx --no-build --no-restore -c Release
+          -o artifacts/packages
+          -p:IncludeSymbols=true
+          -p:SymbolPackageFormat=snupkg
+
+      - name: List packages to publish
+        run: ls -la artifacts/packages
+
+      - name: NuGet login (trusted publishing)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push packages to NuGet.org
+        run: >-
+          dotnet nuget push "artifacts/packages/*.nupkg"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Push symbol packages to NuGet.org
+        run: >-
+          dotnet nuget push "artifacts/packages/*.snupkg"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

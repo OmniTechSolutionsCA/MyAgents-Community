@@ -84,7 +84,11 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
                 var typeSymbol = kvp.Key;
                 var toolMethods = kvp.Value;
                 var sourceCode = GenerateToolFile(typeSymbol, toolMethods);
-                var fileName = $"{typeSymbol.ContainingNamespace.ToDisplayString().Replace('.', '_')}_{typeSymbol.Name}_AgentTools.g.cs";
+                // Global-namespace types must not produce "<global namespace>" in the hint name.
+                var namespacePart = typeSymbol.ContainingNamespace.IsGlobalNamespace
+                    ? "Global"
+                    : typeSymbol.ContainingNamespace.ToDisplayString().Replace('.', '_');
+                var fileName = $"{namespacePart}_{typeSymbol.Name}_AgentTools.g.cs";
                 spc.AddSource(fileName, SourceText.From(sourceCode, Encoding.UTF8));
             }
         });

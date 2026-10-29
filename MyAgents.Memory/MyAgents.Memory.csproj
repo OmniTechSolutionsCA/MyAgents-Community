@@ -17,7 +17,6 @@
   <!-- MIT-licensed package (open-core). See LICENSE in this directory. -->
   <PropertyGroup>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>0.2.0-preview.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Update="$(MSBuildThisFileDirectory)..\LICENSE" Pack="false" />

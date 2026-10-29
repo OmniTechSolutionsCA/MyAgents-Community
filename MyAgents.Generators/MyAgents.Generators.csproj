@@ -14,4 +14,21 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
   </ItemGroup>
+
+  <!--
+    Ship as a Roslyn source-generator analyzer package: the generator DLL goes into
+    analyzers/dotnet/cs and is picked up automatically by consumers who reference this
+    package, enabling [AgentTool] code generation without a ProjectReference.
+  -->
+  <PropertyGroup>
+    <DevelopmentDependency>false</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- NU5128: generator packages ship no lib assembly by design; the DLL goes to analyzers/dotnet/cs. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <Description>MyAgents source generator: compile-time [AgentTool] ITool wrappers with JSON schema generation, reflection-free argument binding, and NativeAOT-safe JsonContext serialization.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
 </Project>
