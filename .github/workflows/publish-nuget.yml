@@ -50,11 +50,7 @@ jobs:
         run: dotnet test MyAgents.Community.slnx --no-build --no-restore -c Release --logger "trx;LogFileName=publish.trx"
 
       - name: Pack (with symbol packages)
-        run: >-
-          dotnet pack MyAgents.Community.slnx --no-build --no-restore -c Release
-          -o artifacts/packages
-          -p:IncludeSymbols=true
-          -p:SymbolPackageFormat=snupkg
+        run: dotnet pack MyAgents.Community.slnx --no-build --no-restore -c Release -o artifacts/packages
 
       - name: List packages to publish
         run: ls -la artifacts/packages
