@@ -42,7 +42,7 @@ stable release.
   to pass through token deltas in real-time while recording duration and tool calls, preserving incremental
   streaming for callers using `LoggingFeature`.
 - **An agent using `GuardrailsFeature` no longer streams token-by-token.** Guardrail evaluation
-  now happens before any output is released, at latency parity with the blocking path. This is a
+  now happens before any output is released, at parity with the blocking path. This is a
   deliberate trade: text already handed to a caller cannot be retracted, and `IGuardrailPolicy`
   cannot be evaluated per-delta. Middleware that wants true incremental streaming overrides
   `InvokeStreamingAsync`; the guardrail middleware deliberately does not.
@@ -60,6 +60,15 @@ stable release.
   with rented `ArrayPool<double>` score accumulators, contiguous struct `Posting` lists, and `string.Create` lowercasing.
   For 10,000 indexed documents, search latency dropped from 1.55 ms to 47.47 μs (32.7x faster) and allocations dropped from
   920.98 KB to 816 B (1,128x reduction), completely eliminating Gen1/Gen2 garbage collection pauses.
+- **`SqliteCheckpointer` prepared command caching.** Cached pre-allocated and prepared `SqliteCommand` statements and
+  reusable parameter bindings (`_saveCommand`, `_loadCommand`, `_deleteCommand`), eliminating per-checkpoint command creation,
+  SQL re-parsing, and `SqliteParameter` allocations.
+- **`VectorMemoryStore` & `HybridMemoryRetriever` zero-allocation metadata reference binding.** Stored direct references to
+  `IReadOnlyDictionary<string, string>` and `DateTimeOffset` on `VectorRecord`, making JSON serialization lazy and completely
+  eliminating `JsonSerializer.Deserialize` on every retrieved search hit. Vector entry upsert dropped from allocating JSON string
+  buffers down to 752 B and 203.5 ns. Streamlined hybrid retrieval into a single pre-allocated candidate dictionary using
+  `CollectionsMarshal.GetValueRefOrAddDefault`, eliminating intermediate sparse/dense rank maps, LINQ `Concat`/`Distinct`/`ToArray` allocations,
+  and LINQ `OrderByDescending`.
 - **Zero-allocation logging.** Replaced runtime reflection / dynamic logging across `ResilienceMiddleware`,
   `FallbackMiddleware`, `CircuitBreakerMiddleware`, `ContextWindowMiddleware`, `CapabilityRouter`, and
   `LoggingFeature` with source-generated `[LoggerMessage]` partial methods.

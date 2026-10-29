@@ -36,7 +36,7 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         _embedder = embedder ?? throw new ArgumentNullException(nameof(embedder));
     }
 
-    // ── IMemoryStore ──────────────────────────────────────────────────────────
+    // ── IMemoryStore ─────────────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public async ValueTask SetAsync(MemoryEntry entry, CancellationToken cancellationToken = default)
@@ -49,15 +49,15 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         var collection = GetOrCreateCollection(entry.Namespace);
         await collection.EnsureCollectionExistsAsync(cancellationToken).ConfigureAwait(false);
 
+        var createdAtOffset = entry.CreatedAt ?? DateTimeOffset.UtcNow;
         var record = new VectorRecord
         {
             Key = entry.Key,
             Namespace = entry.Namespace,
             Content = entry.Content,
-            MetadataJson = entry.Metadata is null
-                ? null
-                : System.Text.Json.JsonSerializer.Serialize(entry.Metadata),
-            CreatedAt = (entry.CreatedAt ?? DateTimeOffset.UtcNow).ToString("O"),
+            Metadata = entry.Metadata,
+            CreatedAtOffset = createdAtOffset,
+            CreatedAt = createdAtOffset.ToString("O"),
             Embedding = embedding,
         };
 
@@ -89,7 +89,12 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
             // Delegate to vector search when a query is provided
             var vectorResults = await VectorSearchAsync(ns, query, maxResults, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            return vectorResults.Select(r => r.Entry).ToList();
+            var searchResults = new MemoryEntry[vectorResults.Count];
+            for (var i = 0; i < vectorResults.Count; i++)
+            {
+                searchResults[i] = vectorResults[i].Entry;
+            }
+            return searchResults;
         }
 
         // No query — return all records in the namespace via GetAsync with filter
@@ -125,7 +130,7 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         _collections.TryRemove(ns, out _);
     }
 
-    // ── IVectorMemoryStore ────────────────────────────────────────────────────
+    // ── IVectorMemoryStore ───────────────────────────────────────────────────────
 
     /// <inheritdoc/>
     public async ValueTask<IReadOnlyList<VectorSearchResult>> VectorSearchAsync(
@@ -141,20 +146,23 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
         var queryEmbedding = await EmbedAsync(query, cancellationToken).ConfigureAwait(false);
         var collection = GetOrCreateCollection(ns);
 
-        var searchResults = await collection.SearchAsync(
+        var results = new List<VectorSearchResult>(maxResults);
+        await foreach (var r in collection.SearchAsync(
             queryEmbedding,
             top: maxResults,
-            cancellationToken: cancellationToken)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            cancellationToken: cancellationToken).ConfigureAwait(false))
+        {
+            var score = (float)(r.Score ?? 0.0);
+            if (score >= minScore)
+            {
+                results.Add(new VectorSearchResult(ToEntry(r.Record), score));
+            }
+        }
 
-        return searchResults
-            .Where(r => r.Score >= minScore)
-            .Select(r => new VectorSearchResult(ToEntry(r.Record), (float)(r.Score ?? 0.0)))
-            .ToList();
+        return results;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────────────────
 
     private async ValueTask<ReadOnlyMemory<float>> EmbedAsync(string text, CancellationToken ct)
     {
@@ -169,14 +177,14 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
 
     private static MemoryEntry ToEntry(VectorRecord record)
     {
-        IReadOnlyDictionary<string, string>? metadata = null;
-        if (!string.IsNullOrEmpty(record.MetadataJson))
+        var metadata = record.Metadata;
+        if (metadata is null && !string.IsNullOrEmpty(record.MetadataJson))
         {
             metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(record.MetadataJson);
         }
 
-        DateTimeOffset? createdAt = null;
-        if (!string.IsNullOrEmpty(record.CreatedAt) &&
+        var createdAt = record.CreatedAtOffset;
+        if (!createdAt.HasValue && !string.IsNullOrEmpty(record.CreatedAt) &&
             DateTimeOffset.TryParse(record.CreatedAt, out var parsed))
         {
             createdAt = parsed;
@@ -191,7 +199,7 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
     }
 }
 
-// ── Internal record type ───────────────────────────────────────────────────────
+// ── Internal record type ─────────────────────────────────────────────────────
 
 /// <summary>
 /// Internal record stored in the <see cref="InMemoryCollection{TKey,TRecord}"/>.
@@ -200,6 +208,8 @@ public sealed class VectorMemoryStore : IVectorMemoryStore
 /// </summary>
 internal sealed class VectorRecord
 {
+    private string? _metadataJson;
+
     [VectorStoreKey]
     public string Key { get; set; } = string.Empty;
 
@@ -210,11 +220,25 @@ internal sealed class VectorRecord
     public string Content { get; set; } = string.Empty;
 
     [VectorStoreData]
-    public string? MetadataJson { get; set; }
+    public string? MetadataJson
+    {
+        get => _metadataJson ??= (Metadata is null ? null : System.Text.Json.JsonSerializer.Serialize(Metadata));
+        set => _metadataJson = value;
+    }
 
     [VectorStoreData]
     public string? CreatedAt { get; set; }
 
     [VectorStoreVector(Dimensions: 1536)]
     public ReadOnlyMemory<float> Embedding { get; set; }
+
+    /// <summary>
+    /// Direct in-memory reference to metadata to bypass JSON serialization/deserialization.
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Direct timestamp offset to bypass string parsing.
+    /// </summary>
+    public DateTimeOffset? CreatedAtOffset { get; set; }
 }

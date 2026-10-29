@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using MyAgents.Core.Memory;
 
 namespace MyAgents.Memory;
@@ -46,6 +47,15 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         }
     }
 
+    private struct Candidate
+    {
+        public MemoryEntry? Entry;
+        public int DenseRank;
+        public float DenseSimilarity;
+        public int SparseRank;
+        public double SparseScore;
+    }
+
     /// <inheritdoc />
     public async ValueTask<IReadOnlyList<HybridMemorySearchResult>> SearchHybridAsync(
         string ns,
@@ -62,61 +72,56 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
 
         // 1. Sparse BM25 Search
         var sparseHits = bm25Index.Search(query.QueryText, candidateFetchCount);
-        var sparseRankMap = new Dictionary<string, (int Rank, double Score)>(StringComparer.OrdinalIgnoreCase);
-        for (var i = 0; i < sparseHits.Count; i++)
-        {
-            sparseRankMap[sparseHits[i].DocId] = (i + 1, sparseHits[i].Score);
-        }
 
         // 2. Dense Vector Search
         var denseHits = _vectorStore is not null && !string.IsNullOrWhiteSpace(query.QueryText)
             ? await _vectorStore.VectorSearchAsync(ns, query.QueryText, candidateFetchCount, cancellationToken: cancellationToken).ConfigureAwait(false)
-            : Array.Empty<VectorSearchResult>();
+            : (IReadOnlyList<VectorSearchResult>)Array.Empty<VectorSearchResult>();
 
-        var denseRankMap = new Dictionary<string, (int Rank, float Score, MemoryEntry Entry)>(StringComparer.OrdinalIgnoreCase);
+        var candidates = new Dictionary<string, Candidate>(sparseHits.Count + denseHits.Count, StringComparer.OrdinalIgnoreCase);
+
+        double maxSparseScore = 1.0;
+        for (var i = 0; i < sparseHits.Count; i++)
+        {
+            var hit = sparseHits[i];
+            if (hit.Score > maxSparseScore)
+            {
+                maxSparseScore = hit.Score;
+            }
+
+            ref var cand = ref CollectionsMarshal.GetValueRefOrAddDefault(candidates, hit.DocId, out _);
+            cand.SparseRank = i + 1;
+            cand.SparseScore = hit.Score;
+        }
+        if (maxSparseScore <= 0.0) maxSparseScore = 1.0;
+
         for (var i = 0; i < denseHits.Count; i++)
         {
             var hit = denseHits[i];
-            if (!denseRankMap.ContainsKey(hit.Entry.Key))
+            ref var cand = ref CollectionsMarshal.GetValueRefOrAddDefault(candidates, hit.Entry.Key, out _);
+            if (cand.DenseRank == 0)
             {
-                denseRankMap[hit.Entry.Key] = (denseRankMap.Count + 1, hit.Score, hit.Entry);
+                cand.DenseRank = i + 1;
+                cand.DenseSimilarity = hit.Score;
+                cand.Entry = hit.Entry;
             }
         }
 
-        // 3. Collect all candidate keys
-        var allKeys = sparseRankMap.Keys.Concat(denseRankMap.Keys).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-        var results = new List<HybridMemorySearchResult>(allKeys.Length);
+        var results = new List<HybridMemorySearchResult>(candidates.Count);
 
-        var maxSparseScore = sparseHits.Count > 0 ? sparseHits.Max(h => h.Score) : 1.0;
-        if (maxSparseScore <= 0.0) maxSparseScore = 1.0;
-
-        foreach (var key in allKeys)
+        foreach (var (key, cand) in candidates)
         {
-            MemoryEntry? entry = null;
-            if (denseRankMap.TryGetValue(key, out var denseData))
-            {
-                entry = denseData.Entry;
-            }
-            else
-            {
-                entry = await _store.GetAsync(ns, key, cancellationToken).ConfigureAwait(false);
-            }
-
+            var entry = cand.Entry ?? await _store.GetAsync(ns, key, cancellationToken).ConfigureAwait(false);
             if (entry is null || !MatchesMetadata(entry, query.MetadataFilters))
             {
                 continue;
             }
 
-            int? dRank = denseData.Rank != 0 ? denseData.Rank : null;
-            float? dSim = denseData.Score != 0 ? denseData.Score : null;
+            int? dRank = cand.DenseRank != 0 ? cand.DenseRank : null;
+            float? dSim = cand.DenseRank != 0 ? cand.DenseSimilarity : null;
 
-            int? sRank = null;
-            double? sScore = null;
-            if (sparseRankMap.TryGetValue(key, out var sparseData))
-            {
-                sRank = sparseData.Rank;
-                sScore = sparseData.Score;
-            }
+            int? sRank = cand.SparseRank != 0 ? cand.SparseRank : null;
+            double? sScore = cand.SparseRank != 0 ? cand.SparseScore : null;
 
             double fusedScore;
             if (query.RankingMode == HybridRankingMode.ReciprocalRankFusion)
@@ -146,9 +151,8 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         HybridMemorySearchResult[] sorted;
         if (results.Count <= query.MaxResults)
         {
-            sorted = results
-                .OrderByDescending(r => r.FusedScore)
-                .ToArray();
+            results.Sort(static (a, b) => b.FusedScore.CompareTo(a.FusedScore));
+            sorted = results.ToArray();
         }
         else
         {
@@ -180,16 +184,24 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         if (_telemetrySink is not null && sorted.Length > 0)
         {
             var top = sorted[0];
+            var resultKeys = new string[sorted.Length];
+            double scoreSum = 0;
+            for (var i = 0; i < sorted.Length; i++)
+            {
+                resultKeys[i] = sorted[i].Entry.Key;
+                scoreSum += sorted[i].FusedScore;
+            }
+
             await _telemetrySink.RecordAsync(new MemoryRetrievalTelemetry(
                 Namespace: ns,
                 QueryText: query.QueryText,
-                CandidateCount: allKeys.Length,
+                CandidateCount: candidates.Count,
                 ResultCount: sorted.Length,
                 TopResultKey: top.Entry.Key,
                 TopResultScore: top.FusedScore,
-                AverageScore: sorted.Average(r => r.FusedScore),
+                AverageScore: scoreSum / sorted.Length,
                 RecordedAt: DateTimeOffset.UtcNow,
-                ResultKeys: sorted.Select(r => r.Entry.Key).ToArray()), cancellationToken).ConfigureAwait(false);
+                ResultKeys: resultKeys), cancellationToken).ConfigureAwait(false);
         }
 
         return sorted;
@@ -214,18 +226,21 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         var hybridResults = await SearchHybridAsync(ns, hybridQuery, cancellationToken).ConfigureAwait(false);
 
         var halfLife = query.RecencyHalfLife ?? TimeSpan.FromDays(7);
-        return hybridResults.Select(hr =>
+        var finalResults = new MemorySearchResult[hybridResults.Count];
+        for (var i = 0; i < hybridResults.Count; i++)
         {
+            var hr = hybridResults[i];
             var recency = ScoreRecency(hr.Entry.CreatedAt, halfLife);
             var importance = ScoreImportance(hr.Entry.Metadata);
-            return new MemorySearchResult(
+            finalResults[i] = new MemorySearchResult(
                 Entry: hr.Entry,
                 Score: hr.FusedScore,
                 SemanticScore: hr.DenseSimilarity ?? 0.0,
                 KeywordScore: hr.SparseScore ?? 0.0,
                 RecencyScore: recency,
                 ImportanceScore: importance);
-        }).ToArray();
+        }
+        return finalResults;
     }
 
     private async ValueTask EnsureIndexPopulatedAsync(string ns, CancellationToken ct)
