@@ -20,7 +20,9 @@ public sealed class DelegateTool : ITool
         CancellationToken cancellationToken,
         JsonSerializerOptions options);
 
-    private readonly DirectInvoker _directInvoker;
+    // Compiling the expression-tree invoker costs milliseconds per tool, so it is deferred to the
+    // first invocation; tools that are registered but never called pay nothing.
+    private readonly Lazy<DirectInvoker> _directInvoker;
     private readonly JsonSerializerOptions _jsonOptions;
 
     /// <inheritdoc />
@@ -33,7 +35,7 @@ public sealed class DelegateTool : ITool
     public string? ParametersSchemaJson { get; }
 
     private DelegateTool(
-        DirectInvoker directInvoker,
+        Lazy<DirectInvoker> directInvoker,
         string name,
         string? description,
         string parametersSchemaJson,
@@ -127,7 +129,9 @@ public sealed class DelegateTool : ITool
         }
 
         var schemaJson = rootSchema.ToJsonString();
-        var directInvoker = CompileDirectInvoker(method, descriptors, toolName);
+        var directInvoker = new Lazy<DirectInvoker>(
+            () => CompileDirectInvoker(method, descriptors, toolName),
+            LazyThreadSafetyMode.ExecutionAndPublication);
 
         return new DelegateTool(directInvoker, toolName, toolDescription, schemaJson, options);
     }
@@ -137,7 +141,7 @@ public sealed class DelegateTool : ITool
     {
         if (string.IsNullOrWhiteSpace(jsonArguments))
         {
-            return await _directInvoker(default, false, cancellationToken, _jsonOptions).ConfigureAwait(false);
+            return await _directInvoker.Value(default, false, cancellationToken, _jsonOptions).ConfigureAwait(false);
         }
 
         JsonDocument? doc = null;
@@ -154,7 +158,7 @@ public sealed class DelegateTool : ITool
         {
             var root = doc is not null ? doc.RootElement : default;
             var hasRoot = doc is not null;
-            return await _directInvoker(root, hasRoot, cancellationToken, _jsonOptions).ConfigureAwait(false);
+            return await _directInvoker.Value(root, hasRoot, cancellationToken, _jsonOptions).ConfigureAwait(false);
         }
     }
 

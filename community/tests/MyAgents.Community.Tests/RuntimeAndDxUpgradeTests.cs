@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using ComponentDescription = System.ComponentModel.DescriptionAttribute;
@@ -115,6 +116,17 @@ public sealed class RuntimeAndDxUpgradeTests
             await tool.InvokeAsync("{}"));
 
         Assert.That(ex!.Message, Does.Contain("Missing required argument 'requiredArg'"));
+    }
+
+    [Test]
+    public async Task DelegateTool_concurrent_first_invocations_all_succeed()
+    {
+        var tool = DelegateTool.Create((int a, int b) => a + b, "add");
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 32).Select(i =>
+            Task.Run(async () => await tool.InvokeAsync($"{{\"a\":{i},\"b\":1}}"))));
+
+        Assert.That(results, Is.EqualTo(Enumerable.Range(1, 32).Select(i => i.ToString(CultureInfo.InvariantCulture))));
     }
 
     [Test]

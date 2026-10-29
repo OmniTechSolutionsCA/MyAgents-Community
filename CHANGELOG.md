@@ -72,8 +72,9 @@ Figures below are BenchmarkDotNet default-job means, `main` vs this change, meas
   782 KB → 53.7 KB allocated; weighted linear top-10: 1.235 ms → 181.2 µs (6.8x).
 - **`DelegateTool` compiled direct parameter binding.** Removes the per-invocation `object?[]` and boxing for
   primitive arguments. Primitive invocation: 379.5 ns → 186.7 ns (2.0x), 280 B → 72 B. `ValueTask<T>` invocation:
-  439.1 ns → 372.0 ns, 400 B → 296 B. **Trade-off:** `DelegateTool.Create` now compiles an expression tree and is
-  slower, 178.6 µs → 3.03 ms per tool; source-generated `[AgentTool]` tools avoid this cost entirely.
+  439.1 ns → 372.0 ns, 400 B → 296 B. The typed invoker is compiled lazily on first invocation, so
+  `DelegateTool.Create` drops from 178.6 µs to 1.1 µs; the first call to each tool pays ~3 ms for compilation.
+  Source-generated `[AgentTool]` tools have no compilation step.
 - **`BM25Index` array-indexed scoring.** Pooled `ArrayPool<double>` score accumulators, struct `Posting` lists, a
   bounded min-heap for top-k, and `string.Create` lowercasing. Short query over 10,000 documents: 1,533.7 µs → 47.5 µs
   (32x), 921 KB → 824 B allocated; long query: 3,833.6 µs → 129.7 µs (30x). Single-document `AddOrUpdate`:

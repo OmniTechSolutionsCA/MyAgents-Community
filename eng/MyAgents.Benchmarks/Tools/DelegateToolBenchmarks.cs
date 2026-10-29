@@ -77,4 +77,12 @@ public class DelegateToolBenchmarks
     {
         return DelegateTool.Create(_addFunc, "add");
     }
+
+    [Benchmark]
+    public async ValueTask<string> DelegateTool_CreateAndFirstInvoke()
+    {
+        // Includes the deferred invoker compilation that Create no longer pays up front.
+        var tool = DelegateTool.Create(_addFunc, "add");
+        return await tool.InvokeAsync(_primitiveJsonArgs).ConfigureAwait(false);
+    }
 }
