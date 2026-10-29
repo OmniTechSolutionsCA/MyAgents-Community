@@ -21,14 +21,31 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryUrl>https://github.com/OmniTechSolutionsCA/MyAgents-Community</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/OmniTechSolutionsCA/MyAgents-Community</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <PackageIcon>myagents-icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>ai;agents;llm;orchestration;dotnet</PackageTags>
-    <Version>0.2.0-preview.1</Version>
+    <Version>0.2.0-preview.2</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>0.2.0-preview.1</InformationalVersion>
+    <InformationalVersion>0.2.0-preview.2</InformationalVersion>
+  </PropertyGroup>
+
+  <!-- SourceLink / reproducible builds (built into the .NET SDK; these flags just enable them) -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Symbol packages (snupkg) are produced by the publish workflow; formats declared here so local packs match. -->
+  <PropertyGroup>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsPackable)' != 'false'">
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)assets\myagents-icon.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 </Project>
