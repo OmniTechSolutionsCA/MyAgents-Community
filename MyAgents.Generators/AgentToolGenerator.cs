@@ -12,10 +12,35 @@ namespace MyAgents.Generators;
 /// <summary>
 /// Incremental Roslyn source generator that creates <c>ITool</c> wrappers with compile-time JSON schema generation for methods annotated with <c>[AgentTool]</c>.
 /// </summary>
+/// <remarks>
+/// When <c>AgentToolAttribute.JsonContext</c> points at a <c>JsonSerializerContext</c>, complex parameter
+/// and result types are bound and serialized through source-generated <c>JsonTypeInfo</c> metadata and
+/// their advertised JSON schemas are exported from that same metadata at first use — no reflection, and
+/// NativeAOT/trimming safe. Missing registrations are reported as compile-time errors (MYAG001); complex
+/// types without any context produce a warning (MYAG002) because the wrapper then falls back to
+/// reflection-based System.Text.Json.
+/// </remarks>
 [Generator(LanguageNames.CSharp)]
 public sealed class AgentToolGenerator : IIncrementalGenerator
 {
     private const string AttributeFullName = "MyAgents.Core.Tools.AgentToolAttribute";
+    private const string JsonSerializableAttributeFullName = "System.Text.Json.Serialization.JsonSerializableAttribute";
+
+    private static readonly DiagnosticDescriptor MissingJsonSerializable = new(
+        id: "MYAG001",
+        title: "Complex agent tool type is not registered in the JSON context",
+        messageFormat: "Tool '{0}' uses type '{1}', which is not declared in JsonSerializerContext '{2}'. Add [JsonSerializable(typeof({1}))] to the context, or remove JsonContext.",
+        category: "MyAgents.Generators",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor MissingJsonContext = new(
+        id: "MYAG002",
+        title: "Agent tool uses reflection-based serialization",
+        messageFormat: "Tool '{0}' uses complex type '{1}' without a JsonContext. The generated wrapper falls back to reflection-based System.Text.Json, which is not NativeAOT/trimming safe. Set JsonContext = typeof(...) on [AgentTool] and declare the type with [JsonSerializable].",
+        category: "MyAgents.Generators",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -39,11 +64,18 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             foreach (var method in methods)
             {
                 if (method is null) continue;
+
+                foreach (var diagnostic in method.Diagnostics)
+                {
+                    spc.ReportDiagnostic(diagnostic);
+                }
+
                 if (!groupedByType.TryGetValue(method.ContainingType, out var list))
                 {
                     list = new List<ToolMethodModel>();
                     groupedByType[method.ContainingType] = list;
                 }
+
                 list.Add(method);
             }
 
@@ -81,6 +113,9 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             return null;
         }
 
+        var diagnostics = new List<Diagnostic>();
+        var location = methodSymbol.Locations.FirstOrDefault();
+
         string? customName = null;
         if (toolAttr.ConstructorArguments.Length > 0 &&
             toolAttr.ConstructorArguments[0].Value is string nameVal &&
@@ -90,6 +125,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         }
 
         string? customDescription = null;
+        INamedTypeSymbol? jsonContextType = null;
         foreach (var namedArg in toolAttr.NamedArguments)
         {
             if (namedArg.Key == "Name" && namedArg.Value.Value is string nVal && !string.IsNullOrWhiteSpace(nVal))
@@ -100,7 +136,32 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             {
                 customDescription = descVal;
             }
+            else if (namedArg.Key == "JsonContext" && namedArg.Value.Value is ITypeSymbol ctxType)
+            {
+                jsonContextType = ctxType as INamedTypeSymbol;
+            }
         }
+
+        // Collect every type registered on the JsonSerializerContext via [JsonSerializable].
+        var registeredSerializableTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+        if (jsonContextType is not null)
+        {
+            foreach (var attr in jsonContextType.GetAttributes())
+            {
+                if (attr.AttributeClass?.ToDisplayString() != JsonSerializableAttributeFullName)
+                {
+                    continue;
+                }
+
+                if (attr.ConstructorArguments.Length > 0 &&
+                    attr.ConstructorArguments[0].Value is ITypeSymbol serializableType)
+                {
+                    registeredSerializableTypes.Add(serializableType);
+                }
+            }
+        }
+
+        var toolName = customName ?? methodSymbol.Name;
 
         var parameters = new List<ToolParameterModel>();
         foreach (var p in methodSymbol.Parameters)
@@ -118,6 +179,36 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
                 }
             }
 
+            var isPrimitive = IsPrimitiveSerializable(p.Type.SpecialType);
+            var hasTypeInfo = false;
+            if (!isCt && !isPrimitive)
+            {
+                if (jsonContextType is not null)
+                {
+                    if (registeredSerializableTypes.Contains(p.Type))
+                    {
+                        hasTypeInfo = true;
+                    }
+                    else
+                    {
+                        diagnostics.Add(Diagnostic.Create(
+                            MissingJsonSerializable,
+                            location,
+                            toolName,
+                            p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                            jsonContextType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                    }
+                }
+                else
+                {
+                    diagnostics.Add(Diagnostic.Create(
+                        MissingJsonContext,
+                        location,
+                        toolName,
+                        p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                }
+            }
+
             parameters.Add(new ToolParameterModel(
                 Name: p.Name,
                 TypeDisplay: p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
@@ -126,17 +217,90 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
                 HasDefaultValue: p.HasExplicitDefaultValue,
                 DefaultValueLiteral: GetDefaultValueLiteral(p),
                 IsNullable: p.NullableAnnotation == NullableAnnotation.Annotated,
-                Description: paramDesc));
+                Description: paramDesc,
+                HasTypeInfo: hasTypeInfo));
+        }
+
+        // Classify the return type, unwrapping Task<T>/ValueTask<T> when present.
+        var rawReturnTypeDisplay = methodSymbol.ReturnType.ToDisplayString();
+        var isNonGenericTask = rawReturnTypeDisplay is "System.Threading.Tasks.Task" or "System.Threading.Tasks.ValueTask";
+        var returnType = UnwrapTaskType(methodSymbol.ReturnType, out var isAwaitableWithResult);
+
+        string? returnTypeInfoFieldName = null;
+        var returnIsPrimitive = isNonGenericTask ||
+                                returnType.SpecialType == SpecialType.System_Void ||
+                                IsPrimitiveSerializable(returnType.SpecialType);
+        if (!returnIsPrimitive)
+        {
+            if (jsonContextType is not null)
+            {
+                if (registeredSerializableTypes.Contains(returnType))
+                {
+                    returnTypeInfoFieldName = "__typeInfoReturn";
+                }
+                else
+                {
+                    diagnostics.Add(Diagnostic.Create(
+                        MissingJsonSerializable,
+                        location,
+                        toolName,
+                        returnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        jsonContextType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                }
+            }
+            else
+            {
+                diagnostics.Add(Diagnostic.Create(
+                    MissingJsonContext,
+                    location,
+                    toolName,
+                    returnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            }
         }
 
         return new ToolMethodModel(
             ContainingType: methodSymbol.ContainingType,
             MethodName: methodSymbol.Name,
-            ToolName: customName ?? methodSymbol.Name,
+            ToolName: toolName,
             Description: customDescription,
             IsStatic: methodSymbol.IsStatic,
             ReturnType: methodSymbol.ReturnType,
-            Parameters: parameters);
+            EffectiveReturnType: returnType,
+            IsAwaitableWithResult: isAwaitableWithResult,
+            IsNonGenericTask: isNonGenericTask,
+            Parameters: parameters,
+            JsonContextType: jsonContextType,
+            ReturnTypeInfoFieldName: returnTypeInfoFieldName,
+            Diagnostics: diagnostics);
+    }
+
+    /// <summary>
+    /// Determines whether the parameter/result binding switch handles the type directly (no JSON metadata required).
+    /// </summary>
+    private static bool IsPrimitiveSerializable(SpecialType specialType)
+    {
+        return specialType is SpecialType.System_String
+            or SpecialType.System_Boolean
+            or SpecialType.System_Int32
+            or SpecialType.System_Int64
+            or SpecialType.System_Single
+            or SpecialType.System_Double
+            or SpecialType.System_Decimal;
+    }
+
+    private static ITypeSymbol UnwrapTaskType(ITypeSymbol returnType, out bool isAwaitableWithResult)
+    {
+        isAwaitableWithResult = false;
+        var display = returnType.ToDisplayString();
+        if (returnType is INamedTypeSymbol { IsGenericType: true } named &&
+            (display.StartsWith("System.Threading.Tasks.Task<", StringComparison.Ordinal) ||
+             display.StartsWith("System.Threading.Tasks.ValueTask<", StringComparison.Ordinal)))
+        {
+            isAwaitableWithResult = true;
+            return named.TypeArguments[0];
+        }
+
+        return returnType;
     }
 
     private static string? GetDefaultValueLiteral(IParameterSymbol parameter)
@@ -199,8 +363,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
     {
         var toolClassName = $"{typeSymbol.Name}_{method.MethodName}_GeneratedTool";
         var typeFullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-        var schemaJson = GenerateSchemaJson(method);
+        var hasComplexParams = method.Parameters.Any(p => p.HasTypeInfo);
 
         sb.AppendLine($"{indent}/// <summary>");
         sb.AppendLine($"{indent}/// Compile-time generated <see cref=\"global::MyAgents.Core.Tools.ITool\"/> wrapper for <c>{typeSymbol.Name}.{method.MethodName}</c>.");
@@ -226,16 +389,142 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine();
+
+        var parametersSchemaExpression = "Schema";
+        if (method.JsonContextType is not null)
+        {
+            if (hasComplexParams)
+            {
+                parametersSchemaExpression = "__schemaJson";
+            }
+
+            GenerateJsonContextMembers(sb, indent + "    ", method, emitSchemaConst: !hasComplexParams);
+            sb.AppendLine();
+        }
+        else
+        {
+            var schemaJson = GenerateSchemaJson(method);
+            sb.AppendLine($"{indent}    public const string Schema = \"{EscapeString(schemaJson)}\";");
+            sb.AppendLine();
+        }
+
         sb.AppendLine($"{indent}    public string Name => \"{EscapeString(method.ToolName)}\";");
         sb.AppendLine($"{indent}    public string? Description => {(method.Description is not null ? $"\"{EscapeString(method.Description)}\"" : "null")};");
-        sb.AppendLine($"{indent}    public string? ParametersSchemaJson => Schema;");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}    public const string Schema = \"{EscapeString(schemaJson)}\";");
+        sb.AppendLine($"{indent}    public string? ParametersSchemaJson => {parametersSchemaExpression};");
         sb.AppendLine();
 
         GenerateInvokeMethod(sb, indent + "    ", typeSymbol, method);
 
         sb.AppendLine($"{indent}}}");
+    }
+
+    /// <summary>
+    /// Emits static serialization metadata fields (resolved <see cref="global::System.Text.Json.Serialization.Metadata.JsonTypeInfo"/>
+    /// instances and exporter-generated parameter schemas) plus a static constructor that fails fast at first use
+    /// when a type is missing from the context — never falling back to reflection.
+    /// </summary>
+    private static void GenerateJsonContextMembers(StringBuilder sb, string indent, ToolMethodModel method, bool emitSchemaConst)
+    {
+        var contextFullName = method.JsonContextType!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var hasComplexParams = method.Parameters.Any(p => p.HasTypeInfo);
+        var hasComplexReturn = method.ReturnTypeInfoFieldName is not null;
+        var className = $"{method.ContainingType.Name}_{method.MethodName}_GeneratedTool";
+
+        foreach (var p in method.Parameters.Where(p => p.HasTypeInfo))
+        {
+            sb.AppendLine($"{indent}private static readonly global::System.Text.Json.Serialization.Metadata.JsonTypeInfo __typeInfo_{SanitizeIdentifier(p.Name)};");
+        }
+
+        if (hasComplexReturn)
+        {
+            sb.AppendLine($"{indent}private static readonly global::System.Text.Json.Serialization.Metadata.JsonTypeInfo __typeInfoReturn;");
+        }
+
+        if (hasComplexParams)
+        {
+            sb.AppendLine($"{indent}private static readonly string __schemaJson;");
+            foreach (var p in method.Parameters.Where(p => p.HasTypeInfo))
+            {
+                sb.AppendLine($"{indent}private static readonly string __paramSchema_{SanitizeIdentifier(p.Name)};");
+            }
+        }
+
+        sb.AppendLine();
+        sb.AppendLine($"{indent}static {className}()");
+        sb.AppendLine($"{indent}{{");
+
+        foreach (var p in method.Parameters.Where(p => p.HasTypeInfo))
+        {
+            var field = $"__typeInfo_{SanitizeIdentifier(p.Name)}";
+            sb.AppendLine($"{indent}    {field} = {contextFullName}.Default.GetTypeInfo(typeof({p.TypeDisplay}))");
+            sb.AppendLine($"{indent}        ?? throw new global::System.InvalidOperationException(\"Tool '{EscapeString(method.ToolName)}': no JSON serialization metadata for type '{EscapeString(p.TypeDisplay)}' in {EscapeString(contextFullName)}. Declare it with [JsonSerializable].\");");
+        }
+
+        if (hasComplexReturn)
+        {
+            var effectiveReturnDisplay = method.EffectiveReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            sb.AppendLine($"{indent}    __typeInfoReturn = {contextFullName}.Default.GetTypeInfo(typeof({effectiveReturnDisplay}))");
+            sb.AppendLine($"{indent}        ?? throw new global::System.InvalidOperationException(\"Tool '{EscapeString(method.ToolName)}': no JSON serialization metadata for return type '{EscapeString(effectiveReturnDisplay)}' in {EscapeString(contextFullName)}. Declare it with [JsonSerializable].\");");
+        }
+
+        foreach (var p in method.Parameters.Where(p => p.HasTypeInfo))
+        {
+            var schemaField = $"__paramSchema_{SanitizeIdentifier(p.Name)}";
+            sb.AppendLine($"{indent}    {schemaField} = global::System.Text.Json.Schema.JsonSchemaExporter.GetJsonSchemaAsNode(");
+            sb.AppendLine($"{indent}        {contextFullName}.Default.Options,");
+            sb.AppendLine($"{indent}        typeof({p.TypeDisplay})).ToJsonString();");
+        }
+
+        if (hasComplexParams)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{indent}    __schemaJson = BuildSchemaJson();");
+        }
+
+        sb.AppendLine($"{indent}}}");
+
+        if (hasComplexParams)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{indent}private static string BuildSchemaJson()");
+            sb.AppendLine($"{indent}{{");
+            sb.AppendLine($"{indent}    var __root = global::System.Text.Json.Nodes.JsonNode.Parse(SchemaScaffold)!.AsObject();");
+            sb.AppendLine($"{indent}    var __props = (global::System.Text.Json.Nodes.JsonObject)__root[\"properties\"]!;");
+            foreach (var p in method.Parameters.Where(p => p.HasTypeInfo))
+            {
+                var schemaField = $"__paramSchema_{SanitizeIdentifier(p.Name)}";
+                var nodeVar = $"__node_{SanitizeIdentifier(p.Name)}";
+                var nameLiteral = $"\"{EscapeString(p.Name)}\"";
+                sb.AppendLine($"{indent}    var {nodeVar} = global::System.Text.Json.Nodes.JsonNode.Parse({schemaField})!;");
+                sb.AppendLine($"{indent}    __props[{nameLiteral}] = {nodeVar};");
+                if (p.Description is not null)
+                {
+                    sb.AppendLine($"{indent}    {nodeVar}[\"description\"] = \"{EscapeString(p.Description)}\";");
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine($"{indent}    return __root.ToJsonString();");
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+            var scaffoldJson = GenerateSchemaJson(method);
+            sb.AppendLine($"{indent}public const string SchemaScaffold = \"{EscapeString(scaffoldJson)}\";");
+        }
+        else if (emitSchemaConst)
+        {
+            var schemaJson = GenerateSchemaJson(method);
+            sb.AppendLine($"{indent}public const string Schema = \"{EscapeString(schemaJson)}\";");
+        }
+    }
+
+    private static string SanitizeIdentifier(string name)
+    {
+        var sb = new StringBuilder(name.Length);
+        foreach (var c in name)
+        {
+            sb.Append(char.IsLetterOrDigit(c) ? c : '_');
+        }
+
+        return sb.ToString();
     }
 
     private static string GenerateSchemaJson(ToolMethodModel method)
@@ -251,10 +540,14 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             if (!first) propsSb.Append(',');
             first = false;
 
-            var jsonType = GetJsonType(p.TypeSpecial, p.TypeDisplay);
+            // Complex types get a placeholder that is replaced at static-initialization time
+            // with an exporter-accurate schema derived from the tool's JsonSerializerContext.
+            var jsonType = p.HasTypeInfo
+                ? "object"
+                : GetJsonType(p.TypeSpecial, p.TypeDisplay);
             propsSb.Append($"\"{EscapeString(p.Name)}\":{{\"type\":\"{jsonType}\"");
 
-            if (!string.IsNullOrWhiteSpace(p.Description))
+            if (!p.HasTypeInfo && !string.IsNullOrWhiteSpace(p.Description))
             {
                 propsSb.Append($",\"description\":\"{EscapeString(p.Description!)}\"");
             }
@@ -319,9 +612,9 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
 
     private static void GenerateInvokeMethod(StringBuilder sb, string indent, INamedTypeSymbol typeSymbol, ToolMethodModel method)
     {
-        var returnTypeStr = method.ReturnType.ToDisplayString();
-        var isAsync = returnTypeStr.StartsWith("System.Threading.Tasks.Task", StringComparison.Ordinal) ||
-                      returnTypeStr.StartsWith("System.Threading.Tasks.ValueTask", StringComparison.Ordinal);
+        var returnTypeDisplay = method.ReturnType.ToDisplayString();
+        var isAsync = returnTypeDisplay.StartsWith("System.Threading.Tasks.Task", StringComparison.Ordinal) ||
+                      returnTypeDisplay.StartsWith("System.Threading.Tasks.ValueTask", StringComparison.Ordinal);
 
         var asyncKeyword = isAsync ? "async " : "";
         sb.AppendLine($"{indent}public {asyncKeyword}global::System.Threading.Tasks.ValueTask<string> InvokeAsync(string jsonArguments, global::System.Threading.CancellationToken cancellationToken = default)");
@@ -337,7 +630,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
 
         var argList = string.Join(", ", method.Parameters.Select(p => p.IsCancellationToken ? "cancellationToken" : p.Name));
         var targetPrefix = method.IsStatic
-            ? typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            ? method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             : "_target";
 
         var callExpr = $"{targetPrefix}.{method.MethodName}({argList})";
@@ -345,7 +638,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         var nonCtParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
         if (nonCtParams.Count == 0)
         {
-            GenerateReturnStatement(sb, indent + "    ", method.ReturnType, callExpr);
+            GenerateReturnStatement(sb, indent + "    ", method, callExpr);
             sb.AppendLine($"{indent}}}");
             return;
         }
@@ -369,7 +662,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine();
-        GenerateReturnStatement(sb, indent + "        ", method.ReturnType, callExpr);
+        GenerateReturnStatement(sb, indent + "        ", method, callExpr);
         sb.AppendLine($"{indent}    }}");
         sb.AppendLine($"{indent}}}");
         sb.AppendLine();
@@ -410,38 +703,54 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         sb.AppendLine($"{indent}if (__TryFindArgument(__root, {nameLiteral}, out var {propName}))");
         sb.AppendLine($"{indent}{{");
 
-        switch (p.TypeSpecial)
+        if (p.HasTypeInfo)
         {
-            case SpecialType.System_String:
-                sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.String) {p.Name} = {propName}.GetString()!;");
-                sb.AppendLine($"{indent}    else if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Null) {p.Name} = null!;");
-                sb.AppendLine($"{indent}    else {invalid};");
-                break;
-            case SpecialType.System_Boolean:
-                sb.AppendLine($"{indent}    if ({propName}.ValueKind is global::System.Text.Json.JsonValueKind.True or global::System.Text.Json.JsonValueKind.False) {p.Name} = {propName}.GetBoolean();");
-                sb.AppendLine($"{indent}    else {invalid};");
-                break;
-            case SpecialType.System_Int32:
-            case SpecialType.System_Int64:
-            case SpecialType.System_Double:
-            case SpecialType.System_Single:
-            case SpecialType.System_Decimal:
-                var getter = p.TypeSpecial switch
-                {
-                    SpecialType.System_Int32 => "TryGetInt32",
-                    SpecialType.System_Int64 => "TryGetInt64",
-                    SpecialType.System_Double => "TryGetDouble",
-                    SpecialType.System_Single => "TryGetSingle",
-                    _ => "TryGetDecimal",
-                };
-                sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Number && {propName}.{getter}(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
-                sb.AppendLine($"{indent}    else {invalid};");
-                break;
-            default:
-                // Non-primitive arguments use reflection-based System.Text.Json deserialization,
-                // which is not NativeAOT/trimming safe. Errors propagate as JsonException.
-                sb.AppendLine($"{indent}    {p.Name} = global::System.Text.Json.JsonSerializer.Deserialize<{p.TypeDisplay}>({propName})!;");
-                break;
+            // Source-generated JsonTypeInfo path: no reflection, NativeAOT/trimming safe.
+            var typeInfoField = $"__typeInfo_{SanitizeIdentifier(p.Name)}";
+            sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Null)");
+            sb.AppendLine($"{indent}    {{");
+            sb.AppendLine($"{indent}        {p.Name} = null!;");
+            sb.AppendLine($"{indent}    }}");
+            sb.AppendLine($"{indent}    else");
+            sb.AppendLine($"{indent}    {{");
+            sb.AppendLine($"{indent}        {p.Name} = ({p.TypeDisplay})global::System.Text.Json.JsonSerializer.Deserialize({propName}, {typeInfoField})!;");
+            sb.AppendLine($"{indent}    }}");
+        }
+        else
+        {
+            switch (p.TypeSpecial)
+            {
+                case SpecialType.System_String:
+                    sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.String) {p.Name} = {propName}.GetString()!;");
+                    sb.AppendLine($"{indent}    else if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Null) {p.Name} = null!;");
+                    sb.AppendLine($"{indent}    else {invalid};");
+                    break;
+                case SpecialType.System_Boolean:
+                    sb.AppendLine($"{indent}    if ({propName}.ValueKind is global::System.Text.Json.JsonValueKind.True or global::System.Text.Json.JsonValueKind.False) {p.Name} = {propName}.GetBoolean();");
+                    sb.AppendLine($"{indent}    else {invalid};");
+                    break;
+                case SpecialType.System_Int32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_Double:
+                case SpecialType.System_Single:
+                case SpecialType.System_Decimal:
+                    var getter = p.TypeSpecial switch
+                    {
+                        SpecialType.System_Int32 => "TryGetInt32",
+                        SpecialType.System_Int64 => "TryGetInt64",
+                        SpecialType.System_Double => "TryGetDouble",
+                        SpecialType.System_Single => "TryGetSingle",
+                        _ => "TryGetDecimal",
+                    };
+                    sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Number && {propName}.{getter}(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
+                    sb.AppendLine($"{indent}    else {invalid};");
+                    break;
+                default:
+                    // Non-primitive arguments use reflection-based System.Text.Json deserialization,
+                    // which is not NativeAOT/trimming safe. Errors propagate as JsonException.
+                    sb.AppendLine($"{indent}    {p.Name} = global::System.Text.Json.JsonSerializer.Deserialize<{p.TypeDisplay}>({propName})!;");
+                    break;
+            }
         }
 
         sb.AppendLine($"{indent}}}");
@@ -456,9 +765,9 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
     }
 
     // Result formatting mirrors DelegateTool so both tool flavours return identical strings.
-    private static void GenerateReturnStatement(StringBuilder sb, string indent, ITypeSymbol returnType, string callExpr)
+    private static void GenerateReturnStatement(StringBuilder sb, string indent, ToolMethodModel method, string callExpr)
     {
-        var returnTypeStr = returnType.ToDisplayString();
+        var returnType = method.EffectiveReturnType;
 
         if (returnType.SpecialType == SpecialType.System_Void)
         {
@@ -467,27 +776,25 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             return;
         }
 
-        if (returnTypeStr is "System.Threading.Tasks.Task" or "System.Threading.Tasks.ValueTask")
+        if (method.IsNonGenericTask)
         {
             sb.AppendLine($"{indent}await {callExpr}.ConfigureAwait(false);");
             sb.AppendLine($"{indent}return \"true\";");
             return;
         }
 
-        if (returnType is INamedTypeSymbol { IsGenericType: true } named &&
-            (returnTypeStr.StartsWith("System.Threading.Tasks.Task<", StringComparison.Ordinal) ||
-             returnTypeStr.StartsWith("System.Threading.Tasks.ValueTask<", StringComparison.Ordinal)))
+        if (method.IsAwaitableWithResult)
         {
             sb.AppendLine($"{indent}var __result = await {callExpr}.ConfigureAwait(false);");
-            sb.AppendLine($"{indent}return {FormatResultExpression(named.TypeArguments[0], "__result")};");
+            sb.AppendLine($"{indent}return {FormatResultExpression(returnType, "__result", method.ReturnTypeInfoFieldName)};");
             return;
         }
 
         sb.AppendLine($"{indent}var __result = {callExpr};");
-        sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>({FormatResultExpression(returnType, "__result")});");
+        sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>({FormatResultExpression(returnType, "__result", method.ReturnTypeInfoFieldName)});");
     }
 
-    private static string FormatResultExpression(ITypeSymbol type, string value)
+    private static string FormatResultExpression(ITypeSymbol type, string value, string? typeInfoFieldName)
     {
         switch (type.SpecialType)
         {
@@ -502,6 +809,12 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             case SpecialType.System_Decimal:
                 return $"{value}.ToString(global::System.Globalization.CultureInfo.InvariantCulture)";
             default:
+                if (typeInfoFieldName is not null)
+                {
+                    // Source-generated JsonTypeInfo path: no reflection, NativeAOT/trimming safe.
+                    return $"global::System.Text.Json.JsonSerializer.Serialize({value}, {typeInfoFieldName})";
+                }
+
                 return $"{value} is null ? \"null\" : global::System.Text.Json.JsonSerializer.Serialize({value})";
         }
     }
@@ -583,7 +896,13 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         public string? Description { get; }
         public bool IsStatic { get; }
         public ITypeSymbol ReturnType { get; }
+        public ITypeSymbol EffectiveReturnType { get; }
+        public bool IsAwaitableWithResult { get; }
+        public bool IsNonGenericTask { get; }
         public List<ToolParameterModel> Parameters { get; }
+        public INamedTypeSymbol? JsonContextType { get; }
+        public string? ReturnTypeInfoFieldName { get; }
+        public List<Diagnostic> Diagnostics { get; }
 
         public ToolMethodModel(
             INamedTypeSymbol ContainingType,
@@ -592,7 +911,13 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             string? Description,
             bool IsStatic,
             ITypeSymbol ReturnType,
-            List<ToolParameterModel> Parameters)
+            ITypeSymbol EffectiveReturnType,
+            bool IsAwaitableWithResult,
+            bool IsNonGenericTask,
+            List<ToolParameterModel> Parameters,
+            INamedTypeSymbol? JsonContextType,
+            string? ReturnTypeInfoFieldName,
+            List<Diagnostic> Diagnostics)
         {
             this.ContainingType = ContainingType;
             this.MethodName = MethodName;
@@ -600,7 +925,13 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             this.Description = Description;
             this.IsStatic = IsStatic;
             this.ReturnType = ReturnType;
+            this.EffectiveReturnType = EffectiveReturnType;
+            this.IsAwaitableWithResult = IsAwaitableWithResult;
+            this.IsNonGenericTask = IsNonGenericTask;
             this.Parameters = Parameters;
+            this.JsonContextType = JsonContextType;
+            this.ReturnTypeInfoFieldName = ReturnTypeInfoFieldName;
+            this.Diagnostics = Diagnostics;
         }
     }
 
@@ -614,6 +945,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         public string? DefaultValueLiteral { get; }
         public bool IsNullable { get; }
         public string? Description { get; }
+        public bool HasTypeInfo { get; }
 
         public ToolParameterModel(
             string Name,
@@ -623,7 +955,8 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             bool HasDefaultValue,
             string? DefaultValueLiteral,
             bool IsNullable,
-            string? Description)
+            string? Description,
+            bool HasTypeInfo)
         {
             this.Name = Name;
             this.TypeDisplay = TypeDisplay;
@@ -633,6 +966,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             this.DefaultValueLiteral = DefaultValueLiteral;
             this.IsNullable = IsNullable;
             this.Description = Description;
+            this.HasTypeInfo = HasTypeInfo;
         }
     }
 }

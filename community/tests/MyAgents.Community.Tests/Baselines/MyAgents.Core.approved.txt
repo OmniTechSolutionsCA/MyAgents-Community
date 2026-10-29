@@ -669,6 +669,7 @@ TYPE class MyAgents.Core.Tools.AgentFunctionCallSerializer
 TYPE class MyAgents.Core.Tools.AgentToolAttribute
   CTOR AgentToolAttribute(string name)
   PROP string Description { get; set; }
+  PROP System.Type JsonContext { get; set; }
   PROP string Name { get; set; }
 TYPE class MyAgents.Core.Tools.DefaultProcessRunner
   CTOR DefaultProcessRunner()

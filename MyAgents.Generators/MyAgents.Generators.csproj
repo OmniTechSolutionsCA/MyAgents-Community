@@ -3,6 +3,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsRoslynComponent>true</IsRoslynComponent>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- RS2008 (analyzer release tracking) does not apply to source generators that are versioned with the repo. -->
+    <NoWarn>$(NoWarn);RS2008</NoWarn>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <RootNamespace>MyAgents.Generators</RootNamespace>
