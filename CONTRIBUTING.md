@@ -53,9 +53,16 @@ dotnet run --project eng/MyAgents.Benchmarks/MyAgents.Benchmarks.csproj -c Relea
 dotnet run --project eng/MyAgents.Benchmarks/MyAgents.Benchmarks.csproj -c Release -- --filter *
 ```
 
+The harness uses BenchmarkDotNet's default job. Append `--job short` for a quick local signal, but
+do not quote ShortRun numbers: with three iterations the error is often as large as the mean. On
+hybrid CPUs (performance + efficiency cores), pin to one logical CPU with `--affinity <mask>`, run the
+baseline and the change back-to-back with the same mask, and check that the `HandwrittenITool_PrimitiveArgs`
+control matches on both sides before comparing timings.
+
 ### Performance Budgets
 
-When contributing to core dispatch loops or memory indexing paths, maintain these targets:
+When contributing to core dispatch loops or memory indexing paths, maintain these targets
+(measured on an AMD Ryzen AI 9 HX 370 pinned to one logical CPU; compare against `main` on your own machine):
 - **`DelegateTool.InvokeAsync` (primitives)**: ≤ 200 ns and ≤ 72 B allocated (zero boxing, compiled expression binding).
 - **`BM25Index.Search` (10k docs, Top-10)**: ≤ 50 μs and < 1 KB allocated (pooled accumulator, min-heap ranking).
 - **`AgentPipeline.InvokeAsync` (cached chain)**: ≤ 15 ns and 0 B allocated.

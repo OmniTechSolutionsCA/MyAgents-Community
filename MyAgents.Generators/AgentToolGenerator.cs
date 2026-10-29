@@ -10,8 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace MyAgents.Generators;
 
 /// <summary>
-/// Incremental Roslyn source generator that creates reflection-free, NativeAOT-compatible
-/// <c>ITool</c> wrappers with compile-time JSON schema generation for methods annotated with <c>[AgentTool]</c>.
+/// Incremental Roslyn source generator that creates <c>ITool</c> wrappers with compile-time JSON schema generation for methods annotated with <c>[AgentTool]</c>.
 /// </summary>
 [Generator(LanguageNames.CSharp)]
 public sealed class AgentToolGenerator : IIncrementalGenerator
@@ -204,7 +203,7 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         var schemaJson = GenerateSchemaJson(method);
 
         sb.AppendLine($"{indent}/// <summary>");
-        sb.AppendLine($"{indent}/// Generated reflection-free <see cref=\"global::MyAgents.Core.Tools.ITool\"/> wrapper for <c>{typeSymbol.Name}.{method.MethodName}</c>.");
+        sb.AppendLine($"{indent}/// Compile-time generated <see cref=\"global::MyAgents.Core.Tools.ITool\"/> wrapper for <c>{typeSymbol.Name}.{method.MethodName}</c>.");
         sb.AppendLine($"{indent}/// </summary>");
         sb.AppendLine($"{indent}[global::System.CodeDom.Compiler.GeneratedCode(\"MyAgents.Generators\", \"1.0.0.0\")]");
         sb.AppendLine($"{indent}public sealed class {toolClassName} : global::MyAgents.Core.Tools.ITool");
@@ -336,32 +335,6 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
             sb.AppendLine($"{indent}    {p.TypeDisplay} {p.Name} = {defaultVal};");
         }
 
-        var nonCtParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
-        if (nonCtParams.Count > 0)
-        {
-            sb.AppendLine($"{indent}    if (!string.IsNullOrWhiteSpace(jsonArguments))");
-            sb.AppendLine($"{indent}    {{");
-            sb.AppendLine($"{indent}        try");
-            sb.AppendLine($"{indent}        {{");
-            sb.AppendLine($"{indent}            using var __doc = global::System.Text.Json.JsonDocument.Parse(jsonArguments);");
-            sb.AppendLine($"{indent}            var __root = __doc.RootElement;");
-            sb.AppendLine($"{indent}            if (__root.ValueKind == global::System.Text.Json.JsonValueKind.Object)");
-            sb.AppendLine($"{indent}            {{");
-
-            foreach (var p in nonCtParams)
-            {
-                GenerateParameterExtractor(sb, indent + "                ", p);
-            }
-
-            sb.AppendLine($"{indent}            }}");
-            sb.AppendLine($"{indent}        }}");
-            sb.AppendLine($"{indent}        catch (global::System.Text.Json.JsonException)");
-            sb.AppendLine($"{indent}        {{");
-            sb.AppendLine($"{indent}            // Graceful fallback to default arguments");
-            sb.AppendLine($"{indent}        }}");
-            sb.AppendLine($"{indent}    }}");
-        }
-
         var argList = string.Join(", ", method.Parameters.Select(p => p.IsCancellationToken ? "cancellationToken" : p.Name));
         var targetPrefix = method.IsStatic
             ? typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -369,48 +342,120 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
 
         var callExpr = $"{targetPrefix}.{method.MethodName}({argList})";
 
-        GenerateReturnStatement(sb, indent + "    ", method.ReturnType, callExpr);
+        var nonCtParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
+        if (nonCtParams.Count == 0)
+        {
+            GenerateReturnStatement(sb, indent + "    ", method.ReturnType, callExpr);
+            sb.AppendLine($"{indent}}}");
+            return;
+        }
 
+        // Mirrors DelegateTool: invalid JSON is treated as an empty argument object, while
+        // missing required arguments and wrongly typed values are reported to the caller.
+        sb.AppendLine($"{indent}    global::System.Text.Json.JsonDocument? __doc = null;");
+        sb.AppendLine($"{indent}    if (!string.IsNullOrWhiteSpace(jsonArguments))");
+        sb.AppendLine($"{indent}    {{");
+        sb.AppendLine($"{indent}        try {{ __doc = global::System.Text.Json.JsonDocument.Parse(jsonArguments); }}");
+        sb.AppendLine($"{indent}        catch (global::System.Text.Json.JsonException) {{ }}");
+        sb.AppendLine($"{indent}    }}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}    using (__doc)");
+        sb.AppendLine($"{indent}    {{");
+        sb.AppendLine($"{indent}        var __root = __doc is not null ? __doc.RootElement : default;");
+
+        foreach (var p in nonCtParams)
+        {
+            GenerateParameterExtractor(sb, indent + "        ", method.ToolName, p);
+        }
+
+        sb.AppendLine();
+        GenerateReturnStatement(sb, indent + "        ", method.ReturnType, callExpr);
+        sb.AppendLine($"{indent}    }}");
         sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+        GenerateBindingHelpers(sb, indent, method.ToolName);
     }
 
-    private static void GenerateParameterExtractor(StringBuilder sb, string indent, ToolParameterModel p)
+    private static void GenerateBindingHelpers(StringBuilder sb, string indent, string toolName)
+    {
+        sb.AppendLine($"{indent}private static bool __TryFindArgument(global::System.Text.Json.JsonElement root, string name, out global::System.Text.Json.JsonElement value)");
+        sb.AppendLine($"{indent}{{");
+        sb.AppendLine($"{indent}    if (root.ValueKind == global::System.Text.Json.JsonValueKind.Object)");
+        sb.AppendLine($"{indent}    {{");
+        sb.AppendLine($"{indent}        if (root.TryGetProperty(name, out value)) return true;");
+        sb.AppendLine($"{indent}        foreach (var __prop in root.EnumerateObject())");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            if (string.Equals(__prop.Name, name, global::System.StringComparison.OrdinalIgnoreCase))");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                value = __prop.Value;");
+        sb.AppendLine($"{indent}                return true;");
+        sb.AppendLine($"{indent}            }}");
+        sb.AppendLine($"{indent}        }}");
+        sb.AppendLine($"{indent}    }}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}    value = default;");
+        sb.AppendLine($"{indent}    return false;");
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}private static global::System.Text.Json.JsonException __InvalidArgument(string name, string typeName) =>");
+        sb.AppendLine($"{indent}    new(\"The JSON value for argument '\" + name + \"' of tool '{EscapeString(toolName)}' could not be converted to \" + typeName + \".\");");
+    }
+
+    private static void GenerateParameterExtractor(StringBuilder sb, string indent, string toolName, ToolParameterModel p)
     {
         var propName = $"__{p.Name}Prop";
-        sb.AppendLine($"{indent}if (__root.TryGetProperty(\"{EscapeString(p.Name)}\", out var {propName}))");
+        var nameLiteral = $"\"{EscapeString(p.Name)}\"";
+        var invalid = $"throw __InvalidArgument({nameLiteral}, \"{EscapeString(p.TypeDisplay)}\")";
+
+        sb.AppendLine($"{indent}if (__TryFindArgument(__root, {nameLiteral}, out var {propName}))");
         sb.AppendLine($"{indent}{{");
 
         switch (p.TypeSpecial)
         {
             case SpecialType.System_String:
-                sb.AppendLine($"{indent}    {p.Name} = {propName}.GetString()!;");
+                sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.String) {p.Name} = {propName}.GetString()!;");
+                sb.AppendLine($"{indent}    else if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Null) {p.Name} = null!;");
+                sb.AppendLine($"{indent}    else {invalid};");
                 break;
             case SpecialType.System_Boolean:
-                sb.AppendLine($"{indent}    {p.Name} = {propName}.ValueKind == global::System.Text.Json.JsonValueKind.True;");
+                sb.AppendLine($"{indent}    if ({propName}.ValueKind is global::System.Text.Json.JsonValueKind.True or global::System.Text.Json.JsonValueKind.False) {p.Name} = {propName}.GetBoolean();");
+                sb.AppendLine($"{indent}    else {invalid};");
                 break;
             case SpecialType.System_Int32:
-                sb.AppendLine($"{indent}    if ({propName}.TryGetInt32(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
-                break;
             case SpecialType.System_Int64:
-                sb.AppendLine($"{indent}    if ({propName}.TryGetInt64(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
-                break;
             case SpecialType.System_Double:
-                sb.AppendLine($"{indent}    if ({propName}.TryGetDouble(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
-                break;
             case SpecialType.System_Single:
-                sb.AppendLine($"{indent}    if ({propName}.TryGetSingle(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
-                break;
             case SpecialType.System_Decimal:
-                sb.AppendLine($"{indent}    if ({propName}.TryGetDecimal(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
+                var getter = p.TypeSpecial switch
+                {
+                    SpecialType.System_Int32 => "TryGetInt32",
+                    SpecialType.System_Int64 => "TryGetInt64",
+                    SpecialType.System_Double => "TryGetDouble",
+                    SpecialType.System_Single => "TryGetSingle",
+                    _ => "TryGetDecimal",
+                };
+                sb.AppendLine($"{indent}    if ({propName}.ValueKind == global::System.Text.Json.JsonValueKind.Number && {propName}.{getter}(out var __{p.Name}Val)) {p.Name} = __{p.Name}Val;");
+                sb.AppendLine($"{indent}    else {invalid};");
                 break;
             default:
-                sb.AppendLine($"{indent}    try {{ {p.Name} = global::System.Text.Json.JsonSerializer.Deserialize<{p.TypeDisplay}>({propName}.GetRawText())!; }} catch {{ }}");
+                // Non-primitive arguments use reflection-based System.Text.Json deserialization,
+                // which is not NativeAOT/trimming safe. Errors propagate as JsonException.
+                sb.AppendLine($"{indent}    {p.Name} = global::System.Text.Json.JsonSerializer.Deserialize<{p.TypeDisplay}>({propName})!;");
                 break;
         }
 
         sb.AppendLine($"{indent}}}");
+
+        if (!p.HasDefaultValue && !p.IsNullable)
+        {
+            sb.AppendLine($"{indent}else");
+            sb.AppendLine($"{indent}{{");
+            sb.AppendLine($"{indent}    throw new global::System.ArgumentException(\"Missing required argument '{EscapeString(p.Name)}' for tool '{EscapeString(toolName)}'.\");");
+            sb.AppendLine($"{indent}}}");
+        }
     }
 
+    // Result formatting mirrors DelegateTool so both tool flavours return identical strings.
     private static void GenerateReturnStatement(StringBuilder sb, string indent, ITypeSymbol returnType, string callExpr)
     {
         var returnTypeStr = returnType.ToDisplayString();
@@ -418,58 +463,47 @@ public sealed class AgentToolGenerator : IIncrementalGenerator
         if (returnType.SpecialType == SpecialType.System_Void)
         {
             sb.AppendLine($"{indent}{callExpr};");
-            sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>(string.Empty);");
+            sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>(\"null\");");
             return;
         }
 
-        if (returnTypeStr == "System.Threading.Tasks.Task")
+        if (returnTypeStr is "System.Threading.Tasks.Task" or "System.Threading.Tasks.ValueTask")
         {
             sb.AppendLine($"{indent}await {callExpr}.ConfigureAwait(false);");
-            sb.AppendLine($"{indent}return string.Empty;");
+            sb.AppendLine($"{indent}return \"true\";");
             return;
         }
 
-        if (returnTypeStr == "System.Threading.Tasks.ValueTask")
-        {
-            sb.AppendLine($"{indent}await {callExpr}.ConfigureAwait(false);");
-            sb.AppendLine($"{indent}return string.Empty;");
-            return;
-        }
-
-        if (returnTypeStr == "System.Threading.Tasks.Task<string>" ||
-            returnTypeStr == "System.Threading.Tasks.ValueTask<string>")
+        if (returnType is INamedTypeSymbol { IsGenericType: true } named &&
+            (returnTypeStr.StartsWith("System.Threading.Tasks.Task<", StringComparison.Ordinal) ||
+             returnTypeStr.StartsWith("System.Threading.Tasks.ValueTask<", StringComparison.Ordinal)))
         {
             sb.AppendLine($"{indent}var __result = await {callExpr}.ConfigureAwait(false);");
-            sb.AppendLine($"{indent}return __result ?? string.Empty;");
-            return;
-        }
-
-        if (returnTypeStr.StartsWith("System.Threading.Tasks.Task<", StringComparison.Ordinal) ||
-            returnTypeStr.StartsWith("System.Threading.Tasks.ValueTask<", StringComparison.Ordinal))
-        {
-            sb.AppendLine($"{indent}var __result = await {callExpr}.ConfigureAwait(false);");
-            sb.AppendLine($"{indent}return __result is null ? string.Empty : global::System.Text.Json.JsonSerializer.Serialize(__result);");
-            return;
-        }
-
-        if (returnType.SpecialType == SpecialType.System_String)
-        {
-            sb.AppendLine($"{indent}var __result = {callExpr};");
-            sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>(__result ?? string.Empty);");
-            return;
-        }
-
-        if (returnType.SpecialType is SpecialType.System_Boolean or
-            SpecialType.System_Int32 or SpecialType.System_Int64 or
-            SpecialType.System_Double or SpecialType.System_Single or SpecialType.System_Decimal)
-        {
-            sb.AppendLine($"{indent}var __result = {callExpr};");
-            sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>(__result.ToString());");
+            sb.AppendLine($"{indent}return {FormatResultExpression(named.TypeArguments[0], "__result")};");
             return;
         }
 
         sb.AppendLine($"{indent}var __result = {callExpr};");
-        sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>(__result is null ? string.Empty : global::System.Text.Json.JsonSerializer.Serialize(__result));");
+        sb.AppendLine($"{indent}return new global::System.Threading.Tasks.ValueTask<string>({FormatResultExpression(returnType, "__result")});");
+    }
+
+    private static string FormatResultExpression(ITypeSymbol type, string value)
+    {
+        switch (type.SpecialType)
+        {
+            case SpecialType.System_String:
+                return $"{value} ?? \"null\"";
+            case SpecialType.System_Boolean:
+                return $"{value} ? \"true\" : \"false\"";
+            case SpecialType.System_Int32:
+            case SpecialType.System_Int64:
+            case SpecialType.System_Double:
+            case SpecialType.System_Single:
+            case SpecialType.System_Decimal:
+                return $"{value}.ToString(global::System.Globalization.CultureInfo.InvariantCulture)";
+            default:
+                return $"{value} is null ? \"null\" : global::System.Text.Json.JsonSerializer.Serialize({value})";
+        }
     }
 
     private static void GenerateExtensionClass(StringBuilder sb, string indent, INamedTypeSymbol typeSymbol, List<ToolMethodModel> methods)

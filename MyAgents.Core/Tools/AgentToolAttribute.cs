@@ -2,7 +2,10 @@ namespace MyAgents.Core.Tools;
 
 /// <summary>
 /// Marks a method as an agent tool to be generated at compile time by the Roslyn source generator.
-/// Enables 100% reflection-free, NativeAOT-compatible tool schemas and zero-boxing direct invocation.
+/// The generated tool embeds its JSON schema as a compile-time constant and binds primitive
+/// arguments (<see cref="string"/>, <see cref="bool"/>, <see cref="int"/>, <see cref="long"/>,
+/// <see cref="float"/>, <see cref="double"/>, <see cref="decimal"/>) without reflection or boxing.
+/// Other parameter and return types use reflection-based System.Text.Json serialization.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 public sealed class AgentToolAttribute : Attribute

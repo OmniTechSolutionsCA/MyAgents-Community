@@ -27,13 +27,17 @@ stable release.
   did not forward the `cancellationToken` to feature `ContributeAsync` calls.
 
 ### Added
-- **`MyAgents.Generators` Roslyn incremental source generator for `[AgentTool]`.** Introduced compile-time source
-  generation for agent tools, emitting 100% reflection-free `ITool` wrappers with static precomputed JSON schema constants
-  and zero-boxing argument extractors. Completely eliminates runtime expression compilation and schema generation overhead
-  (saving 5.18 ms and 12.5 KB per tool registration) while ensuring full NativeAOT compatibility.
-- **`eng/MyAgents.Benchmarks` BenchmarkDotNet suite.** Added automated benchmark harness with 7 suites
-  measuring execution latency and heap allocations (`[MemoryDiagnoser]`) across `DelegateTool`, `BM25Index`,
-  `VectorMemoryStore`, `HybridMemoryRetriever`, `ChatClientRuntime`, `AgentPipeline`, `AgentGraph`, and `SqliteCheckpointer`.
+- **`MyAgents.Generators` Roslyn incremental source generator for `[AgentTool]`.** Generates an `ITool`
+  implementation per annotated method, with the JSON schema emitted as a compile-time constant and
+  `As{Method}Tool()` / `AsAgentTools()` registration helpers. Primitive arguments (`string`, `bool`, `int`,
+  `long`, `float`, `double`, `decimal`) are bound without reflection or boxing; other parameter and return
+  types use reflection-based `System.Text.Json`, so generated tools are not NativeAOT/trim safe in general.
+  Generated tools follow the same argument contract as `DelegateTool` (case-insensitive names,
+  `ArgumentException` for missing required arguments, `JsonException` for wrongly typed values,
+  invariant-culture results), enforced by `ToolArgumentBindingContractTests`.
+- **`eng/MyAgents.Benchmarks` BenchmarkDotNet suite.** 8 benchmark classes (21 benchmarks) with
+  `[MemoryDiagnoser]` covering `DelegateTool`, `BM25Index`, `VectorMemoryStore`, `HybridMemoryRetriever`,
+  `ChatClientRuntime`, `AgentPipeline`, `AgentGraph`, and `SqliteCheckpointer`.
 - `AgentOutputAccumulator`: folds the chunks of a streamed turn into the single result a blocking
   turn would have produced. Exposed publicly because any middleware overriding
   `IAgentMiddleware.InvokeStreamingAsync` needs the same fold to reason about a complete turn.
@@ -46,7 +50,7 @@ stable release.
   to pass through token deltas in real-time while recording duration and tool calls, preserving incremental
   streaming for callers using `LoggingFeature`.
 - **An agent using `GuardrailsFeature` no longer streams token-by-token.** Guardrail evaluation
-  now happens before any output is released, at parity with the blocking path. This is a
+  now happens before any output is released, at latency parity with the blocking path. This is a
   deliberate trade: text already handed to a caller cannot be retracted, and `IGuardrailPolicy`
   cannot be evaluated per-delta. Middleware that wants true incremental streaming overrides
   `InvokeStreamingAsync`; the guardrail middleware deliberately does not.
@@ -56,26 +60,26 @@ stable release.
   with zero warnings and zero errors.
 
 ### Performance
-- **Native SIMD `TensorPrimitives` `VectorMemoryStore`.** Replaced preview `Microsoft.SemanticKernel.Connectors.InMemory`
-  with a zero-allocation, SIMD-accelerated vector store using `TensorPrimitives.CosineSimilarity` and bounded min-heap priority queues.
-  For 5,000 vector records, search allocations plummeted from 322.96 KB to **41.68 KB (87% allocation reduction)** and execution latency
-  dropped from 687 µs to **479 µs (1.43x faster)**. Single upsert latency dropped from 203.5 ns to **72.0 ns (2.8x faster)** with allocations
-  reduced by 58% (312 B vs 752 B). Hybrid retrieval latency was cut in half from 408 µs to **200 µs (2.04x faster)** and allocations were cut
-  by 6.1x (53.58 KB vs 328.6 KB).
-- **Compile-time `[AgentTool]` zero cold-start invocation.** Replaced runtime `DelegateTool.Create` expression compilation (5.18 ms and 12.5 KB)
-  with compile-time Roslyn source-generated `ITool` implementations, achieving instant 0 ns startup, static schema constant emission, and
-  allocation-free 72 B invocation matching handwritten `ITool`.
-- **`DelegateTool` compiled direct parameter binding.** Eliminated the per-invocation `object?[]` array
-  allocation and boxing for primitive arguments (`int`, `long`, `double`, `float`, `bool`, `string`, `CancellationToken`).
-  Invocation latency dropped from 386.5 ns to 196.9 ns (1.96x faster) and allocated memory dropped from 280 B to 72 B (74% reduction),
-  matching the performance of handwritten `ITool` implementations.
-- **`BM25Index` array-indexed scoring & zero-allocation tokenization.** Replaced dynamic dictionary resizing and rehashing
-  with rented `ArrayPool<double>` score accumulators, contiguous struct `Posting` lists, and `string.Create` lowercasing.
-  For 10,000 indexed documents, search latency dropped from 1.55 ms to 47.47 μs (32.7x faster) and allocations dropped from
-  920.98 KB to 816 B (1,128x reduction), completely eliminating Gen1/Gen2 garbage collection pauses.
-- **`SqliteCheckpointer` prepared command caching.** Cached pre-allocated and prepared `SqliteCommand` statements and
-  reusable parameter bindings (`_saveCommand`, `_loadCommand`, `_deleteCommand`), eliminating per-checkpoint command creation,
-  SQL re-parsing, and `SqliteParameter` allocations.
+Figures below are BenchmarkDotNet default-job means, `main` vs this change, measured on one machine
+(AMD Ryzen AI 9 HX 370, .NET 10.0.14) pinned to a single logical CPU.
+
+- **Native `TensorPrimitives` `VectorMemoryStore`.** Replaced the preview `Microsoft.SemanticKernel.Connectors.InMemory`
+  dependency with an in-memory store using `TensorPrimitives.CosineSimilarity` and a bounded min-heap.
+  Search over 5,000 × 1,536-dim vectors: 698.8 µs → 478.6 µs (1.46x), 330.1 KB → 41.7 KB allocated.
+  Upsert with metadata: 298.8 ns → 69.9 ns (4.3x), 856 B → 312 B.
+- **`HybridMemoryRetriever` single-pass fusion.** One candidate dictionary via `CollectionsMarshal.GetValueRefOrAddDefault`
+  and a bounded heap instead of LINQ rank maps and sorts. RRF top-10: 1.214 ms → 177.7 µs (6.8x),
+  782 KB → 53.7 KB allocated; weighted linear top-10: 1.235 ms → 181.2 µs (6.8x).
+- **`DelegateTool` compiled direct parameter binding.** Removes the per-invocation `object?[]` and boxing for
+  primitive arguments. Primitive invocation: 379.5 ns → 186.7 ns (2.0x), 280 B → 72 B. `ValueTask<T>` invocation:
+  439.1 ns → 372.0 ns, 400 B → 296 B. **Trade-off:** `DelegateTool.Create` now compiles an expression tree and is
+  slower, 178.6 µs → 3.03 ms per tool; source-generated `[AgentTool]` tools avoid this cost entirely.
+- **`BM25Index` array-indexed scoring.** Pooled `ArrayPool<double>` score accumulators, struct `Posting` lists, a
+  bounded min-heap for top-k, and `string.Create` lowercasing. Short query over 10,000 documents: 1,533.7 µs → 47.5 µs
+  (32x), 921 KB → 824 B allocated; long query: 3,833.6 µs → 129.7 µs (30x). Single-document `AddOrUpdate`:
+  1.76 µs → 1.40 µs, 4.69 KB → 3.5 KB.
+- **`SqliteCheckpointer` prepared command caching.** Save and load reuse prepared `SqliteCommand` instances with
+  pre-bound parameters under the existing gate. Save + load: 47.9 µs → 43.9 µs, 15.48 KB → 13.3 KB.
 - **Zero-allocation logging.** Replaced runtime reflection / dynamic logging across `ResilienceMiddleware`,
   `FallbackMiddleware`, `CircuitBreakerMiddleware`, `ContextWindowMiddleware`, `CapabilityRouter`, and
   `LoggingFeature` with source-generated `[LoggerMessage]` partial methods.

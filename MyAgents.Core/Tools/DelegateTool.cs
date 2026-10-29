@@ -200,7 +200,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue is int di ? di : 0),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else if (p.ParameterType == typeof(long))
                 {
@@ -210,7 +211,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue is long dl ? dl : 0L),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else if (p.ParameterType == typeof(bool))
                 {
@@ -220,7 +222,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue is bool db && db),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else if (p.ParameterType == typeof(double))
                 {
@@ -230,7 +233,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue is double dd ? dd : 0.0),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else if (p.ParameterType == typeof(float))
                 {
@@ -240,7 +244,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue is float df ? df : 0.0f),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else if (p.ParameterType == typeof(string))
                 {
@@ -250,7 +255,8 @@ public sealed class DelegateTool : ITool
                         Expression.Constant(p.HasDefaultValue),
                         Expression.Constant(p.DefaultValue as string, typeof(string)),
                         Expression.Constant(p.IsRequired),
-                        Expression.Constant(toolName));
+                        Expression.Constant(toolName),
+                        optionsParam);
                 }
                 else
                 {
@@ -418,14 +424,13 @@ public sealed class DelegateTool : ITool
         return false;
     }
 
-    private static int GetArgumentInt32(JsonElement root, bool hasRoot, string name, bool hasDefault, int defaultValue, bool isRequired, string toolName)
+    private static int GetArgumentInt32(JsonElement root, bool hasRoot, string name, bool hasDefault, int defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
             if (element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out var val))
                 return val;
-            if (element.ValueKind == JsonValueKind.String && int.TryParse(element.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
+            return element.Deserialize<int>(options);
         }
 
         if (hasDefault) return defaultValue;
@@ -433,14 +438,13 @@ public sealed class DelegateTool : ITool
         return defaultValue;
     }
 
-    private static long GetArgumentInt64(JsonElement root, bool hasRoot, string name, bool hasDefault, long defaultValue, bool isRequired, string toolName)
+    private static long GetArgumentInt64(JsonElement root, bool hasRoot, string name, bool hasDefault, long defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
             if (element.ValueKind == JsonValueKind.Number && element.TryGetInt64(out var val))
                 return val;
-            if (element.ValueKind == JsonValueKind.String && long.TryParse(element.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
+            return element.Deserialize<long>(options);
         }
 
         if (hasDefault) return defaultValue;
@@ -448,14 +452,13 @@ public sealed class DelegateTool : ITool
         return defaultValue;
     }
 
-    private static double GetArgumentDouble(JsonElement root, bool hasRoot, string name, bool hasDefault, double defaultValue, bool isRequired, string toolName)
+    private static double GetArgumentDouble(JsonElement root, bool hasRoot, string name, bool hasDefault, double defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
             if (element.ValueKind == JsonValueKind.Number && element.TryGetDouble(out var val))
                 return val;
-            if (element.ValueKind == JsonValueKind.String && double.TryParse(element.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
+            return element.Deserialize<double>(options);
         }
 
         if (hasDefault) return defaultValue;
@@ -463,14 +466,13 @@ public sealed class DelegateTool : ITool
         return defaultValue;
     }
 
-    private static float GetArgumentSingle(JsonElement root, bool hasRoot, string name, bool hasDefault, float defaultValue, bool isRequired, string toolName)
+    private static float GetArgumentSingle(JsonElement root, bool hasRoot, string name, bool hasDefault, float defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
             if (element.ValueKind == JsonValueKind.Number && element.TryGetSingle(out var val))
                 return val;
-            if (element.ValueKind == JsonValueKind.String && float.TryParse(element.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
-                return parsed;
+            return element.Deserialize<float>(options);
         }
 
         if (hasDefault) return defaultValue;
@@ -478,14 +480,13 @@ public sealed class DelegateTool : ITool
         return defaultValue;
     }
 
-    private static bool GetArgumentBoolean(JsonElement root, bool hasRoot, string name, bool hasDefault, bool defaultValue, bool isRequired, string toolName)
+    private static bool GetArgumentBoolean(JsonElement root, bool hasRoot, string name, bool hasDefault, bool defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
             if (element.ValueKind is JsonValueKind.True or JsonValueKind.False)
                 return element.GetBoolean();
-            if (element.ValueKind == JsonValueKind.String && bool.TryParse(element.GetString(), out var parsed))
-                return parsed;
+            return element.Deserialize<bool>(options);
         }
 
         if (hasDefault) return defaultValue;
@@ -493,7 +494,7 @@ public sealed class DelegateTool : ITool
         return defaultValue;
     }
 
-    private static string? GetArgumentString(JsonElement root, bool hasRoot, string name, bool hasDefault, string? defaultValue, bool isRequired, string toolName)
+    private static string? GetArgumentString(JsonElement root, bool hasRoot, string name, bool hasDefault, string? defaultValue, bool isRequired, string toolName, JsonSerializerOptions options)
     {
         if (hasRoot && TryFindProperty(root, name, out var element))
         {
@@ -501,7 +502,7 @@ public sealed class DelegateTool : ITool
                 return element.GetString();
             if (element.ValueKind == JsonValueKind.Null)
                 return null;
-            return element.GetRawText();
+            return element.Deserialize<string>(options);
         }
 
         if (hasDefault) return defaultValue;
