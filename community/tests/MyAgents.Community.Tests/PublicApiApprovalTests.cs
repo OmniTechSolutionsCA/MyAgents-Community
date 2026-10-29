@@ -18,7 +18,7 @@ namespace MyAgents.Community.Tests;
 /// </para>
 /// <code>
 /// dotnet run --project eng/PublicApiSnapshotTool -- \
-///   MyAgents.Core/bin/Release/net10.0/MyAgents.Core.dll \
+///   community/tests/MyAgents.Community.Tests/bin/Release/net10.0/MyAgents.Core.dll \
 ///   community/tests/MyAgents.Community.Tests/Baselines/MyAgents.Core.approved.txt
 /// </code>
 /// <para>Then review the diff before committing.</para>

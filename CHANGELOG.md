@@ -9,10 +9,9 @@ stable release.
 ### Fixed
 - **Streaming content loss with blocking middleware.** `IAgentMiddleware`'s default
   streaming bridge accumulated the chunks of a turn and then yielded only the final one,
-  so registering any middleware that implements just the blocking path (for example
-  `LoggingFeature`) silently truncated the caller's response to its last delta. The bridge
-  now folds the chunks into the shape a blocking turn would have produced and yields the
-  complete turn.
+  so registering any middleware that implements just the blocking path silently truncated
+  the caller's response to its last delta. The bridge now folds the chunks into the shape a
+  blocking turn would have produced and yields the complete turn.
 - **Guardrails could be bypassed on the streaming path.** `GuardrailMiddleware` evaluated
   only the last delta of a stream and then appended its replacement message to text that had
   already been delivered — leaking the flagged content while appearing to block it. Guardrails
@@ -22,15 +21,23 @@ stable release.
   whole-turn contract, per-delta messages defeated it: the blocklist policy joins messages with
   a newline, which severed a blocked phrase spanning two deltas, and `MaxLengthGuardrailPolicy`
   summed per-message lengths instead of the turn total.
+- **Cancellation ignored in process execution and session creation.** `DefaultProcessRunner`
+  failed to check cancellation before launching processes, dropped tokens in output stream readers,
+  and failed to throw `OperationCanceledException` on pre-cancelled tokens. `DefaultAgentSessionFactory.CreateSessionAsync`
+  did not forward the `cancellationToken` to feature `ContributeAsync` calls.
 
 ### Added
 - `AgentOutputAccumulator`: folds the chunks of a streamed turn into the single result a blocking
   turn would have produced. Exposed publicly because any middleware overriding
   `IAgentMiddleware.InvokeStreamingAsync` needs the same fold to reason about a complete turn.
-- `PublicApiApprovalTests` and approved public-API baselines, so that an intentional or accidental
-  change to any package's public surface fails the build instead of shipping silently.
+- `PublicApiApprovalTests` and approved public-API baselines across all six packages, ensuring that
+  unintended changes to public APIs fail the build immediately.
+- Contract test suites: `StreamingPipelineTests`, `ProcessRunnerTests`, `SessionCreationTests`.
 
 ### Changed
+- **`LoggingMiddleware` streaming is now natively incremental.** Upgraded `LoggingMiddleware.InvokeStreamingAsync`
+  to pass through token deltas in real-time while recording duration and tool calls, preserving incremental
+  streaming for callers using `LoggingFeature`.
 - **An agent using `GuardrailsFeature` no longer streams token-by-token.** Guardrail evaluation
   now happens before any output is released, at latency parity with the blocking path. This is a
   deliberate trade: text already handed to a caller cannot be retracted, and `IGuardrailPolicy`
@@ -38,6 +45,19 @@ stable release.
   `InvokeStreamingAsync`; the guardrail middleware deliberately does not.
   `ChatClientRuntime.InvokeStreamingAsync` itself still emits incremental updates, so streaming
   remains token-level for agents without guardrails.
+- **Code analysis tightened.** Enabled `<AnalysisMode>Recommended</AnalysisMode>` across all packages
+  with zero warnings and zero errors.
+
+### Performance
+- **Zero-allocation logging.** Replaced runtime reflection / dynamic logging across `ResilienceMiddleware`,
+  `FallbackMiddleware`, `CircuitBreakerMiddleware`, `ContextWindowMiddleware`, `CapabilityRouter`, and
+  `LoggingFeature` with source-generated `[LoggerMessage]` partial methods.
+- **BM25 regex tokenization.** Replaced heap-allocated `MatchCollection` in `BM25Index.Tokenize` with .NET 10
+  `EnumerateMatches` struct enumeration.
+- **Chat client runtime hot-loop optimization.** Eliminated LINQ and empty dictionary allocations during
+  function call extraction in `ChatClientRuntime`.
+- **Internal collection devirtualization.** Devirtualized private/internal collections across Core, Agents,
+  Memory, Mcp, and Chat runtime to concrete types.
 
 ## [0.2.0-preview.1] - 2026-10-27
 
