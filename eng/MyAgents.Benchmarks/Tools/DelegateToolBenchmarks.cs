@@ -4,6 +4,12 @@ using MyAgents.Core.Tools;
 
 namespace MyAgents.Benchmarks.Tools;
 
+public static class BenchmarkToolMethods
+{
+    [AgentTool(Name = "add")]
+    public static int Add(int a, int b, bool flag, CancellationToken cancellationToken = default) => a + b;
+}
+
 [MemoryDiagnoser]
 public class DelegateToolBenchmarks
 {
@@ -27,6 +33,7 @@ public class DelegateToolBenchmarks
     public sealed record WeatherReport(string City, double TemperatureC, string Condition);
 
     private readonly ITool _handwrittenTool = new HandwrittenTool();
+    private readonly ITool _sourceGeneratedTool = BenchmarkToolMethodsAgentToolsExtensions.AsAddTool();
     private readonly ITool _delegatePrimitiveTool;
     private readonly ITool _delegateAsyncTool;
     private readonly string _primitiveJsonArgs = "{\"a\":42,\"b\":108,\"flag\":true}";
@@ -45,6 +52,12 @@ public class DelegateToolBenchmarks
     public async ValueTask<string> HandwrittenITool_PrimitiveArgs()
     {
         return await _handwrittenTool.InvokeAsync(_primitiveJsonArgs).ConfigureAwait(false);
+    }
+
+    [Benchmark]
+    public async ValueTask<string> SourceGeneratedAgentTool_PrimitiveArgs()
+    {
+        return await _sourceGeneratedTool.InvokeAsync(_primitiveJsonArgs).ConfigureAwait(false);
     }
 
     [Benchmark]

@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="MyAgents.Core/MyAgents.Core.csproj" />
+  <Project Path="MyAgents.Generators/MyAgents.Generators.csproj" />
   <Project Path="MyAgents.Agents/MyAgents.Agents.csproj" />
   <Project Path="MyAgents.Runtime.Chat/MyAgents.Runtime.Chat.csproj" />
   <Project Path="MyAgents.Memory/MyAgents.Memory.csproj" />

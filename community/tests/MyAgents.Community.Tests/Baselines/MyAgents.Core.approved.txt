@@ -666,6 +666,10 @@ TYPE class MyAgents.Core.Tools.AgentFunctionCall
 TYPE class MyAgents.Core.Tools.AgentFunctionCallSerializer
   METHOD bool TryParse(string content, MyAgents.Core.Tools.AgentFunctionCall& call)
   METHOD string Serialize(MyAgents.Core.Tools.AgentFunctionCall call)
+TYPE class MyAgents.Core.Tools.AgentToolAttribute
+  CTOR AgentToolAttribute(string name)
+  PROP string Description { get; set; }
+  PROP string Name { get; set; }
 TYPE class MyAgents.Core.Tools.DefaultProcessRunner
   CTOR DefaultProcessRunner()
   METHOD System.Threading.Tasks.Task<MyAgents.Core.Tools.ProcessResult> RunAsync(string fileName, System.Collections.Generic.IEnumerable<string> args, System.Threading.CancellationToken cancellationToken)

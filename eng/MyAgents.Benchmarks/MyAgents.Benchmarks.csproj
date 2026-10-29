@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\MyAgents.Core\MyAgents.Core.csproj" />
+    <ProjectReference Include="..\..\MyAgents.Generators\MyAgents.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\MyAgents.Runtime.Chat\MyAgents.Runtime.Chat.csproj" />
     <ProjectReference Include="..\..\MyAgents.Agents\MyAgents.Agents.csproj" />
     <ProjectReference Include="..\..\MyAgents.Memory\MyAgents.Memory.csproj" />
