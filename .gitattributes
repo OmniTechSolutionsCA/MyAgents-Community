@@ -1,1 +1,13 @@
-* text eol=lf
+# Normalize text files
+* text=auto
+
+# Binary assets must never be line-ending normalized
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.snk binary
+*.dll binary
+*.exe binary
+*.pdb binary
