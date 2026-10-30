@@ -6,6 +6,12 @@ stable release.
 
 ## [Unreleased]
 
+### Changed
+- **Version bumped to `0.2.0-preview.3`** in preparation for the next publish.
+- README now reflects that packages are published on NuGet.org: live `NuGet`
+  version badge, install-from-NuGet quick start, `MyAgents.Generators` added to
+  the package table, and updated project-status wording.
+
 ### Added
 - **NuGet publishing via Trusted Publishing (OIDC).** `publish-nuget.yml` workflow builds, tests, and packs
   all packages with symbol packages (`snupkg`), Source Link, and deterministic builds, then pushes to
