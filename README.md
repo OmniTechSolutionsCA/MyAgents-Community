@@ -11,7 +11,7 @@
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](#getting-started)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Release: preview](https://img.shields.io/badge/release-preview-orange)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/releases)
-[![NuGet: not published](https://img.shields.io/badge/NuGet-not%20published-lightgrey?logo=nuget)](#project-status)
+[![NuGet](https://img.shields.io/nuget/vpre/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
 [![Preview](https://img.shields.io/badge/status-preview-orange)](#project-status)
 
 **Explore:** [Capabilities](#capabilities) · [Architecture](#architecture) ·
@@ -53,7 +53,7 @@ containerized runtime are maintained separately from the Community packages in t
 
 > [!WARNING]
 > This is a preview. APIs and package versions may change. NuGet packages are
-> not available yet.
+> published as prerelease (`0.2.0-preview.*`) — pin exact versions.
 
 ## Capabilities
 
@@ -99,11 +99,38 @@ session to your provider and applies the configured tool policy.
 | [MyAgents.Memory](MyAgents.Memory/README.md) | Memory abstractions and local in-memory integration. |
 | [MyAgents.Mcp](MyAgents.Mcp/README.md) | Adapters for applications using the .NET Model Context Protocol library. |
 | [MyAgents.Testing](MyAgents.Testing/README.md) | Deterministic test doubles for agents and runtimes. |
+| [MyAgents.Generators](MyAgents.Generators/README.md) | Source generator for `[AgentTool]`: compile-time `ITool` wrappers with JSON schemas and NativeAOT-safe binding. Installed automatically with any package reference. |
 
 Bring your own provider-specific `IChatClient`. The Community packages do not
 include a model provider, hosted service, or vendor credentials.
 
+All packages are published on
+[NuGet.org](https://www.nuget.org/profiles/OmniTechSolutionsCA) with symbols
+(`snupkg`), Source Link, and deterministic builds.
+
 ## Getting started
+
+### Install from NuGet
+
+The fastest way to try MyAgents is to add the packages to an existing .NET 10
+project:
+
+```powershell
+dotnet add package MyAgents.Core --prerelease
+dotnet add package MyAgents.Agents --prerelease
+dotnet add package MyAgents.Runtime.Chat --prerelease
+# Optional:
+dotnet add package MyAgents.Memory --prerelease
+dotnet add package MyAgents.Mcp --prerelease
+dotnet add package MyAgents.Testing --prerelease
+```
+
+`MyAgents.Generators` is a source-generator/analyzer package — add it when you
+use `[AgentTool]`:
+
+```powershell
+dotnet add package MyAgents.Generators --prerelease
+```
 
 ### Requirements
 
@@ -161,8 +188,10 @@ Slack deployment is maintained separately from this Community repository.
 
 ## Project status
 
-The Community edition is a preview. It has no stable release, published NuGet
-packages, or compatibility guarantee yet.
+The Community edition is a preview. It has no stable release or compatibility
+guarantee yet. All packages are published to
+[NuGet.org](https://www.nuget.org/profiles/OmniTechSolutionsCA) as prerelease
+versions.
 
 ### Build and test checks
 
