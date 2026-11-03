@@ -29,6 +29,6 @@
     <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.13" />
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
     <PackageVersion Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.13" />
-    <PackageVersion Include="System.Numerics.Tensors" Version="10.0.13" />
+    <PackageVersion Include="System.Numerics.Tensors" Version="10.0.14" />
   </ItemGroup>
 </Project>
