@@ -7,7 +7,7 @@ stable release.
 ## [Unreleased]
 
 ### Changed
-- **Version bumped to `0.2.0-preview.3`** in preparation for the next publish.
+- **Version bumped to `0.2.0-preview.4`** in preparation for publish, packaging RAG document ingestion, zero-dependency document readers, SQLite store, VectorData bridge, and performance optimizations.
 - README now reflects that packages are published on NuGet.org: live `NuGet`
   version badge, install-from-NuGet quick start, `MyAgents.Generators` added to
   the package table, and updated project-status wording.
