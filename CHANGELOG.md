@@ -6,11 +6,15 @@ stable release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-05
+
+### General Availability
+- **First General Availability (GA) 1.0.0 release of MyAgents Community.**
+- Stable production release supporting .NET 10, NativeAOT, and Microsoft.Extensions.AI.
+
 ### Changed
-- **Version bumped to `0.2.0-preview.4`** in preparation for publish, packaging RAG document ingestion, zero-dependency document readers, SQLite store, VectorData bridge, and performance optimizations.
-- README now reflects that packages are published on NuGet.org: live `NuGet`
-  version badge, install-from-NuGet quick start, `MyAgents.Generators` added to
-  the package table, and updated project-status wording.
+- **Version promoted to `1.0.0` (GA)** from preview.
+- README and package metadata updated to reflect full production stability.
 - **RAG & memory performance optimizations (`MyAgents.Memory`).** Implemented $O(N)$ candidate window slicing in `RecursiveCharacterTextChunker.FindSplitEnd`; single-pass token budget cutoff via `ApproximateTokenCounter.FindMaxLengthForTokenBudget`; pre-normalized embeddings on storage/load with single-pass `TensorPrimitives.Dot` during `VectorSearchAsync`; duplicate BM25 indexing elimination during batch ingestion and deletion for change notifier stores; and zero-regex span tokenization in `BM25Index.Tokenize` alongside SIMD span `SequenceEqual` adjacent chunk overlap stitching.
 
 ### Added
