@@ -10,9 +10,9 @@
 [![PR checks](https://img.shields.io/badge/PR%20checks-view-24292f?logo=github)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/pulls)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](#getting-started)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Release: preview](https://img.shields.io/badge/release-preview-orange)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/releases)
-[![NuGet](https://img.shields.io/nuget/vpre/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
-[![Preview](https://img.shields.io/badge/status-preview-orange)](#project-status)
+[![Release: 1.0.0](https://img.shields.io/badge/release-1.0.0-brightgreen)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/releases)
+[![NuGet](https://img.shields.io/nuget/v/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
+[![Status: General Availability](https://img.shields.io/badge/status-GA%201.0.0-brightgreen)](#project-status)
 
 **Explore:** [Capabilities](#capabilities) · [Architecture](#architecture) ·
 [Packages](#packages) · [Quick start](#getting-started) · [Examples](#examples) ·
@@ -50,10 +50,6 @@ sequenceDiagram
 
 This represents Omni's active internal deployment. Its Slack integration and
 containerized runtime are maintained separately from the Community packages in this repository.
-
-> [!WARNING]
-> This is a preview. APIs and package versions may change. NuGet packages are
-> published as prerelease (`0.2.0-preview.*`) — pin exact versions.
 
 ## Capabilities
 
@@ -121,22 +117,22 @@ The fastest way to try MyAgents is to add the packages to an existing .NET 10
 project:
 
 ```powershell
-dotnet add package MyAgents.Core --prerelease
-dotnet add package MyAgents.Agents --prerelease
-dotnet add package MyAgents.Runtime.Chat --prerelease
+dotnet add package MyAgents.Core
+dotnet add package MyAgents.Agents
+dotnet add package MyAgents.Runtime.Chat
 # Optional:
-dotnet add package MyAgents.Runtime.Workers --prerelease
-dotnet add package MyAgents.Runtime.Workers.Sqlite --prerelease
-dotnet add package MyAgents.Memory --prerelease
-dotnet add package MyAgents.Mcp --prerelease
-dotnet add package MyAgents.Testing --prerelease
+dotnet add package MyAgents.Runtime.Workers
+dotnet add package MyAgents.Runtime.Workers.Sqlite
+dotnet add package MyAgents.Memory
+dotnet add package MyAgents.Mcp
+dotnet add package MyAgents.Testing
 ```
 
 `MyAgents.Generators` is a source-generator/analyzer package — add it when you
 use `[AgentTool]`:
 
 ```powershell
-dotnet add package MyAgents.Generators --prerelease
+dotnet add package MyAgents.Generators
 ```
 
 ### Requirements
@@ -197,10 +193,10 @@ is maintained separately from this Community repository.
 
 ## Project status
 
-The Community edition is a preview. It has no stable release or compatibility
-guarantee yet. All packages are published to
-[NuGet.org](https://www.nuget.org/profiles/OmniTechSolutionsCA) as prerelease
-versions.
+MyAgents Community is at **General Availability (GA) 1.0.0** with full semantic versioning
+and backward-compatibility commitments. All packages are published to
+[NuGet.org](https://www.nuget.org/profiles/OmniTechSolutionsCA) with symbol packages
+(`snupkg`), Source Link, and deterministic builds.
 
 ### Build and test checks
 

@@ -26,10 +26,10 @@
     <PackageIcon>myagents-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>ai;agents;llm;orchestration;dotnet</PackageTags>
-    <Version>0.2.0-preview.4</Version>
+    <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>0.2.0-preview.4</InformationalVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
   </PropertyGroup>
 
   <!-- SourceLink / reproducible builds (built into the .NET SDK; these flags just enable them) -->
