@@ -57,6 +57,13 @@ public interface IHybridMemoryRetriever : IMemoryRetriever
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Rebuilds the namespace's BM25 lexical index from the current entries in the memory store.
+    /// </summary>
+    ValueTask RefreshLexicalIndexAsync(
+        string ns,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Synchronizes or indexes an entry into the BM25 sparse engine.
     /// </summary>
     void IndexLexicalEntry(string ns, MemoryEntry entry);

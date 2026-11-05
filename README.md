@@ -63,6 +63,8 @@ containerized runtime are maintained separately from the Community packages in t
   and observations as reusable features.
 - **Run chat and tools in process.** `MyAgents.Runtime.Chat` manages the
   model/tool loop and returns turn results and token usage.
+- **Run durable agent work.** Optional worker packages execute leased runs and
+  provide a local SQLite backend for restart recovery.
 - **Extend applications.** Optional Community packages add memory abstractions
   and .NET Model Context Protocol adapters.
 - **Test without live services.** Use deterministic doubles to exercise agent
@@ -96,6 +98,8 @@ session to your provider and applies the configured tool policy.
 | [MyAgents.Core](MyAgents.Core/README.md) | Agent, session, runtime, tool, approval, and result contracts. |
 | [MyAgents.Agents](MyAgents.Agents/README.md) | Reusable features for prompts, tools, model selection, and observations. |
 | [MyAgents.Runtime.Chat](MyAgents.Runtime.Chat/README.md) | In-process chat and tool execution over any `IChatClient` provider. |
+| [MyAgents.Runtime.Workers](MyAgents.Runtime.Workers/README.md) | Optional Generic Host worker for durable agent runs and workflow handlers. |
+| [MyAgents.Runtime.Workers.Sqlite](MyAgents.Runtime.Workers.Sqlite/README.md) | Single-machine SQLite persistence adapter for durable agent runs. |
 | [MyAgents.Memory](MyAgents.Memory/README.md) | Memory abstractions and local in-memory integration. |
 | [MyAgents.Mcp](MyAgents.Mcp/README.md) | Adapters for applications using the .NET Model Context Protocol library. |
 | [MyAgents.Testing](MyAgents.Testing/README.md) | Deterministic test doubles for agents and runtimes. |
@@ -120,6 +124,8 @@ dotnet add package MyAgents.Core --prerelease
 dotnet add package MyAgents.Agents --prerelease
 dotnet add package MyAgents.Runtime.Chat --prerelease
 # Optional:
+dotnet add package MyAgents.Runtime.Workers --prerelease
+dotnet add package MyAgents.Runtime.Workers.Sqlite --prerelease
 dotnet add package MyAgents.Memory --prerelease
 dotnet add package MyAgents.Mcp --prerelease
 dotnet add package MyAgents.Testing --prerelease
@@ -180,11 +186,15 @@ describes provider registration and runtime behavior. The
 [Community tests](community/tests/MyAgents.Community.Tests/) exercise chat
 turns, tool calls, and approvals without contacting a live model.
 
+The [DurableAgentRuns sample](community/samples/DurableAgentRuns/README.md)
+demonstrates restart recovery using the local SQLite adapter.
+
 ## Community scope
 
 This edition provides the core contracts, feature composition, in-process chat
-and tool runtime, memory and MCP integrations, and test helpers. Omni's internal
-Slack deployment is maintained separately from this Community repository.
+and tool runtime, optional durable-run workers and local SQLite persistence,
+memory and MCP integrations, and test helpers. Omni's internal Slack deployment
+is maintained separately from this Community repository.
 
 ## Project status
 

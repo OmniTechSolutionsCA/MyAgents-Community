@@ -14,6 +14,8 @@ Use one independently meaningful top-level type per file. The file name must mat
 
 - `MyAgents.Core` — Core contracts (`IAgent`, `IAgentRuntime`, `IAgentSession`, `IAgentFeature`, `ITool`, `IWorkflow<T>`, middleware, and assembly definitions) with zero provider or external runtime coupling.
 - `MyAgents.Runtime.Chat` — In-process `IChatClient` turn execution, tool loop, streaming, checkpointer, and multi-model routing.
+- `MyAgents.Runtime.Workers` — Optional Generic Host worker and workflow adapter for durable agent runs.
+- `MyAgents.Runtime.Workers.Sqlite` — Optional single-machine SQLite backend for durable agent runs.
 - `MyAgents.Agents` — Built-in agent features, guardrails, observability, and web search capabilities.
 - `MyAgents.Memory` — Memory abstractions, hybrid retrieval, and vector/in-memory stores.
 - `MyAgents.Mcp` — Model Context Protocol (`.NET` MCP) tool, prompt, and resource adapters.

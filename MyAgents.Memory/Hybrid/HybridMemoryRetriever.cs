@@ -208,6 +208,26 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
     }
 
     /// <inheritdoc />
+    public async ValueTask RefreshLexicalIndexAsync(
+        string ns,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ns);
+
+        var entries = await _store.SearchAsync(
+            ns,
+            maxResults: int.MaxValue,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+        var refreshedIndex = new BM25Index();
+        foreach (var entry in entries)
+        {
+            refreshedIndex.AddOrUpdate(entry.Key, entry.Content);
+        }
+
+        _bm25Indices[ns] = refreshedIndex;
+    }
+
+    /// <inheritdoc />
     public async ValueTask<IReadOnlyList<MemorySearchResult>> SearchAsync(
         string ns,
         MemoryQuery query,
@@ -249,7 +269,7 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         if (index.DocumentCount == 0)
         {
             // Seed index with current store contents
-            var entries = await _store.SearchAsync(ns, maxResults: 500, cancellationToken: ct).ConfigureAwait(false);
+            var entries = await _store.SearchAsync(ns, maxResults: int.MaxValue, cancellationToken: ct).ConfigureAwait(false);
             foreach (var entry in entries)
             {
                 index.AddOrUpdate(entry.Key, entry.Content);
