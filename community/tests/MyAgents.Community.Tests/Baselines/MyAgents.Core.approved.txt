@@ -560,9 +560,12 @@ TYPE interface MyAgents.Core.Memory.IMemoryStore
   METHOD System.Threading.Tasks.ValueTask SetAsync(MyAgents.Core.Memory.MemoryEntry entry, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Memory.MemoryEntry> GetAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Memory.MemoryEntry>> SearchAsync(string ns, string query, int maxResults, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Memory.IMemoryStoreChangeNotifier
+  METHOD System.IDisposable Subscribe(System.Action<MyAgents.Core.Memory.MemoryStoreChangedEvent> listener)
 TYPE class MyAgents.Core.Memory.InMemoryMemoryStore
   CTOR InMemoryMemoryStore()
   PROP int Count { get; }
+  METHOD System.IDisposable Subscribe(System.Action<MyAgents.Core.Memory.MemoryStoreChangedEvent> listener)
   METHOD System.Threading.Tasks.ValueTask ClearAsync(string ns, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask DeleteAsync(string ns, string key, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask SetAsync(MyAgents.Core.Memory.MemoryEntry entry, System.Threading.CancellationToken cancellationToken)
@@ -581,6 +584,22 @@ TYPE class MyAgents.Core.Memory.MemoryEntry
   METHOD int GetHashCode()
   METHOD string ToString()
   METHOD void Deconstruct(string& Key, string& Namespace, string& Content, System.Collections.Generic.IReadOnlyDictionary<string, string>& Metadata, System.Nullable<System.DateTimeOffset>& CreatedAt)
+TYPE enum MyAgents.Core.Memory.MemoryStoreChangeKind
+  FIELD MyAgents.Core.Memory.MemoryStoreChangeKind Clear
+  FIELD MyAgents.Core.Memory.MemoryStoreChangeKind Delete
+  FIELD MyAgents.Core.Memory.MemoryStoreChangeKind Set
+TYPE class MyAgents.Core.Memory.MemoryStoreChangedEvent
+  CTOR MemoryStoreChangedEvent(MyAgents.Core.Memory.MemoryStoreChangeKind Kind, string Namespace, string Key, MyAgents.Core.Memory.MemoryEntry Entry)
+  PROP MyAgents.Core.Memory.MemoryEntry Entry { get; set; }
+  PROP string Key { get; set; }
+  PROP MyAgents.Core.Memory.MemoryStoreChangeKind Kind { get; set; }
+  PROP string Namespace { get; set; }
+  METHOD MyAgents.Core.Memory.MemoryStoreChangedEvent <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Memory.MemoryStoreChangedEvent other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Memory.MemoryStoreChangeKind& Kind, string& Namespace, string& Key, MyAgents.Core.Memory.MemoryEntry& Entry)
 TYPE class MyAgents.Core.Messaging.ChannelEnvelope
   CTOR ChannelEnvelope(MyAgents.Core.AgentMessage Message, string SenderAgentName, string TargetAgentName, System.Nullable<System.DateTimeOffset> PublishedAt)
   PROP MyAgents.Core.AgentMessage Message { get; set; }

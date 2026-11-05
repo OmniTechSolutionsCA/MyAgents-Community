@@ -65,8 +65,9 @@ containerized runtime are maintained separately from the Community packages in t
   model/tool loop and returns turn results and token usage.
 - **Run durable agent work.** Optional worker packages execute leased runs and
   provide a local SQLite backend for restart recovery.
-- **Extend applications.** Optional Community packages add memory abstractions
-  and .NET Model Context Protocol adapters.
+- **Extend applications.** Optional Community packages add memory abstractions,
+  hybrid dense vector + BM25 retrieval, token-aware document ingestion, and .NET Model
+  Context Protocol adapters.
 - **Test without live services.** Use deterministic doubles to exercise agent
   behavior without a model provider or remote service.
 
@@ -100,7 +101,7 @@ session to your provider and applies the configured tool policy.
 | [MyAgents.Runtime.Chat](MyAgents.Runtime.Chat/README.md) | In-process chat and tool execution over any `IChatClient` provider. |
 | [MyAgents.Runtime.Workers](MyAgents.Runtime.Workers/README.md) | Optional Generic Host worker for durable agent runs and workflow handlers. |
 | [MyAgents.Runtime.Workers.Sqlite](MyAgents.Runtime.Workers.Sqlite/README.md) | Single-machine SQLite persistence adapter for durable agent runs. |
-| [MyAgents.Memory](MyAgents.Memory/README.md) | Memory abstractions and local in-memory integration. |
+| [MyAgents.Memory](MyAgents.Memory/README.md) | Memory abstractions, hybrid dense vector + BM25 retrieval, document ingestion, and SQLite / VectorData persistence. |
 | [MyAgents.Mcp](MyAgents.Mcp/README.md) | Adapters for applications using the .NET Model Context Protocol library. |
 | [MyAgents.Testing](MyAgents.Testing/README.md) | Deterministic test doubles for agents and runtimes. |
 | [MyAgents.Generators](MyAgents.Generators/README.md) | Source generator for `[AgentTool]`: compile-time `ITool` wrappers with JSON schemas and NativeAOT-safe binding. Installed automatically with any package reference. |
@@ -141,7 +142,6 @@ dotnet add package MyAgents.Generators --prerelease
 ### Requirements
 
 - .NET 10 SDK
-- PowerShell 7 for the Community boundary check and export scripts
 
 ### Build and test from source
 
@@ -150,7 +150,6 @@ Clone the repository, then run these commands from its root:
 ```powershell
 git clone https://github.com/OmniTechSolutionsCA/MyAgents-Community.git
 cd MyAgents-Community
-pwsh -File community/eng/check-open-core-boundary.ps1
 dotnet restore MyAgents.Community.slnx
 dotnet build MyAgents.Community.slnx --no-restore -c Release
 dotnet test MyAgents.Community.slnx --no-build -c Release

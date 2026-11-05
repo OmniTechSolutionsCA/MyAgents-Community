@@ -46,6 +46,7 @@ public sealed class DefaultMemoryRetriever : IMemoryRetriever
                 ns,
                 query.Text,
                 candidateCount,
+                metadataFilters: query.MetadataFilters,
                 cancellationToken: cancellationToken).ConfigureAwait(false))
                 .GroupBy(static item => item.Entry.Key, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(static group => group.Key, static group => group.Max(static item => item.Score), StringComparer.OrdinalIgnoreCase);

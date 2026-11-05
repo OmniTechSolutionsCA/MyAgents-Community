@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Text.RegularExpressions;
 
 namespace MyAgents.Memory;
 
@@ -7,16 +6,13 @@ namespace MyAgents.Memory;
 /// High-performance in-memory BM25 (Best Matching 25) sparse lexical index and ranking engine.
 /// Computes probabilistic relevance using term frequency saturation and document length normalization.
 /// </summary>
-public sealed partial class BM25Index
+public sealed class BM25Index
 {
     private readonly struct Posting(int docIndex, int freq)
     {
         public int DocIndex { get; } = docIndex;
         public int Freq { get; } = freq;
     }
-
-    [GeneratedRegex(@"[a-zA-Z0-9_\-\.]{2,}")]
-    private static partial Regex GetTokenRegex();
 
     private readonly double _k1;
     private readonly double _b;
@@ -27,6 +23,7 @@ public sealed partial class BM25Index
     private readonly List<int> _docLengths = [];
     private readonly List<bool> _docActive = [];
     private readonly List<string[]> _docTokens = [];
+    private readonly List<IReadOnlyDictionary<string, string>?> _docMetadata = [];
     private readonly Dictionary<string, List<Posting>> _invertedIndex = new(StringComparer.OrdinalIgnoreCase);
 
     private int _activeDocCount;
@@ -52,9 +49,12 @@ public sealed partial class BM25Index
     }
 
     /// <summary>
-    /// Indexes or updates a document with the given unique identifier and text content.
+    /// Indexes or updates a document with the given unique identifier, text content, and optional metadata.
     /// </summary>
-    public void AddOrUpdate(string docId, string content)
+    public void AddOrUpdate(
+        string docId,
+        string content,
+        IReadOnlyDictionary<string, string>? metadata = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(docId);
         ArgumentNullException.ThrowIfNull(content);
@@ -73,6 +73,7 @@ public sealed partial class BM25Index
             _docLengths.Add(tokens.Length);
             _docActive.Add(true);
             _docTokens.Add(tokens);
+            _docMetadata.Add(metadata);
             _docIndexMap[docId] = docIdx;
             _activeDocCount++;
             _totalDocLength += tokens.Length;
@@ -127,6 +128,7 @@ public sealed partial class BM25Index
             _docLengths.Clear();
             _docActive.Clear();
             _docTokens.Clear();
+            _docMetadata.Clear();
             _invertedIndex.Clear();
             _activeDocCount = 0;
             _totalDocLength = 0;
@@ -134,12 +136,16 @@ public sealed partial class BM25Index
     }
 
     /// <summary>
-    /// Executes a BM25 sparse search over the indexed documents.
+    /// Executes a BM25 sparse search over the indexed documents, optionally pre-filtering by metadata before top-K selection.
     /// </summary>
     /// <param name="query">The search query.</param>
     /// <param name="maxResults">Maximum number of scored results to return.</param>
+    /// <param name="metadataFilters">Optional case-insensitive metadata filters applied before top-K selection.</param>
     /// <returns>Ranked list of document identifiers with their non-negative BM25 scores.</returns>
-    public IReadOnlyList<(string DocId, double Score)> Search(string query, int maxResults = 10)
+    public IReadOnlyList<(string DocId, double Score)> Search(
+        string query,
+        int maxResults = 10,
+        IReadOnlyDictionary<string, string>? metadataFilters = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxResults);
@@ -149,6 +155,8 @@ public sealed partial class BM25Index
         {
             return [];
         }
+
+        var hasFilters = metadataFilters is { Count: > 0 };
 
         lock (_sync)
         {
@@ -214,6 +222,11 @@ public sealed partial class BM25Index
                             continue;
                         }
 
+                        if (hasFilters && !MatchesMetadata(_docMetadata[docIdx], metadataFilters))
+                        {
+                            continue;
+                        }
+
                         var docLen = _docLengths[docIdx];
                         var freq = posting.Freq;
                         var denominator = freq + k1Factor + bFactor * docLen;
@@ -262,6 +275,32 @@ public sealed partial class BM25Index
         }
     }
 
+    private static bool MatchesMetadata(
+        IReadOnlyDictionary<string, string>? metadata,
+        IReadOnlyDictionary<string, string>? filters)
+    {
+        if (filters is null || filters.Count == 0)
+        {
+            return true;
+        }
+
+        if (metadata is null)
+        {
+            return false;
+        }
+
+        foreach (var (key, value) in filters)
+        {
+            if (!metadata.TryGetValue(key, out var existing) ||
+                !string.Equals(existing, value, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void RemoveInternal(string docId, int docIdx)
     {
         _docActive[docIdx] = false;
@@ -272,6 +311,7 @@ public sealed partial class BM25Index
 
         var tokens = _docTokens[docIdx];
         _docTokens[docIdx] = [];
+        _docMetadata[docIdx] = null;
 
         var distinctTerms = tokens.Distinct(StringComparer.OrdinalIgnoreCase);
         foreach (var term in distinctTerms)
@@ -299,25 +339,44 @@ public sealed partial class BM25Index
         }
     }
 
+    private static bool IsTokenChar(char ch) =>
+        char.IsAsciiLetterOrDigit(ch) || ch == '_' || ch == '-' || ch == '.';
+
     private static string[] Tokenize(string text)
     {
         if (string.IsNullOrEmpty(text))
             return [];
 
-        var regex = GetTokenRegex();
-        var matches = regex.EnumerateMatches(text.AsSpan());
+        var span = text.AsSpan();
         var list = new List<string>();
-        foreach (var match in matches)
+        var i = 0;
+        while (i < span.Length)
         {
-            var token = string.Create(match.Length, (text, match.Index), static (span, state) =>
+            if (!IsTokenChar(span[i]))
             {
-                var src = state.text.AsSpan(state.Index, span.Length);
-                for (var i = 0; i < span.Length; i++)
+                i++;
+                continue;
+            }
+
+            var start = i;
+            while (i < span.Length && IsTokenChar(span[i]))
+            {
+                i++;
+            }
+
+            var length = i - start;
+            if (length >= 2)
+            {
+                var token = string.Create(length, (text, start), static (dst, state) =>
                 {
-                    span[i] = char.ToLowerInvariant(src[i]);
-                }
-            });
-            list.Add(token);
+                    var src = state.text.AsSpan(state.start, dst.Length);
+                    for (var k = 0; k < dst.Length; k++)
+                    {
+                        dst[k] = char.ToLowerInvariant(src[k]);
+                    }
+                });
+                list.Add(token);
+            }
         }
 
         return list.Count == 0 ? [] : list.ToArray();

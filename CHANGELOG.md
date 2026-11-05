@@ -11,8 +11,32 @@ stable release.
 - README now reflects that packages are published on NuGet.org: live `NuGet`
   version badge, install-from-NuGet quick start, `MyAgents.Generators` added to
   the package table, and updated project-status wording.
+- **RAG & memory performance optimizations (`MyAgents.Memory`).** Implemented $O(N)$ candidate window slicing in `RecursiveCharacterTextChunker.FindSplitEnd`; single-pass token budget cutoff via `ApproximateTokenCounter.FindMaxLengthForTokenBudget`; pre-normalized embeddings on storage/load with single-pass `TensorPrimitives.Dot` during `VectorSearchAsync`; duplicate BM25 indexing elimination during batch ingestion and deletion for change notifier stores; and zero-regex span tokenization in `BM25Index.Tokenize` alongside SIMD span `SequenceEqual` adjacent chunk overlap stitching.
 
 ### Added
+- **RAG document ingestion, grounded citations, and agentic knowledge base tools (`MyAgents.Core`, `MyAgents.Memory`).**
+  Added `ITextChunker`, `RecursiveCharacterTextChunker`, `MarkdownTextChunker`, and `ApproximateTokenCounter`
+  for boundary-aware, heading-aware, and code-fence-preserving text splitting with character (`ChunkSize`)
+  and token (`MaxTokens`) budgets; `IDocumentIngestor` (`IngestAsync`, `IngestBatchAsync`, `DeleteDocumentAsync`),
+  `DefaultDocumentIngestor`, `DocumentIngestionBuilder` (`UseChunker`, `UseMarkdownChunker`, `UseTokenCounter`),
+  and `AddDocumentIngestion` for single-batch embedding generation (`IVectorMemoryStore.SetBatchAsync`),
+  provenance metadata tagging (`source`, `document_title`, `chunk_index`, `chunk_count`), and atomic
+  replace-by-source re-ingestion; `IMemoryStoreChangeNotifier` (`MemoryStoreChangedEvent`,
+  `MemoryStoreChangeKind`) on `InMemoryMemoryStore` and `VectorMemoryStore` for reactive BM25 lexical
+  synchronization alongside `MemoryRetentionService.ApplyAsync`; metadata pre-filtering before top-K
+  selection in `BM25Index.Search` and `IVectorMemoryStore.VectorSearchAsync`; durable snapshot persistence on
+  `VectorMemoryStore` (`SaveSnapshotAsync`, `LoadSnapshotAsync`, `SaveToFileAsync`, `LoadFromFileAsync`),
+  transactional WAL-mode `SqliteMemoryStore` (`AddSqliteMemoryStore`), and `VectorDataMemoryStore`
+  (`AddVectorDataMemoryStore`, `VectorDataMemoryRecord`) bridging `Microsoft.Extensions.VectorData.Abstractions`
+  `VectorStoreCollection<string, VectorDataMemoryRecord>` to `IVectorMemoryStore` and `IMemoryStoreChangeNotifier`;
+  zero-dependency document readers (`IDocumentReader`, `HtmlDocumentReader`, `CompositeDocumentReader`,
+  `DocumentIngestionBuilder.UseDocumentReader`, `IngestStreamAsync`, `IngestFileAsync`) for HTML-to-Markdown,
+  Markdown front-matter/H1, plain text, and JSON stream/file ingestion; content-hash embedding reuse and
+  `CachingEmbeddingGenerator`; `KnowledgeBaseFeature` (`SearchKnowledgeBaseTool` and `IngestDocumentTool`)
+  for on-demand agentic RAG; and upgraded `RetrievalAugmentationFeature` with numbered citations,
+  `MaxContextCharacters` / `MaxContextTokens` budgeting, `DeduplicateAcrossTurns`, `AdjacentChunkWindow`
+  neighbor expansion, and post-turn `CitationGrounder` verification (`OnCitationsEvaluated` and
+  `AppendCitationReferences`).
 - **Durable agent-run execution.** Added provider-neutral run and lease contracts, the optional
   `MyAgents.Runtime.Workers` hosted worker, the local `MyAgents.Runtime.Workers.Sqlite` adapter,
   workflow integration, bounded concurrency and admission, and batch submission/reporting. SQLite
