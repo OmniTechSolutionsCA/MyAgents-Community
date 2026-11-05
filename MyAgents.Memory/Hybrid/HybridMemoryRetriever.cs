@@ -8,11 +8,12 @@ namespace MyAgents.Memory;
 /// Hybrid memory retriever combining semantic dense embeddings with BM25 sparse lexical indexing.
 /// Merges disparate ranking signals using Reciprocal Rank Fusion (RRF) for optimal recall and precision.
 /// </summary>
-public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
+public sealed class HybridMemoryRetriever : IHybridMemoryRetriever, IDisposable
 {
     private readonly IMemoryStore _store;
     private readonly IVectorMemoryStore? _vectorStore;
     private readonly IMemoryTelemetrySink? _telemetrySink;
+    private readonly IDisposable? _storeSubscription;
     private readonly ConcurrentDictionary<string, BM25Index> _bm25Indices = new(StringComparer.OrdinalIgnoreCase);
 
     public HybridMemoryRetriever(
@@ -23,6 +24,17 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _vectorStore = vectorStore;
         _telemetrySink = telemetrySink;
+
+        if (_store is IMemoryStoreChangeNotifier notifier)
+        {
+            _storeSubscription = notifier.Subscribe(OnStoreChanged);
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _storeSubscription?.Dispose();
     }
 
     /// <inheritdoc />
@@ -32,7 +44,7 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         ArgumentNullException.ThrowIfNull(entry);
 
         var index = _bm25Indices.GetOrAdd(ns, _ => new BM25Index());
-        index.AddOrUpdate(entry.Key, entry.Content);
+        index.AddOrUpdate(entry.Key, entry.Content, entry.Metadata);
     }
 
     /// <inheritdoc />
@@ -70,12 +82,17 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         var bm25Index = _bm25Indices.GetOrAdd(ns, _ => new BM25Index());
         var candidateFetchCount = Math.Max(query.MaxResults * 3, 20);
 
-        // 1. Sparse BM25 Search
-        var sparseHits = bm25Index.Search(query.QueryText, candidateFetchCount);
+        // 1. Sparse BM25 Search (pre-filtered by metadataFilters before top-K heap)
+        var sparseHits = bm25Index.Search(query.QueryText, candidateFetchCount, query.MetadataFilters);
 
-        // 2. Dense Vector Search
+        // 2. Dense Vector Search (pre-filtered by metadataFilters before top-K heap)
         var denseHits = _vectorStore is not null && !string.IsNullOrWhiteSpace(query.QueryText)
-            ? await _vectorStore.VectorSearchAsync(ns, query.QueryText, candidateFetchCount, cancellationToken: cancellationToken).ConfigureAwait(false)
+            ? await _vectorStore.VectorSearchAsync(
+                ns,
+                query.QueryText,
+                candidateFetchCount,
+                metadataFilters: query.MetadataFilters,
+                cancellationToken: cancellationToken).ConfigureAwait(false)
             : (IReadOnlyList<VectorSearchResult>)Array.Empty<VectorSearchResult>();
 
         var candidates = new Dictionary<string, Candidate>(sparseHits.Count + denseHits.Count, StringComparer.OrdinalIgnoreCase);
@@ -221,7 +238,7 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         var refreshedIndex = new BM25Index();
         foreach (var entry in entries)
         {
-            refreshedIndex.AddOrUpdate(entry.Key, entry.Content);
+            refreshedIndex.AddOrUpdate(entry.Key, entry.Content, entry.Metadata);
         }
 
         _bm25Indices[ns] = refreshedIndex;
@@ -263,6 +280,28 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
         return finalResults;
     }
 
+    private void OnStoreChanged(MemoryStoreChangedEvent change)
+    {
+        switch (change.Kind)
+        {
+            case MemoryStoreChangeKind.Set when change.Entry is not null:
+                IndexLexicalEntry(change.Namespace, change.Entry);
+                break;
+
+            case MemoryStoreChangeKind.Delete when !string.IsNullOrWhiteSpace(change.Key):
+                RemoveLexicalEntry(change.Namespace, change.Key);
+                break;
+
+            case MemoryStoreChangeKind.Clear:
+                if (_bm25Indices.TryGetValue(change.Namespace, out var index))
+                {
+                    index.Clear();
+                }
+
+                break;
+        }
+    }
+
     private async ValueTask EnsureIndexPopulatedAsync(string ns, CancellationToken ct)
     {
         var index = _bm25Indices.GetOrAdd(ns, _ => new BM25Index());
@@ -272,7 +311,7 @@ public sealed class HybridMemoryRetriever : IHybridMemoryRetriever
             var entries = await _store.SearchAsync(ns, maxResults: int.MaxValue, cancellationToken: ct).ConfigureAwait(false);
             foreach (var entry in entries)
             {
-                index.AddOrUpdate(entry.Key, entry.Content);
+                index.AddOrUpdate(entry.Key, entry.Content, entry.Metadata);
             }
         }
     }

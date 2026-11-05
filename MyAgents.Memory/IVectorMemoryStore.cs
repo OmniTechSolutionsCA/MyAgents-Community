@@ -20,6 +20,7 @@ public interface IVectorMemoryStore : IMemoryStore
     /// Minimum similarity score threshold (0.0–1.0). Results below this are excluded.
     /// Defaults to 0.0 (return all results up to <paramref name="maxResults"/>).
     /// </param>
+    /// <param name="metadataFilters">Optional case-insensitive metadata filters evaluated before top-K selection.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
     /// Matching entries ordered by descending similarity score, each paired with its score.
@@ -29,6 +30,17 @@ public interface IVectorMemoryStore : IMemoryStore
         string query,
         int maxResults = 5,
         float minScore = 0.0f,
+        IReadOnlyDictionary<string, string>? metadataFilters = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Embeds and stores a batch of entries in a single embedding generator request.
+    /// If embedding generation fails, no entries from the batch are written to the store.
+    /// </summary>
+    /// <param name="entries">Entries to embed and upsert.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    ValueTask SetBatchAsync(
+        IReadOnlyList<MemoryEntry> entries,
         CancellationToken cancellationToken = default);
 }
 

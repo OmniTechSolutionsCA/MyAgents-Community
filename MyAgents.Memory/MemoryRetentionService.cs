@@ -10,11 +10,16 @@ public sealed class MemoryRetentionService
 {
     private readonly IMemoryStore _store;
     private readonly IMemorySummaryGenerator? _summaryGenerator;
+    private readonly IHybridMemoryRetriever? _hybridRetriever;
 
-    public MemoryRetentionService(IMemoryStore store, IMemorySummaryGenerator? summaryGenerator = null)
+    public MemoryRetentionService(
+        IMemoryStore store,
+        IMemorySummaryGenerator? summaryGenerator = null,
+        IHybridMemoryRetriever? hybridRetriever = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _summaryGenerator = summaryGenerator;
+        _hybridRetriever = hybridRetriever;
     }
 
     public async ValueTask<MemoryRetentionResult> ApplyAsync(
@@ -46,7 +51,10 @@ public sealed class MemoryRetentionService
             .ToArray();
 
         foreach (var entry in toDelete)
+        {
             await _store.DeleteAsync(entry.Namespace, entry.Key, cancellationToken).ConfigureAwait(false);
+            _hybridRetriever?.RemoveLexicalEntry(entry.Namespace, entry.Key);
+        }
 
         MemoryEntry? summaryEntry = null;
         if (policy.SummarizeTrimmedEntries && _summaryGenerator is not null && overflow.Count > 0)
@@ -67,6 +75,7 @@ public sealed class MemoryRetentionService
                 },
                 CreatedAt: DateTimeOffset.UtcNow);
             await _store.SetAsync(summaryEntry, cancellationToken).ConfigureAwait(false);
+            _hybridRetriever?.IndexLexicalEntry(ns, summaryEntry);
         }
 
         return new MemoryRetentionResult(

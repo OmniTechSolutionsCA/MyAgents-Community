@@ -51,3 +51,45 @@ public interface IMemoryStore
     /// </summary>
     ValueTask ClearAsync(string ns, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Kind of mutation applied to an <see cref="IMemoryStore"/>.
+/// </summary>
+public enum MemoryStoreChangeKind
+{
+    /// <summary>An entry was added or updated.</summary>
+    Set = 0,
+
+    /// <summary>A specific entry was removed.</summary>
+    Delete = 1,
+
+    /// <summary>All entries in a namespace were cleared.</summary>
+    Clear = 2,
+}
+
+/// <summary>
+/// Describes a mutation that occurred in an <see cref="IMemoryStore"/>.
+/// </summary>
+/// <param name="Kind">The mutation kind (<see cref="MemoryStoreChangeKind.Set"/>, <see cref="MemoryStoreChangeKind.Delete"/>, or <see cref="MemoryStoreChangeKind.Clear"/>).</param>
+/// <param name="Namespace">The affected namespace.</param>
+/// <param name="Key">The affected entry key, or <see langword="null"/> when <paramref name="Kind"/> is <see cref="MemoryStoreChangeKind.Clear"/>.</param>
+/// <param name="Entry">The stored entry when <paramref name="Kind"/> is <see cref="MemoryStoreChangeKind.Set"/>; otherwise <see langword="null"/>.</param>
+public sealed record MemoryStoreChangedEvent(
+    MemoryStoreChangeKind Kind,
+    string Namespace,
+    string? Key = null,
+    MemoryEntry? Entry = null);
+
+/// <summary>
+/// Optional interface implemented by <see cref="IMemoryStore"/> implementations that publish
+/// synchronous change notifications when entries are added, updated, deleted, or cleared.
+/// Enables secondary indices (such as BM25 lexical indices) to stay synchronized automatically.
+/// </summary>
+public interface IMemoryStoreChangeNotifier
+{
+    /// <summary>
+    /// Registers a listener invoked whenever an entry is stored, deleted, or a namespace is cleared.
+    /// Disposing the returned token unregisters the listener.
+    /// </summary>
+    IDisposable Subscribe(Action<MemoryStoreChangedEvent> listener);
+}
