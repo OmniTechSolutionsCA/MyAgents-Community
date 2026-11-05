@@ -30,6 +30,8 @@ public sealed class PublicApiApprovalTests
     [TestCase(typeof(MyAgents.Runtime.Chat.ChatClientRuntime), "MyAgents.Runtime.Chat.approved.txt")]
     [TestCase(typeof(MyAgents.Memory.IMemoryRetriever), "MyAgents.Memory.approved.txt")]
     [TestCase(typeof(MyAgents.Mcp.McpFeature), "MyAgents.Mcp.approved.txt")]
+    [TestCase(typeof(MyAgents.Runtime.Workers.AgentRunWorkerServiceCollectionExtensions), "MyAgents.Runtime.Workers.approved.txt")]
+    [TestCase(typeof(MyAgents.Runtime.Workers.Sqlite.SqliteAgentRunBackend), "MyAgents.Runtime.Workers.Sqlite.approved.txt")]
     [TestCase(typeof(MyAgents.Testing.InMemoryAgent), "MyAgents.Testing.approved.txt")]
     public void Public_api_matches_approved_baseline(Type anchorType, string baselineFileName)
     {

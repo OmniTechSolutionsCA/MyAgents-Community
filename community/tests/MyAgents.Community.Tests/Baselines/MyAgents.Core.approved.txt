@@ -271,6 +271,171 @@ TYPE class MyAgents.Core.DocumentAgentContent
   METHOD int GetHashCode()
   METHOD string ToString()
   METHOD void Deconstruct(System.ReadOnlyMemory<System.Byte>& Data, string& MediaType, string& FileName)
+TYPE class MyAgents.Core.Execution.AgentRunAdmissionRejectedException
+  CTOR AgentRunAdmissionRejectedException(string scopeKey, int limit)
+  PROP int Limit { get; }
+  PROP string ScopeKey { get; }
+TYPE class MyAgents.Core.Execution.AgentRunBackendOptions
+  CTOR AgentRunBackendOptions()
+  PROP System.Nullable<int> MaxLeasedRunsPerScope { get; set; }
+  PROP System.Nullable<int> MaxOutstandingRunsPerScope { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunBackendOptions <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunBackendOptions other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Validate()
+TYPE class MyAgents.Core.Execution.AgentRunContext
+  CTOR AgentRunContext(MyAgents.Core.Execution.AgentRunLease lease, System.Func<string, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<bool>> saveCheckpointAsync)
+  PROP int Attempt { get; }
+  PROP string CheckpointJson { get; }
+  PROP System.Nullable<System.DateTimeOffset> Deadline { get; }
+  PROP string HandlerId { get; }
+  PROP string InputJson { get; }
+  PROP MyAgents.Core.Execution.AgentRunLease Lease { get; }
+  PROP string ResumeInputJson { get; }
+  PROP string RunId { get; }
+  METHOD System.Threading.Tasks.ValueTask<bool> SaveCheckpointAsync(string checkpointJson, System.Threading.CancellationToken cancellationToken)
+  METHOD string CreateOperationId(string stableStepId)
+TYPE class MyAgents.Core.Execution.AgentRunFailure
+  CTOR AgentRunFailure(string Code, string Message, bool Retryable)
+  PROP string Code { get; set; }
+  PROP string Message { get; set; }
+  PROP bool Retryable { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunFailure <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunFailure other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& Code, string& Message, bool& Retryable)
+TYPE enum MyAgents.Core.Execution.AgentRunHandlerDisposition
+  FIELD MyAgents.Core.Execution.AgentRunHandlerDisposition Completed
+  FIELD MyAgents.Core.Execution.AgentRunHandlerDisposition WaitingForInput
+TYPE class MyAgents.Core.Execution.AgentRunHandlerResult
+  CTOR AgentRunHandlerResult(MyAgents.Core.Execution.AgentRunHandlerDisposition Disposition, string OutputJson, string CheckpointJson, string PendingInputDescription)
+  PROP string CheckpointJson { get; set; }
+  PROP MyAgents.Core.Execution.AgentRunHandlerDisposition Disposition { get; set; }
+  PROP string OutputJson { get; set; }
+  PROP string PendingInputDescription { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunHandlerResult <Clone>$()
+  METHOD MyAgents.Core.Execution.AgentRunHandlerResult Completed(string outputJson)
+  METHOD MyAgents.Core.Execution.AgentRunHandlerResult WaitingForInput(string checkpointJson, string pendingInputDescription)
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunHandlerResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Execution.AgentRunHandlerDisposition& Disposition, string& OutputJson, string& CheckpointJson, string& PendingInputDescription)
+TYPE class MyAgents.Core.Execution.AgentRunLease
+  CTOR AgentRunLease(string RunId, MyAgents.Core.Execution.AgentRunRequest Request, string WorkerId, string LeaseId, long FencingToken, int Attempt, int FailureCount, System.DateTimeOffset LeaseExpiresAt, string CheckpointJson, string ResumeInputJson, bool CancellationRequested)
+  PROP int Attempt { get; set; }
+  PROP bool CancellationRequested { get; set; }
+  PROP string CheckpointJson { get; set; }
+  PROP int FailureCount { get; set; }
+  PROP long FencingToken { get; set; }
+  PROP System.DateTimeOffset LeaseExpiresAt { get; set; }
+  PROP string LeaseId { get; set; }
+  PROP MyAgents.Core.Execution.AgentRunRequest Request { get; set; }
+  PROP string ResumeInputJson { get; set; }
+  PROP string RunId { get; set; }
+  PROP string WorkerId { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunLease <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunLease other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& RunId, MyAgents.Core.Execution.AgentRunRequest& Request, string& WorkerId, string& LeaseId, long& FencingToken, int& Attempt, int& FailureCount, System.DateTimeOffset& LeaseExpiresAt, string& CheckpointJson, string& ResumeInputJson, bool& CancellationRequested)
+TYPE class MyAgents.Core.Execution.AgentRunLeaseRenewal
+  CTOR AgentRunLeaseRenewal(bool LeaseIsValid, bool CancellationRequested, System.Nullable<System.DateTimeOffset> LeaseExpiresAt)
+  PROP bool CancellationRequested { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> LeaseExpiresAt { get; set; }
+  PROP bool LeaseIsValid { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunLeaseRenewal <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunLeaseRenewal other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(bool& LeaseIsValid, bool& CancellationRequested, System.Nullable<System.DateTimeOffset>& LeaseExpiresAt)
+TYPE class MyAgents.Core.Execution.AgentRunRecord
+  CTOR AgentRunRecord(string RunId, MyAgents.Core.Execution.AgentRunRequest Request, MyAgents.Core.Execution.AgentRunStatus Status, int Attempt, int FailureCount, System.DateTimeOffset CreatedAt, System.DateTimeOffset UpdatedAt, System.Nullable<System.DateTimeOffset> NextAttemptAt, string OutputJson, string FailureCode, string FailureMessage, string CheckpointJson, string ResumeInputJson, string PendingInputDescription, string WorkerId, string LeaseId, System.Nullable<long> FencingToken, System.Nullable<System.DateTimeOffset> LeaseExpiresAt, bool CancellationRequested)
+  PROP int Attempt { get; set; }
+  PROP bool CancellationRequested { get; set; }
+  PROP string CheckpointJson { get; set; }
+  PROP System.DateTimeOffset CreatedAt { get; set; }
+  PROP string FailureCode { get; set; }
+  PROP int FailureCount { get; set; }
+  PROP string FailureMessage { get; set; }
+  PROP System.Nullable<long> FencingToken { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> LeaseExpiresAt { get; set; }
+  PROP string LeaseId { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> NextAttemptAt { get; set; }
+  PROP string OutputJson { get; set; }
+  PROP string PendingInputDescription { get; set; }
+  PROP MyAgents.Core.Execution.AgentRunRequest Request { get; set; }
+  PROP string ResumeInputJson { get; set; }
+  PROP string RunId { get; set; }
+  PROP MyAgents.Core.Execution.AgentRunStatus Status { get; set; }
+  PROP System.DateTimeOffset UpdatedAt { get; set; }
+  PROP string WorkerId { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& RunId, MyAgents.Core.Execution.AgentRunRequest& Request, MyAgents.Core.Execution.AgentRunStatus& Status, int& Attempt, int& FailureCount, System.DateTimeOffset& CreatedAt, System.DateTimeOffset& UpdatedAt, System.Nullable<System.DateTimeOffset>& NextAttemptAt, string& OutputJson, string& FailureCode, string& FailureMessage, string& CheckpointJson, string& ResumeInputJson, string& PendingInputDescription, string& WorkerId, string& LeaseId, System.Nullable<long>& FencingToken, System.Nullable<System.DateTimeOffset>& LeaseExpiresAt, bool& CancellationRequested)
+TYPE class MyAgents.Core.Execution.AgentRunRequest
+  CTOR AgentRunRequest(string HandlerId, string InputJson, string IdempotencyKey, string ScopeKey, System.Nullable<System.DateTimeOffset> Deadline, int MaxAttempts, string BatchId, string CaseId)
+  PROP string BatchId { get; set; }
+  PROP string CaseId { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> Deadline { get; set; }
+  PROP string HandlerId { get; set; }
+  PROP string IdempotencyKey { get; set; }
+  PROP string InputJson { get; set; }
+  PROP int MaxAttempts { get; set; }
+  PROP string ScopeKey { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunRequest <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunRequest other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& HandlerId, string& InputJson, string& IdempotencyKey, string& ScopeKey, System.Nullable<System.DateTimeOffset>& Deadline, int& MaxAttempts, string& BatchId, string& CaseId)
+TYPE enum MyAgents.Core.Execution.AgentRunStatus
+  FIELD MyAgents.Core.Execution.AgentRunStatus Cancelled
+  FIELD MyAgents.Core.Execution.AgentRunStatus DeadlineExceeded
+  FIELD MyAgents.Core.Execution.AgentRunStatus Failed
+  FIELD MyAgents.Core.Execution.AgentRunStatus Leased
+  FIELD MyAgents.Core.Execution.AgentRunStatus Queued
+  FIELD MyAgents.Core.Execution.AgentRunStatus RetryScheduled
+  FIELD MyAgents.Core.Execution.AgentRunStatus Succeeded
+  FIELD MyAgents.Core.Execution.AgentRunStatus WaitingForInput
+TYPE class MyAgents.Core.Execution.AgentRunSubmission
+  CTOR AgentRunSubmission(string RunId, bool WasDeduplicated)
+  PROP string RunId { get; set; }
+  PROP bool WasDeduplicated { get; set; }
+  METHOD MyAgents.Core.Execution.AgentRunSubmission <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Execution.AgentRunSubmission other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& RunId, bool& WasDeduplicated)
+TYPE interface MyAgents.Core.Execution.IAgentRunBackend
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunLease> ClaimAsync(string workerId, System.TimeSpan leaseDuration, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunLeaseRenewal> RenewLeaseAsync(MyAgents.Core.Execution.AgentRunLease lease, System.TimeSpan leaseDuration, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunRecord> GetAsync(string runId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunSubmission> SubmitAsync(MyAgents.Core.Execution.AgentRunRequest request, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> CancelAsync(string runId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> CompleteAsync(MyAgents.Core.Execution.AgentRunLease lease, string outputJson, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> FailAsync(MyAgents.Core.Execution.AgentRunLease lease, MyAgents.Core.Execution.AgentRunFailure failure, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> ResumeAsync(string runId, string resumeInputJson, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> RetryAsync(MyAgents.Core.Execution.AgentRunLease lease, MyAgents.Core.Execution.AgentRunFailure failure, System.TimeSpan retryDelay, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> SaveCheckpointAsync(MyAgents.Core.Execution.AgentRunLease lease, string checkpointJson, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<bool> WaitForInputAsync(MyAgents.Core.Execution.AgentRunLease lease, string checkpointJson, string pendingInputDescription, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Execution.IAgentRunBatchCatalog
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Execution.AgentRunRecord>> GetBatchRunsAsync(string batchId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Execution.IAgentRunBatchController
+  METHOD System.Threading.Tasks.ValueTask<int> CancelBatchAsync(string batchId, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Execution.IAgentRunHandler
+  PROP string HandlerId { get; }
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunHandlerResult> ExecuteAsync(MyAgents.Core.Execution.AgentRunContext context, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Core.FallbackMiddleware
   CTOR FallbackMiddleware(MyAgents.Core.IFallbackPolicy policy, Microsoft.Extensions.Logging.ILogger<MyAgents.Core.FallbackMiddleware> logger)
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> InvokeAsync(MyAgents.Core.AgentTurnContext context, System.Func<MyAgents.Core.AgentTurnContext, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult>> next, System.Threading.CancellationToken cancellationToken)

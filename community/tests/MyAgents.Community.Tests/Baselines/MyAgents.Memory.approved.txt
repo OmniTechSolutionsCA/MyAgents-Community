@@ -65,6 +65,7 @@ TYPE class MyAgents.Memory.HybridMemoryQuery
   METHOD void Deconstruct(string& QueryText, int& MaxResults, double& DenseWeight, double& SparseWeight, int& RrfK, MyAgents.Memory.HybridRankingMode& RankingMode, double& MinScore, System.Collections.Generic.IReadOnlyDictionary<string, string>& MetadataFilters)
 TYPE class MyAgents.Memory.HybridMemoryRetriever
   CTOR HybridMemoryRetriever(MyAgents.Core.Memory.IMemoryStore store, MyAgents.Memory.IVectorMemoryStore vectorStore, MyAgents.Memory.IMemoryTelemetrySink telemetrySink)
+  METHOD System.Threading.Tasks.ValueTask RefreshLexicalIndexAsync(string ns, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.HybridMemorySearchResult>> SearchHybridAsync(string ns, MyAgents.Memory.HybridMemoryQuery query, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.MemorySearchResult>> SearchAsync(string ns, MyAgents.Memory.MemoryQuery query, System.Threading.CancellationToken cancellationToken)
   METHOD void IndexLexicalEntry(string ns, MyAgents.Core.Memory.MemoryEntry entry)
@@ -92,6 +93,7 @@ TYPE interface MyAgents.Memory.IEpisodicMemoryStore
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> GetSessionEpisodesAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.EpisodicMemoryEntry>> RecallEpisodesAsync(MyAgents.Memory.EpisodicRecallQuery query, System.Threading.CancellationToken cancellationToken)
 TYPE interface MyAgents.Memory.IHybridMemoryRetriever
+  METHOD System.Threading.Tasks.ValueTask RefreshLexicalIndexAsync(string ns, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Memory.HybridMemorySearchResult>> SearchHybridAsync(string ns, MyAgents.Memory.HybridMemoryQuery query, System.Threading.CancellationToken cancellationToken)
   METHOD void IndexLexicalEntry(string ns, MyAgents.Core.Memory.MemoryEntry entry)
   METHOD void RemoveLexicalEntry(string ns, string key)

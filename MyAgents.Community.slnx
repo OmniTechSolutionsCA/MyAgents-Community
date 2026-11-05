@@ -3,11 +3,14 @@
   <Project Path="MyAgents.Generators/MyAgents.Generators.csproj" />
   <Project Path="MyAgents.Agents/MyAgents.Agents.csproj" />
   <Project Path="MyAgents.Runtime.Chat/MyAgents.Runtime.Chat.csproj" />
+  <Project Path="MyAgents.Runtime.Workers/MyAgents.Runtime.Workers.csproj" />
+  <Project Path="MyAgents.Runtime.Workers.Sqlite/MyAgents.Runtime.Workers.Sqlite.csproj" />
   <Project Path="MyAgents.Memory/MyAgents.Memory.csproj" />
   <Project Path="MyAgents.Mcp/MyAgents.Mcp.csproj" />
   <Project Path="MyAgents.Testing/MyAgents.Testing.csproj" />
   <Project Path="community/tests/MyAgents.Community.Tests/MyAgents.Community.Tests.csproj" />
   <Project Path="community/samples/ChatWithTools/ChatWithTools.csproj" />
+  <Project Path="community/samples/DurableAgentRuns/DurableAgentRuns.csproj" />
   <Project Path="community/samples/NativeAotTools/NativeAotTools.csproj" />
   <Project Path="eng/MyAgents.Benchmarks/MyAgents.Benchmarks.csproj" />
 </Solution>

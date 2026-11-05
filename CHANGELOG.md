@@ -13,6 +13,10 @@ stable release.
   the package table, and updated project-status wording.
 
 ### Added
+- **Durable agent-run execution.** Added provider-neutral run and lease contracts, the optional
+  `MyAgents.Runtime.Workers` hosted worker, the local `MyAgents.Runtime.Workers.Sqlite` adapter,
+  workflow integration, bounded concurrency and admission, and batch submission/reporting. SQLite
+  is a single-machine reference adapter; execution is at-least-once.
 - **NuGet publishing via Trusted Publishing (OIDC).** `publish-nuget.yml` workflow builds, tests, and packs
   all packages with symbol packages (`snupkg`), Source Link, and deterministic builds, then pushes to
   NuGet.org via `NuGet/login@v1` — no stored API key. `MyAgents.Generators` now ships as a proper Roslyn
@@ -20,6 +24,9 @@ stable release.
   Package metadata gains icon, project URL, and release-notes links across all packages.
 
 ### Fixed
+- **Hybrid memory lexical seeding and refresh.** Initial BM25 seeding now covers all stored entries,
+  and `IHybridMemoryRetriever.RefreshLexicalIndexAsync` rebuilds the namespace index after direct store
+  changes or retention deletions.
 - **`[AgentTool]` classes in the global namespace crashed the source generator.** The generated file hint
   name embedded the literal `"<global namespace>"` display string, which is an invalid hint name; the
   generator silently stopped contributing source (tool registration extension missing). Global-namespace

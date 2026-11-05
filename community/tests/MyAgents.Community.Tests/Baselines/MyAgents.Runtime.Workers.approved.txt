@@ -1,0 +1,65 @@
+TYPE class MyAgents.Runtime.Workers.AgentRunBatchCase
+  CTOR AgentRunBatchCase(string CaseId, MyAgents.Core.Execution.AgentRunRequest Request)
+  PROP string CaseId { get; set; }
+  PROP MyAgents.Core.Execution.AgentRunRequest Request { get; set; }
+  METHOD MyAgents.Runtime.Workers.AgentRunBatchCase <Clone>$()
+  METHOD bool Equals(MyAgents.Runtime.Workers.AgentRunBatchCase other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& CaseId, MyAgents.Core.Execution.AgentRunRequest& Request)
+TYPE class MyAgents.Runtime.Workers.AgentRunBatchController
+  CTOR AgentRunBatchController(MyAgents.Core.Execution.IAgentRunBatchController controller)
+  METHOD System.Threading.Tasks.ValueTask<int> CancelAsync(string batchId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Runtime.Workers.AgentRunBatchReporter
+  CTOR AgentRunBatchReporter(MyAgents.Core.Execution.IAgentRunBatchCatalog catalog)
+  CTOR AgentRunBatchReporter(MyAgents.Core.Execution.IAgentRunBatchCatalog catalog, MyAgents.Core.IRunTraceSink traceSink)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Runtime.Workers.AgentRunBatchSummary> GetSummaryAsync(string batchId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Runtime.Workers.AgentRunBatchSubmitter
+  CTOR AgentRunBatchSubmitter(MyAgents.Core.Execution.IAgentRunBackend backend)
+  METHOD System.Collections.Generic.IAsyncEnumerable<MyAgents.Core.Execution.AgentRunSubmission> SubmitAsync(string batchId, System.Collections.Generic.IAsyncEnumerable<MyAgents.Runtime.Workers.AgentRunBatchCase> cases, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Runtime.Workers.AgentRunBatchSummary
+  CTOR AgentRunBatchSummary(string BatchId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Execution.AgentRunRecord> Runs, int SucceededCount, int FailedCount, int CancelledCount, int DeadlineExceededCount, int PendingCount, System.Collections.Generic.IReadOnlyList<MyAgents.Runtime.Workers.AgentRunTraceSummary> TraceSummaries)
+  PROP string BatchId { get; set; }
+  PROP int CancelledCount { get; set; }
+  PROP int DeadlineExceededCount { get; set; }
+  PROP int FailedCount { get; set; }
+  PROP bool IsComplete { get; }
+  PROP int PendingCount { get; set; }
+  PROP int RunCount { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Execution.AgentRunRecord> Runs { get; set; }
+  PROP int SucceededCount { get; set; }
+  PROP System.Nullable<double> SuccessRate { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Runtime.Workers.AgentRunTraceSummary> TraceSummaries { get; set; }
+  METHOD MyAgents.Runtime.Workers.AgentRunBatchSummary <Clone>$()
+  METHOD bool Equals(MyAgents.Runtime.Workers.AgentRunBatchSummary other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& BatchId, System.Collections.Generic.IReadOnlyList<MyAgents.Core.Execution.AgentRunRecord>& Runs, int& SucceededCount, int& FailedCount, int& CancelledCount, int& DeadlineExceededCount, int& PendingCount, System.Collections.Generic.IReadOnlyList<MyAgents.Runtime.Workers.AgentRunTraceSummary>& TraceSummaries)
+TYPE class MyAgents.Runtime.Workers.AgentRunTraceSummary
+  CTOR AgentRunTraceSummary(string RunId, int RecordCount, System.Collections.Generic.IReadOnlyDictionary<MyAgents.Core.RunEventKind, int> EventCounts)
+  PROP System.Collections.Generic.IReadOnlyDictionary<MyAgents.Core.RunEventKind, int> EventCounts { get; set; }
+  PROP int RecordCount { get; set; }
+  PROP string RunId { get; set; }
+  METHOD MyAgents.Runtime.Workers.AgentRunTraceSummary <Clone>$()
+  METHOD bool Equals(MyAgents.Runtime.Workers.AgentRunTraceSummary other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& RunId, int& RecordCount, System.Collections.Generic.IReadOnlyDictionary<MyAgents.Core.RunEventKind, int>& EventCounts)
+TYPE class MyAgents.Runtime.Workers.AgentRunWorkerOptions
+  CTOR AgentRunWorkerOptions()
+  PROP System.TimeSpan BaseRetryDelay { get; set; }
+  PROP System.TimeSpan IdlePollInterval { get; set; }
+  PROP System.TimeSpan LeaseDuration { get; set; }
+  PROP System.TimeSpan LeaseRenewalInterval { get; set; }
+  PROP int MaxConcurrentRuns { get; set; }
+  PROP System.TimeSpan MaximumRetryDelay { get; set; }
+  PROP string WorkerId { get; set; }
+TYPE class MyAgents.Runtime.Workers.AgentRunWorkerServiceCollectionExtensions
+  METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgentsRunWorker(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<MyAgents.Runtime.Workers.AgentRunWorkerOptions> configure)
+TYPE class MyAgents.Runtime.Workers.WorkflowAgentRunHandler<TState>
+  CTOR WorkflowAgentRunHandler`1(string handlerId, MyAgents.Core.Workflows.WorkflowHost workflowHost, MyAgents.Core.Workflows.IWorkflow<TState> workflow, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TState> stateTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.Workflows.WorkflowSnapshot> snapshotTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.ToolApprovalDecision> approvalDecisionTypeInfo)
+  PROP string HandlerId { get; }
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunHandlerResult> ExecuteAsync(MyAgents.Core.Execution.AgentRunContext context, System.Threading.CancellationToken cancellationToken)
