@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "globalMetadata": {
+      "_appName": "MyAgents Community",
+      "_appTitle": "MyAgents Community Documentation",
+      "_enableSearch": true,
+      "_gitContribute": {
+        "repo": "https://github.com/OmniTechSolutionsCA/MyAgents-Community",
+        "branch": "main"
+      }
+    },
+    "template": [
+      "default",
+      "modern"
+    ]
+  }
+}

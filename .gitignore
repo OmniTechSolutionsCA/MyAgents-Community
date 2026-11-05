@@ -61,3 +61,7 @@ studio-data/
 .sisyphus/
 .playwright-mcp/
 .test-results/
+
+# Documentation site output
+_site/
+docs-site/_site/
