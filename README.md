@@ -14,58 +14,69 @@
 [![NuGet](https://img.shields.io/nuget/v/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
 [![Status: General Availability](https://img.shields.io/badge/status-GA%201.0.0-brightgreen)](#project-status)
 
-**Explore:** [Capabilities](#capabilities) · [Architecture](#architecture) ·
-[Packages](#packages) · [Quick start](#getting-started) · [Examples](#examples) ·
-[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+**Explore:** [Quick start](#getting-started) · [Capabilities](#capabilities) ·
+[Architecture](#architecture) · [Packages](#packages) · [Examples & Samples](#examples) ·
+[Real-world deployment](#real-world-deployment-example) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-MyAgents Community is a provider-neutral foundation for self-hosted agent
-applications. Connect a model through Microsoft.Extensions.AI's `IChatClient`,
-compose agent behavior from reusable features, and let the MyAgents runtime
-manage chat turns and registered tool calls.
+MyAgents Community is a modular, high-performance, and provider-neutral agent
+runtime for .NET 10. Connect any AI model through Microsoft.Extensions.AI's
+`IChatClient`, compose agent behaviors from reusable features, and execute tool
+invocations with NativeAOT safety, durable restart recovery, and hybrid memory retrieval.
 
-Omni Technology Solutions also uses a MyAgents assistant internally in Slack.
-That Slack integration is separate from the Community packages in this repository.
+### Quick Example (C#)
 
-### Internal Slack example
+```csharp
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
+using MyAgents.Core.Tools;
+using MyAgents.Runtime.Chat;
 
-The following diagram illustrates the architecture and message flow of Omni's internal Slack assistant deployment:
+// 1. Configure services with your IChatClient and MyAgents runtime
+var services = new ServiceCollection();
+services.AddSingleton<IChatClient>(chatClient); // Ollama, OpenAI, Azure, etc.
+services.AddMyAgentsChatRuntime();
 
-```mermaid
-sequenceDiagram
-    actor User as Slack user
-    participant Slack
-    participant Worker as Cloudflare Worker
-    participant Runtime as MyAgents runtime container
-    participant Model as AI model provider
+await using var provider = services.BuildServiceProvider();
+var sessionFactory = provider.GetRequiredService<IAgentSessionFactory>();
 
-    User->>Slack: Mention the assistant
-    Slack->>Worker: Deliver event
-    Worker->>Runtime: Forward eligible request
-    Runtime->>Model: Request a response
-    Model-->>Runtime: Return model response
-    Runtime-->>Worker: Return assistant response
-    Worker->>Slack: Post response
-    Slack-->>User: Show response
+// 2. Define an agent with prompts and tools
+var definition = new AgentDefinition("assistant", [
+    AgentFeature.Create(assembly =>
+    {
+        assembly.Prompts.AddSystem("You are a helpful assistant.");
+        assembly.Tools.Add(DelegateTool.Create("get_time", () => DateTimeOffset.UtcNow.ToString("O")));
+    })
+]);
+
+// 3. Create a session and run turns
+await using var session = sessionFactory.CreateSession("session-1", definition);
+var turn = await session.InvokeAsync([AgentMessage.FromText("user", "What time is it in UTC?")]);
+
+foreach (var message in turn.Output)
+{
+    Console.WriteLine(message.Content);
+}
 ```
-
-This represents Omni's active internal deployment. Its Slack integration and
-containerized runtime are maintained separately from the Community packages in this repository.
 
 ## Capabilities
 
-- **Bring your own model provider.** Use any provider integration that
-  implements Microsoft.Extensions.AI's [`IChatClient`](https://learn.microsoft.com/en-us/dotnet/core/extensions/artificial-intelligence).
-- **Compose agent behavior.** Add prompts, tools, model capabilities, memory,
-  and observations as reusable features.
-- **Run chat and tools in process.** `MyAgents.Runtime.Chat` manages the
-  model/tool loop and returns turn results and token usage.
-- **Run durable agent work.** Optional worker packages execute leased runs and
-  provide a local SQLite backend for restart recovery.
-- **Extend applications.** Optional Community packages add memory abstractions,
-  hybrid dense vector + BM25 retrieval, token-aware document ingestion, and .NET Model
-  Context Protocol adapters.
-- **Test without live services.** Use deterministic doubles to exercise agent
-  behavior without a model provider or remote service.
+- **Bring your own model provider.** Integrate any provider implementing
+  Microsoft.Extensions.AI's [`IChatClient`](https://learn.microsoft.com/en-us/dotnet/core/extensions/artificial-intelligence)
+  (Ollama, OpenAI, Azure OpenAI, Anthropic, Gemini, local models).
+- **Compile-time NativeAOT tools (`MyAgents.Generators`).** Annotate methods with `[AgentTool]`;
+  the Roslyn incremental source generator generates compile-time JSON schemas, zero-reflection
+  argument binders, and NativeAOT-safe serialization.
+- **Durable agent execution (`MyAgents.Runtime.Workers`).** Generic Host worker for leased agent runs,
+  at-least-once execution, admission throttling, and transactional SQLite restart recovery
+  (`MyAgents.Runtime.Workers.Sqlite`).
+- **Hybrid RAG & memory retrieval (`MyAgents.Memory`).** Dense SIMD vector search (`TensorPrimitives.Dot`)
+  combined with sparse BM25 lexical ranking via Reciprocal Rank Fusion (RRF), zero-dependency document
+  readers (HTML-to-Markdown, Markdown front-matter, JSON, Text), and persistent SQLite/VectorData stores.
+- **Safe tool governance & telemetry.** Pluggable `IToolApprovalPolicy`, streaming guardrails,
+  circuit breakers, and end-to-end OpenTelemetry distributed tracing across all turns and tool calls.
+- **Deterministic testing (`MyAgents.Testing`).** Exercise turn loops, approvals, and workflows
+  without connecting to a live model or remote service.
 
 ## Architecture
 
@@ -173,16 +184,45 @@ approval policy is registered, calls are allowed by default. Register an
 explicit policy before enabling tools that can change data or perform other
 sensitive actions.
 
-## Examples
+## Examples & Samples
 
-The [chat and tool sample](community/samples/ChatWithTools/README.md) is a
-complete console application. The [chat runtime guide](MyAgents.Runtime.Chat/README.md)
-describes provider registration and runtime behavior. The
-[Community tests](community/tests/MyAgents.Community.Tests/) exercise chat
-turns, tool calls, and approvals without contacting a live model.
+The repository includes runnable console samples demonstrating core capabilities:
 
-The [DurableAgentRuns sample](community/samples/DurableAgentRuns/README.md)
-demonstrates restart recovery using the local SQLite adapter.
+- **[ChatWithTools](community/samples/ChatWithTools/README.md)**: Connects to Ollama or OpenAI-compatible
+  endpoints, registers an in-process tool, and executes model-driven tool loops.
+- **[NativeAotTools](community/samples/NativeAotTools/README.md)**: Demonstrates compile-time `[AgentTool]`
+  generation and NativeAOT compilation (`dotnet publish -c Release`) with zero reflection.
+- **[DurableAgentRuns](community/samples/DurableAgentRuns/README.md)**: Demonstrates restart recovery,
+  leased execution, and state persistence using the SQLite worker adapter.
+- **[Community Tests](community/tests/MyAgents.Community.Tests/)**: Exhaustive automated tests exercising
+  turns, approvals, circuit breakers, and hybrid retrieval with deterministic doubles.
+
+## Real-world deployment example
+
+Omni Technology Solutions uses a MyAgents assistant internally in Slack. The sequence
+below illustrates how the self-hosted MyAgents runtime container powers conversational turns
+and tool calls behind an edge ingress worker:
+
+```mermaid
+sequenceDiagram
+    actor User as Slack user
+    participant Slack
+    participant Worker as Cloudflare Worker
+    participant Runtime as MyAgents runtime container
+    participant Model as AI model provider
+
+    User->>Slack: Mention the assistant
+    Slack->>Worker: Deliver event
+    Worker->>Runtime: Forward eligible request
+    Runtime->>Model: Request a response
+    Model-->>Runtime: Return model response
+    Runtime-->>Worker: Return assistant response
+    Worker->>Slack: Post response
+    Slack-->>User: Show response
+```
+
+This represents Omni's active internal deployment. Its Slack integration and containerized runtime
+are maintained separately from the open-source Community packages in this repository.
 
 ## Community scope
 
