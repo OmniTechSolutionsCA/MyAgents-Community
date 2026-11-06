@@ -64,4 +64,4 @@ studio-data/
 
 # Documentation site output
 _site/
-docs-site/_site/
+docs-src/_site/

@@ -1,0 +1,12 @@
+- name: Overview
+  href: index.md
+- name: Architecture
+  href: architecture.md
+- name: NativeAOT Tools
+  href: nativeaot-tools.md
+- name: Durable Agent Runs
+  href: durable-runs.md
+- name: Hybrid RAG & Memory
+  href: hybrid-rag.md
+- name: Tool Approval & Governance
+  href: tool-approval.md
