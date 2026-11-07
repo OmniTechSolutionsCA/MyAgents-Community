@@ -73,9 +73,38 @@
         <article data-uid="">
 <h1 id="myagents-community">MyAgents Community</h1>
 
-<p><strong>Build modular, tool-using AI agents with .NET 10.</strong></p>
-<p>MyAgents Community is a modular, high-performance, and provider-neutral agent runtime for .NET 10. Connect any AI model through Microsoft.Extensions.AI's <code>IChatClient</code>, compose agent behaviors from reusable features, and execute tool invocations with NativeAOT safety, durable restart recovery, and hybrid memory retrieval.</p>
-<h3 id="quick-start-c">Quick Start (C#)</h3>
+<p><strong>Modular, NativeAOT-ready, and provider-neutral AI agent runtime for .NET 10.</strong></p>
+<p><a href="https://www.nuget.org/packages?q=MyAgents"><img src="https://img.shields.io/badge/nuget-v1.0.0-blue" alt="NuGet Version"></a>
+<a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-10.0-purple" alt="Target Framework"></a>
+<a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+<a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen" alt="GitHub Workflow"></a></p>
+<hr>
+<p>MyAgents Community is an enterprise-grade agent framework for .NET 10 built on top of <code>Microsoft.Extensions.AI</code>. It provides complete provider neutrality, compile-time NativeAOT tool generation, restart-recoverable durable worker execution, and hybrid RAG memory with zero vendor lock-in.</p>
+<div class="row" style="margin-top: 24px; margin-bottom: 24px;">
+  <div class="col-md-4" style="margin-bottom: 16px;">
+    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
+      <h3>🚀 NativeAOT Ready</h3>
+      <p style="color: var(--muted-foreground); font-size: 14px;">Generate compile-time tool schemas and bindings with <code>MyAgents.Generators</code>. Zero runtime reflection, zero trimming warnings, and near-instant cold starts.</p>
+      <a href="docs/tools/nativeaot-tools.html">Read NativeAOT Guide &rarr;</a>
+    </div>
+  </div>
+  <div class="col-md-4" style="margin-bottom: 16px;">
+    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
+      <h3>🛡️ Durable Execution</h3>
+      <p style="color: var(--muted-foreground); font-size: 14px;">Background worker leasing, idempotency deduplication, and automatic crash recovery with SQLite persistence via <code>MyAgents.Runtime.Workers</code>.</p>
+      <a href="docs/execution/durable-runs.html">Read Durable Runs &rarr;</a>
+    </div>
+  </div>
+  <div class="col-md-4" style="margin-bottom: 16px;">
+    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
+      <h3>🔍 Hybrid RAG Memory</h3>
+      <p style="color: var(--muted-foreground); font-size: 14px;">Fused SIMD dense cosine similarity (<code>TensorPrimitives</code>) and BM25 sparse lexical ranking with zero external vector database dependencies.</p>
+      <a href="docs/memory/hybrid-rag.html">Read Hybrid RAG &rarr;</a>
+    </div>
+  </div>
+</div>
+<hr>
+<h2 id="quick-start-c">Quick Start (C#)</h2>
 <pre><code class="lang-csharp">using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using MyAgents.Core;
@@ -108,7 +137,68 @@ foreach (var message in turn.Output)
     Console.WriteLine(message.Content);
 }
 </code></pre>
-<p><a href="docs/index.html">Read the Guides</a> to explore NativeAOT tools, durable execution, and hybrid RAG memory.</p>
+<hr>
+<h2 id="package-ecosystem-matrix">Package Ecosystem Matrix</h2>
+<p>Install only the modules your workload needs:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Package</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Core</code></strong></td>
+<td style="text-align: left;">Core interfaces (<code>IAgent</code>, <code>IAgentSession</code>, <code>ITool</code>, <code>AgentDefinition</code>, messages).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Chat</code></strong></td>
+<td style="text-align: left;">Provider-neutral execution runtime using <code>Microsoft.Extensions.AI.IChatClient</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Generators</code></strong></td>
+<td style="text-align: left;">Roslyn incremental source generator for zero-reflection <code>[AgentTool]</code> code emission.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers</code></strong></td>
+<td style="text-align: left;">Long-running durable worker host with lease heartbeats and idempotency.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers.Sqlite</code></strong></td>
+<td style="text-align: left;">SQLite backend for persistent durable runs.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Memory</code></strong></td>
+<td style="text-align: left;">SIMD vector store, BM25 inverted index, Reciprocal Rank Fusion, document readers.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Mcp</code></strong></td>
+<td style="text-align: left;">Model Context Protocol (MCP) tool integration over stdio and HTTP/SSE.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Agents</code></strong></td>
+<td style="text-align: left;">Subagent dispatching, group chats, token cost accounting, and model tier routing.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Testing</code></strong></td>
+<td style="text-align: left;">Deterministic in-memory test agents and session runtimes.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="explore-the-documentation">Explore the Documentation</h2>
+<ul>
+<li><a href="docs/getting-started/quickstart.html">Getting Started Guide</a></li>
+<li><a href="docs/core/architecture.html">Architecture &amp; Execution Lifecycle</a></li>
+<li><a href="docs/tools/nativeaot-tools.html">Zero-Reflection NativeAOT Tools</a></li>
+<li><a href="docs/tools/mcp.html">Model Context Protocol (MCP)</a></li>
+<li><a href="docs/execution/durable-runs.html">Durable Background Execution</a></li>
+<li><a href="docs/memory/hybrid-rag.html">Hybrid RAG &amp; Ingestion</a></li>
+<li><a href="docs/governance/tool-approval.html">Tool Approval &amp; Governance</a></li>
+<li><a href="docs/agents/multi-agent-and-subagents.html">Subagents &amp; Multi-Agent Teams</a></li>
+<li><a href="docs/testing/testing-agents.html">Unit Testing Agents</a></li>
+</ul>
 
 </article>
 

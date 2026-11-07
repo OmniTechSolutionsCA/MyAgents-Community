@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Circuit Breakers &amp; Observability | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Circuit Breakers &amp; Observability | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/circuit-breakers.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="circuit-breakers--observability">Circuit Breakers &amp; Observability</h1>
+
+<p>To protect downstream services from runaway loops, sudden model hallucinations, and cascading failures, MyAgents Community provides built-in circuit breakers, execution observers, and OpenTelemetry metrics.</p>
+<h2 id="1-tool-circuit-breaker">1. Tool Circuit Breaker</h2>
+<p>When an external tool dependency fails repeatedly (e.g. database timeout or third-party API outage), the <code>CircuitBreakerMiddleware</code> trips open, immediately rejecting further tool calls before they hit the failing service:</p>
+<pre><code class="lang-csharp">using MyAgents.Core.Middleware;
+
+var circuitBreaker = new CircuitBreakerMiddleware(new CircuitBreakerOptions
+{
+    FailureThreshold = 3,                       // Trip after 3 consecutive failures
+    BreakDuration = TimeSpan.FromSeconds(30),   // Stay open for 30 seconds
+    HandledExceptions = [typeof(HttpRequestException), typeof(TimeoutException)]
+});
+</code></pre>
+<p>When tripped, the circuit breaker returns a structured error to the model so the agent can adapt or inform the user rather than hanging.</p>
+<hr>
+<h2 id="2-tool-observers">2. Tool Observers</h2>
+<p>Tool observers allow you to audit, log, or measure tool execution without altering the tool's business logic:</p>
+<pre><code class="lang-csharp">using MyAgents.Core.Tools;
+
+public sealed class SecurityAuditToolObserver : IToolObserver
+{
+    private readonly ILogger _logger;
+
+    public SecurityAuditToolObserver(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void OnToolInvoking(ToolInvokingContext context)
+    {
+        _logger.LogInformation(&quot;Tool {ToolName} invoking with args: {Args}&quot;, context.ToolName, context.ArgumentsJson);
+    }
+
+    public void OnToolInvoked(ToolInvokedContext context)
+    {
+        _logger.LogInformation(&quot;Tool {ToolName} completed in {ElapsedMs}ms. Success: {IsSuccess}&quot;,
+            context.ToolName, context.Duration.TotalMilliseconds, context.Result.IsSuccess);
+    }
+}
+</code></pre>
+<p>Register observers using <code>ToolObserverFeature</code>:</p>
+<pre><code class="lang-csharp">var definition = new AgentDefinition(&quot;audited-agent&quot;, [
+    new ToolObserverFeature(new SecurityAuditToolObserver(logger))
+]);
+</code></pre>
+<hr>
+<h2 id="3-opentelemetry-metrics--tracing">3. OpenTelemetry Metrics &amp; Tracing</h2>
+<p><code>MyAgents.Agents</code> integrates natively with <code>System.Diagnostics.DiagnosticSource</code> and OpenTelemetry:</p>
+<pre><code class="lang-csharp">services.AddOpenTelemetry()
+    .WithTracing(tracing =&gt;
+    {
+        tracing.AddSource(&quot;MyAgents.Community&quot;);
+        tracing.AddOtlpExporter();
+    })
+    .WithMetrics(metrics =&gt;
+    {
+        metrics.AddMeter(&quot;MyAgents.Community&quot;);
+        metrics.AddOtlpExporter();
+    });
+</code></pre>
+<p>Exported metrics include:</p>
+<ul>
+<li><code>agent.turn.duration_ms</code>: Duration of conversational turns.</li>
+<li><code>agent.tool.invocations_total</code>: Counter of tool calls tagged by tool name and status.</li>
+<li><code>agent.tokens.cost_usd</code>: Real-time token usage and cost metrics per model tier.</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/circuit-breakers.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

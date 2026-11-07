@@ -13,30 +13,80 @@
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "docs/architecture.md",
+      "source_relative_path": "docs/agents/multi-agent-and-subagents.md",
       "output": {
         ".html": {
-          "relative_path": "docs/architecture.html"
+          "relative_path": "docs/agents/multi-agent-and-subagents.html"
         }
       },
       "version": ""
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "docs/durable-runs.md",
+      "source_relative_path": "docs/core/architecture.md",
       "output": {
         ".html": {
-          "relative_path": "docs/durable-runs.html"
+          "relative_path": "docs/core/architecture.html"
         }
       },
       "version": ""
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "docs/hybrid-rag.md",
+      "source_relative_path": "docs/core/sessions-and-turns.md",
       "output": {
         ".html": {
-          "relative_path": "docs/hybrid-rag.html"
+          "relative_path": "docs/core/sessions-and-turns.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/execution/durable-runs.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/execution/durable-runs.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/getting-started/packages.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/getting-started/packages.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/getting-started/quickstart.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/getting-started/quickstart.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/governance/circuit-breakers.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/governance/circuit-breakers.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/governance/tool-approval.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/governance/tool-approval.html"
         }
       },
       "version": ""
@@ -53,10 +103,40 @@
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "docs/nativeaot-tools.md",
+      "source_relative_path": "docs/memory/document-ingestion.md",
       "output": {
         ".html": {
-          "relative_path": "docs/nativeaot-tools.html"
+          "relative_path": "docs/memory/document-ingestion.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/memory/episodic-memory.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/memory/episodic-memory.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/memory/hybrid-rag.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/memory/hybrid-rag.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/testing/testing-agents.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/testing/testing-agents.html"
         }
       },
       "version": ""
@@ -76,10 +156,30 @@
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "docs/tool-approval.md",
+      "source_relative_path": "docs/tools/delegate-tools.md",
       "output": {
         ".html": {
-          "relative_path": "docs/tool-approval.html"
+          "relative_path": "docs/tools/delegate-tools.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/tools/mcp.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/tools/mcp.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/tools/nativeaot-tools.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/tools/nativeaot-tools.html"
         }
       },
       "version": ""

@@ -87,13 +87,49 @@
         <article data-uid="">
 <h1 id="documentation-guides">Documentation Guides</h1>
 
-<p>Welcome to the MyAgents Community documentation.</p>
+<p>Welcome to the MyAgents Community documentation. Explore guides, architectural patterns, and code samples across the entire platform.</p>
+<hr>
+<h2 id="-getting-started">🚀 Getting Started</h2>
 <ul>
-<li><a href="architecture.html">Architecture</a>: Understand the session factory, agent definitions, and runtime execution loop.</li>
-<li><a href="nativeaot-tools.html">NativeAOT Tools</a>: Author compile-time tools with zero reflection using <code>MyAgents.Generators</code>.</li>
-<li><a href="durable-runs.html">Durable Agent Runs</a>: Background worker leasing, idempotency, and restart recovery with SQLite.</li>
-<li><a href="hybrid-rag.html">Hybrid RAG &amp; Memory</a>: Dense vector SIMD cosine similarity, BM25 lexical ranking, and grounded citations.</li>
-<li><a href="tool-approval.html">Tool Approval &amp; Governance</a>: Tool allowlists, human-in-the-loop approvals, and circuit breakers.</li>
+<li><strong><a href="getting-started/quickstart.html">Quick Start</a></strong>: Build and run your first tool-calling AI agent in under 5 minutes.</li>
+<li><strong><a href="getting-started/packages.html">Package Ecosystem</a></strong>: Explore the 9 modular packages for .NET 10.</li>
+</ul>
+<hr>
+<h2 id="-core-concepts">🏗️ Core Concepts</h2>
+<ul>
+<li><strong><a href="core/architecture.html">Architecture &amp; Execution Lifecycle</a></strong>: Understand how session factories, feature pipelines, and turn loops interact with <code>IChatClient</code>.</li>
+<li><strong><a href="core/sessions-and-turns.html">Sessions &amp; Turns</a></strong>: Manage isolated conversation state, streaming responses, and context windows.</li>
+</ul>
+<hr>
+<h2 id="-tools--extensibility">⚡ Tools &amp; Extensibility</h2>
+<ul>
+<li><strong><a href="tools/nativeaot-tools.html">NativeAOT Tools</a></strong>: Generate zero-reflection, compile-time tools using <code>MyAgents.Generators</code>.</li>
+<li><strong><a href="tools/delegate-tools.html">Delegate &amp; Custom Tools</a></strong>: Create tools from in-process C# lambdas or custom <code>ITool</code> classes.</li>
+<li><strong><a href="tools/mcp.html">Model Context Protocol (MCP)</a></strong>: Connect your agent to external tools and data sources via stdio or HTTP/SSE transports.</li>
+</ul>
+<hr>
+<h2 id="-durable-execution--resilience">🛡️ Durable Execution &amp; Resilience</h2>
+<ul>
+<li><strong><a href="execution/durable-runs.html">Durable Agent Runs</a></strong>: Host crash-resilient, restart-recoverable workloads using SQLite leases and background worker services.</li>
+</ul>
+<hr>
+<h2 id="-memory--retrieval-augmented-generation-rag">🔍 Memory &amp; Retrieval-Augmented Generation (RAG)</h2>
+<ul>
+<li><strong><a href="memory/hybrid-rag.html">Hybrid RAG</a></strong>: Fuse dense SIMD cosine similarity (<code>TensorPrimitives</code>) with BM25 sparse lexical ranking.</li>
+<li><strong><a href="memory/episodic-memory.html">Episodic Memory</a></strong>: Enable cross-session recall and automated milestone consolidation.</li>
+<li><strong><a href="memory/document-ingestion.html">Document Ingestion</a></strong>: Ingest and chunk Markdown, HTML, Plain Text, and JSON with zero third-party dependencies.</li>
+</ul>
+<hr>
+<h2 id="-governance--safety">🔒 Governance &amp; Safety</h2>
+<ul>
+<li><strong><a href="governance/tool-approval.html">Tool Approval &amp; Allowlisting</a></strong>: Enforce rule-based permission policies and human-in-the-loop approval gates.</li>
+<li><strong><a href="governance/circuit-breakers.html">Circuit Breakers &amp; Observability</a></strong>: Protect against cascade failures, monitor tool telemetry, and emit OpenTelemetry metrics.</li>
+</ul>
+<hr>
+<h2 id="-multi-agent-systems--testing">👥 Multi-Agent Systems &amp; Testing</h2>
+<ul>
+<li><strong><a href="agents/multi-agent-and-subagents.html">Subagents &amp; Teams</a></strong>: Orchestrate hierarchical subagent dispatching, group chats, and multi-model cost routing.</li>
+<li><strong><a href="testing/testing-agents.html">Unit Testing Agents</a></strong>: Write fast, deterministic unit tests using <code>MyAgents.Testing</code> and in-memory agents.</li>
 </ul>
 
 </article>

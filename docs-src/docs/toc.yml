@@ -1,12 +1,48 @@
 - name: Overview
   href: index.md
-- name: Architecture
-  href: architecture.md
-- name: NativeAOT Tools
-  href: nativeaot-tools.md
-- name: Durable Agent Runs
-  href: durable-runs.md
-- name: Hybrid RAG & Memory
-  href: hybrid-rag.md
-- name: Tool Approval & Governance
-  href: tool-approval.md
+- name: Getting Started
+  items:
+    - name: Quick Start
+      href: getting-started/quickstart.md
+    - name: Packages Matrix
+      href: getting-started/packages.md
+- name: Core Concepts
+  items:
+    - name: Architecture
+      href: core/architecture.md
+    - name: Sessions & Turns
+      href: core/sessions-and-turns.md
+- name: Tools & Extensibility
+  items:
+    - name: NativeAOT Tools
+      href: tools/nativeaot-tools.md
+    - name: Delegate & Custom Tools
+      href: tools/delegate-tools.md
+    - name: Model Context Protocol (MCP)
+      href: tools/mcp.md
+- name: Durable Execution
+  items:
+    - name: Background Workers & SQLite Leases
+      href: execution/durable-runs.md
+- name: Memory & RAG
+  items:
+    - name: Hybrid RAG (SIMD + BM25)
+      href: memory/hybrid-rag.md
+    - name: Episodic Memory
+      href: memory/episodic-memory.md
+    - name: Document Ingestion
+      href: memory/document-ingestion.md
+- name: Safety & Governance
+  items:
+    - name: Tool Approvals
+      href: governance/tool-approval.md
+    - name: Circuit Breakers & Observability
+      href: governance/circuit-breakers.md
+- name: Multi-Agent Systems
+  items:
+    - name: Subagents & Teams
+      href: agents/multi-agent-and-subagents.md
+- name: Testing
+  items:
+    - name: Testing Agents & Turns
+      href: testing/testing-agents.md

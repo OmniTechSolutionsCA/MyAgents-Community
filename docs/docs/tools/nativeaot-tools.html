@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>NativeAOT Compile-Time Tools | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="NativeAOT Compile-Time Tools | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/tools/nativeaot-tools.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="nativeaot-compile-time-tools">NativeAOT Compile-Time Tools</h1>
+
+<p>The <code>MyAgents.Generators</code> package provides a Roslyn incremental source generator that translates C# methods marked with <code>[AgentTool]</code> into zero-reflection, compile-time tool bindings.</p>
+<h2 id="why-compile-time-tools">Why Compile-Time Tools?</h2>
+<p>Traditional agent frameworks rely on runtime reflection and <code>System.Text.Json</code> runtime schema generation to discover method signatures, serialize parameters, and invoke functions.</p>
+<p>In modern cloud, serverless, and edge environments, runtime reflection introduces:</p>
+<ol>
+<li><strong>Trimming and NativeAOT Incompatibility</strong>: Reflection-based serializers risk trimming warnings or runtime crashes when compiled with <code>PublishAot=true</code>.</li>
+<li><strong>Cold Start Latency</strong>: Reflection and JIT overhead add latency to the first tool execution.</li>
+<li><strong>Allocation Overhead</strong>: Dynamic method invocation allocates on every call.</li>
+</ol>
+<p><code>MyAgents.Generators</code> solves this by emitting:</p>
+<ul>
+<li>Fully static <code>ITool</code> classes.</li>
+<li>Compile-time constant strings for <code>ParametersSchemaJson</code>.</li>
+<li>Strongly-typed JSON context bindings.</li>
+</ul>
+<hr>
+<h2 id="authoring-an-agenttool">Authoring an [AgentTool]</h2>
+<h3 id="1-define-request-and-response-models">1. Define Request and Response Models</h3>
+<p>Ensure types are serializable via <code>System.Text.Json</code>:</p>
+<pre><code class="lang-csharp">using System.ComponentModel;
+using System.Text.Json.Serialization;
+using MyAgents.Core.Tools;
+
+public sealed record CustomerInfoRequest(
+    [Description(&quot;The unique customer ID&quot;)] string CustomerId);
+
+public sealed record CustomerInfoResponse(
+    string Name,
+    string Tier,
+    int OpenTickets);
+
+[JsonSerializable(typeof(CustomerInfoRequest))]
+[JsonSerializable(typeof(CustomerInfoResponse))]
+internal sealed partial class CustomerJsonContext : JsonSerializerContext;
+</code></pre>
+<h3 id="2-implement-the-tool-method">2. Implement the Tool Method</h3>
+<p>Annotate a static or instance method with <code>[AgentTool]</code>:</p>
+<pre><code class="lang-csharp">public static class CustomerServiceTools
+{
+    [AgentTool(
+        Description = &quot;Retrieves account tier and open ticket counts for a customer.&quot;,
+        JsonContext = typeof(CustomerJsonContext))]
+    public static CustomerInfoResponse GetCustomerInfo(CustomerInfoRequest request)
+    {
+        return new CustomerInfoResponse(
+            Name: &quot;Acme Corp&quot;,
+            Tier: &quot;Enterprise&quot;,
+            OpenTickets: 2);
+    }
+}
+</code></pre>
+<h3 id="3-register-the-generated-tool">3. Register the Generated Tool</h3>
+<p>The source generator automatically creates an extension method <code>AsGetCustomerInfoTool()</code>:</p>
+<pre><code class="lang-csharp">var definition = new AgentDefinition(&quot;support-agent&quot;, [
+    AgentFeature.Create(assembly =&gt;
+    {
+        // Add the generated compile-time tool
+        assembly.Tools.Add(CustomerServiceToolsAgentToolsExtensions.AsGetCustomerInfoTool());
+    })
+]);
+</code></pre>
+<hr>
+<h2 id="performance--trimming-verification">Performance &amp; Trimming Verification</h2>
+<p>Because the generated code references <code>CustomerJsonContext</code> directly, the .NET trimming analyzer detects that all types are statically known:</p>
+<pre><code class="lang-xml">&lt;PropertyGroup&gt;
+    &lt;PublishAot&gt;true&lt;/PublishAot&gt;
+    &lt;EnableTrimAnalyzer&gt;true&lt;/EnableTrimAnalyzer&gt;
+&lt;/PropertyGroup&gt;
+</code></pre>
+<p>When building with <code>dotnet publish -c Release</code>, the compilation completes with <strong>0 trim warnings and 0 AOT warnings</strong>.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/tools/nativeaot-tools.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

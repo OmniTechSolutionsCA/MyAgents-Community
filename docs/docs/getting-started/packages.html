@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Package Ecosystem | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Package Ecosystem | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/getting-started/packages.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="package-ecosystem">Package Ecosystem</h1>
+
+<p>MyAgents Community is built as a set of modular, decoupled NuGet packages for .NET 10. Install only what your application requires.</p>
+<h2 id="core-packages-matrix">Core Packages Matrix</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Package</th>
+<th style="text-align: left;">Version</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Target Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Core</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">Core abstractions: <code>IAgent</code>, <code>AgentDefinition</code>, <code>IAgentSession</code>, <code>ITool</code>, messages, and prompts.</td>
+<td style="text-align: left;">Included in all applications.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Chat</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">Provider-neutral conversational runtime integrating with <code>Microsoft.Extensions.AI.IChatClient</code>.</td>
+<td style="text-align: left;">Interactive chat applications, CLI bots, web APIs.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Generators</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">Roslyn incremental source generator for <code>[AgentTool]</code> compile-time tool binding.</td>
+<td style="text-align: left;">High-performance and NativeAOT trimmed applications.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Memory</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">SIMD dense vector similarity (<code>TensorPrimitives</code>), BM25 sparse index, Reciprocal Rank Fusion, document readers.</td>
+<td style="text-align: left;">In-memory RAG, semantic search, long-term memory.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">Durable background worker host with lease coordination, idempotency, and retries.</td>
+<td style="text-align: left;">Long-running asynchronous workflows, background task queues.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers.Sqlite</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">SQLite-backed persistent run backend for durable worker execution.</td>
+<td style="text-align: left;">On-premises and single-node durable worker storage.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Mcp</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">Model Context Protocol (MCP) tool adapters for stdio and HTTP/SSE transports.</td>
+<td style="text-align: left;">Connecting to local or remote MCP servers and tools.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Agents</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">High-level orchestrations: subagents, group chat, token cost tracking, and model routing.</td>
+<td style="text-align: left;">Complex multi-agent teams, hierarchical delegation.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>MyAgents.Testing</code></strong></td>
+<td style="text-align: left;"><code>1.0.0</code></td>
+<td style="text-align: left;">In-memory test runtime, deterministic mock agents, and turn assertions.</td>
+<td style="text-align: left;">Unit tests and integration test suites.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="installation-commands">Installation Commands</h2>
+<h3 id="conversational-chat-agent">Conversational Chat Agent</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Chat
+</code></pre>
+<h3 id="high-performance-nativeaot-agent-with-compile-time-tools">High-Performance NativeAOT Agent with Compile-Time Tools</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Chat
+dotnet add package MyAgents.Generators
+</code></pre>
+<h3 id="retrieval-augmented-generation-rag">Retrieval-Augmented Generation (RAG)</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Chat
+dotnet add package MyAgents.Memory
+</code></pre>
+<h3 id="durable-worker-process-background-queue">Durable Worker Process (Background Queue)</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Workers
+dotnet add package MyAgents.Runtime.Workers.Sqlite
+</code></pre>
+<h3 id="external-mcp-tools-integration">External MCP Tools Integration</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Chat
+dotnet add package MyAgents.Mcp
+</code></pre>
+<h3 id="multi-agent-workflows--cost-routing">Multi-Agent Workflows &amp; Cost Routing</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Runtime.Chat
+dotnet add package MyAgents.Agents
+</code></pre>
+<h3 id="unit-testing-suite">Unit Testing Suite</h3>
+<pre><code class="lang-bash">dotnet add package MyAgents.Testing
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/getting-started/packages.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
