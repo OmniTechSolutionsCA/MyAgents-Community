@@ -19,7 +19,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.14" />
-    <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="10.11.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="ModelContextProtocol" Version="1.0.0" />
     <PackageVersion Include="NUnit" Version="4.3.2" />
