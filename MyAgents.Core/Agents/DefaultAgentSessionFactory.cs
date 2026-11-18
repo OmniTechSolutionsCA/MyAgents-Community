@@ -38,7 +38,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
         // Build the assembly once — features contribute tools, pipeline, system prompts, and memory.
         // ContributeAsync is awaited so features that perform async I/O (e.g. MCP tool discovery)
         // never need to block a thread pool thread via .GetAwaiter().GetResult().
-        var assembly = new AgentAssembly();
+        var assembly = new AgentAssembly { SessionId = sessionId };
         foreach (var feature in definition.Features)
             await feature.ContributeAsync(assembly, cancellationToken).ConfigureAwait(false);
 

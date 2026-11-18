@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="MyAgents.Mcp" />
+    <InternalsVisibleTo Include="MyAgents.Agents" />
     <InternalsVisibleTo Include="MyAgents.Tests" />
   </ItemGroup>
   <!-- MIT-licensed package (open-core). See LICENSE in this directory. -->

@@ -6,6 +6,7 @@ TYPE class MyAgents.Core.AgentAssembly
   PROP MyAgents.Core.PipelineBuilder Pipeline { get; }
   PROP MyAgents.Core.Prompts.PromptRegistry PromptRegistry { get; set; }
   PROP MyAgents.Core.PromptBuilder Prompts { get; }
+  PROP string SessionId { get; }
   PROP System.Collections.Generic.IReadOnlyDictionary<System.Type, object> SessionServices { get; }
   PROP System.Collections.Generic.List<MyAgents.Core.Tools.IToolCallObserver> ToolObservers { get; }
   PROP MyAgents.Core.ToolCatalogBuilder Tools { get; }
@@ -483,6 +484,7 @@ TYPE interface MyAgents.Core.IFallbackPolicy
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.AgentTurnResult> HandleAsync(System.Exception ex, MyAgents.Core.AgentTurnContext context, System.Threading.CancellationToken cancellationToken)
 TYPE interface MyAgents.Core.IGuardrailPolicy
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.INonRetryableException
 TYPE interface MyAgents.Core.IRunTraceCatalog
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<string>> ListRunIdsAsync(System.Threading.CancellationToken cancellationToken)
 TYPE interface MyAgents.Core.IRunTraceSink
@@ -737,6 +739,65 @@ TYPE class MyAgents.Core.RunTraceRecord
   METHOD int GetHashCode()
   METHOD string ToString()
   METHOD void Deconstruct(string& RunId, string& SessionId, MyAgents.Core.RunEventKind& EventKind, System.DateTimeOffset& RecordedAt, string& WorkflowId, string& NodeName, string& ToolName, string& CorrelationId, string& PayloadJson, string& RelatedId)
+TYPE enum MyAgents.Core.Security.CanaryDisposition
+  FIELD MyAgents.Core.Security.CanaryDisposition Abort
+  FIELD MyAgents.Core.Security.CanaryDisposition Allow
+TYPE class MyAgents.Core.Security.CanaryViolationContext
+  CTOR CanaryViolationContext(MyAgents.Core.Security.EgressChannel Channel, MyAgents.Core.Security.EgressScanResult Result, string SessionId)
+  PROP MyAgents.Core.Security.EgressChannel Channel { get; set; }
+  PROP MyAgents.Core.Security.EgressScanResult Result { get; set; }
+  PROP string SessionId { get; set; }
+  METHOD MyAgents.Core.Security.CanaryViolationContext <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Security.CanaryViolationContext other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(MyAgents.Core.Security.EgressChannel& Channel, MyAgents.Core.Security.EgressScanResult& Result, string& SessionId)
+TYPE class MyAgents.Core.Security.CanaryViolationException
+  CTOR CanaryViolationException()
+  CTOR CanaryViolationException(string reason)
+  CTOR CanaryViolationException(string reason, System.Exception innerException)
+  PROP string Reason { get; }
+TYPE enum MyAgents.Core.Security.EgressChannel
+  FIELD MyAgents.Core.Security.EgressChannel ToolArguments
+  FIELD MyAgents.Core.Security.EgressChannel TurnOutput
+TYPE class MyAgents.Core.Security.EgressFinding
+  CTOR EgressFinding(string DetectorName, MyAgents.Core.Security.EgressSeverity Severity, string Reason)
+  PROP string DetectorName { get; set; }
+  PROP string Reason { get; set; }
+  PROP MyAgents.Core.Security.EgressSeverity Severity { get; set; }
+  METHOD MyAgents.Core.Security.EgressFinding <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Security.EgressFinding other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& DetectorName, MyAgents.Core.Security.EgressSeverity& Severity, string& Reason)
+TYPE class MyAgents.Core.Security.EgressScanResult
+  CTOR EgressScanResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressFinding> Findings)
+  PROP MyAgents.Core.Security.EgressScanResult Clean { get; }
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressFinding> Findings { get; set; }
+  PROP bool IsFlagged { get; }
+  PROP MyAgents.Core.Security.EgressSeverity Severity { get; }
+  METHOD MyAgents.Core.Security.EgressScanResult <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Security.EgressScanResult other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressFinding>& Findings)
+TYPE enum MyAgents.Core.Security.EgressSeverity
+  FIELD MyAgents.Core.Security.EgressSeverity Confirmed
+  FIELD MyAgents.Core.Security.EgressSeverity Informational
+  FIELD MyAgents.Core.Security.EgressSeverity Suspicious
+TYPE interface MyAgents.Core.Security.ICanaryVault
+  PROP System.Collections.Generic.IReadOnlyList<string> Canaries { get; }
+  PROP bool IsQuarantined { get; }
+  PROP string QuarantineReason { get; }
+  PROP string SessionId { get; }
+  METHOD void Quarantine(string reason)
+TYPE interface MyAgents.Core.Security.ICanaryViolationHandler
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.CanaryDisposition> HandleAsync(MyAgents.Core.Security.CanaryViolationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Security.IEgressScanner
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.EgressScanResult> ScanAsync(MyAgents.Core.Security.EgressChannel channel, string payload, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Core.SlidingWindowTrimmer
   CTOR SlidingWindowTrimmer(int maxMessages)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)

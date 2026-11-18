@@ -21,6 +21,12 @@ public sealed class ResilienceOptions
 /// Middleware that provides retry resilience with exponential backoff and jitter.
 /// This should be placed at the outermost edge of the pipeline.
 /// </summary>
+/// <remarks>
+/// An exception implementing <see cref="INonRetryableException"/> is never retried, even when the
+/// configured <see cref="ITransientErrorClassifier"/> reports it as transient. A classifier infers
+/// transience from the exception's type, which an application can widen indiscriminately; a marker
+/// on the exception itself is the throwing site's own statement that the failure is terminal.
+/// </remarks>
 public sealed partial class ResilienceMiddleware : IAgentMiddleware
 {
     private static readonly Meter s_meter = new("MyAgents.Core.Resilience", "1.0.0");
@@ -66,7 +72,7 @@ public sealed partial class ResilienceMiddleware : IAgentMiddleware
             {
                 return await next(context, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception ex) when (attempt < _maxRetries && _classifier.IsTransient(ex))
+            catch (Exception ex) when (attempt < _maxRetries && _classifier.IsTransient(ex) && ex is not INonRetryableException)
             {
                 var jitterMs = Random.Shared.Next(0, 100);
                 var delay = TimeSpan.FromMilliseconds(_baseDelay.TotalMilliseconds * Math.Pow(2, attempt) + jitterMs);
@@ -74,7 +80,7 @@ public sealed partial class ResilienceMiddleware : IAgentMiddleware
                 s_retryCount.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
                 await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception ex) when (attempt >= _maxRetries && _classifier.IsTransient(ex))
+            catch (Exception ex) when (attempt >= _maxRetries && _classifier.IsTransient(ex) && ex is not INonRetryableException)
             {
                 LogRetryExhausted(_logger, ex, _maxRetries, context.SessionId);
                 s_retryExhausted.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));
@@ -125,7 +131,7 @@ public sealed partial class ResilienceMiddleware : IAgentMiddleware
                     {
                         throw; // never swallow cancellation
                     }
-                    catch (Exception ex) when (!yieldedAny && attempt < _maxRetries && _classifier.IsTransient(ex))
+                    catch (Exception ex) when (!yieldedAny && attempt < _maxRetries && _classifier.IsTransient(ex) && ex is not INonRetryableException)
                     {
                         LogStreamingTransientError(_logger, ex, attempt + 1, _maxRetries, context.SessionId);
                         s_retryCount.Add(1, new KeyValuePair<string, object?>("agent.session_id", context.SessionId));

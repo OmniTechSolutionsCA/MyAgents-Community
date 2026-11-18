@@ -10,6 +10,13 @@ namespace MyAgents.Core;
 /// </summary>
 public sealed class AgentAssembly
 {
+    /// <summary>
+    /// The id of the session this assembly is being built for, assigned before features contribute.
+    /// <see langword="null"/> only for an assembly constructed outside a session factory (for example
+    /// in a test or a tool that inspects features directly).
+    /// </summary>
+    public string? SessionId { get; internal set; }
+
     private readonly List<object> _ownedResources = new();
     private readonly Dictionary<Type, object> _sessionServices = new();
 
