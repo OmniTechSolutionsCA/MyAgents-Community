@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace MyAgents.Core | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace MyAgents.Core | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core">
+
+  <h1 id="MyAgents_Core" data-uid="MyAgents.Core" class="text-break">Namespace MyAgents.Core</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentAssembly.html">AgentAssembly</a></dt>
+      <dd><p>Assembly context for building an agent. Features contribute to this assembly during the session creation process.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentCapabilities.html">AgentCapabilities</a></dt>
+      <dd><p>Built-in well-known capability definitions.
+Use these constants when declaring or querying agent capabilities so that
+identifiers are consistent across the codebase.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentContent.html">AgentContent</a></dt>
+      <dd><p>Base type for all content parts that can appear in a multi-modal <a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>.
+Core defines the discriminated union; adapter layers map each case to their native content type.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentDefinition.html">AgentDefinition</a></dt>
+      <dd><p>Definition of an agent, composed of features that contribute tools, middleware, and behavior.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a></dt>
+      <dd><p>Represents a message exchanged between agents and the runtime.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentModelCapability.html">AgentModelCapability</a></dt>
+      <dd><p>Declares the preferred model ID for an agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentOutputAccumulator.html">AgentOutputAccumulator</a></dt>
+      <dd><p>Folds the chunks of a streamed turn into the single result a blocking turn would have produced.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentPipeline.html">AgentPipeline</a></dt>
+      <dd><p>Immutable middleware pipeline. Executes middlewares in order, ending with the inner agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+      <dd><p>Specifies the expected response format for an agent turn or session.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.JsonObjectFormat.html">AgentResponseFormat.JsonObjectFormat</a></dt>
+      <dd><p>Generic JSON object response without an enforced schema.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.JsonSchemaFormat.html">AgentResponseFormat.JsonSchemaFormat</a></dt>
+      <dd><p>Schema-constrained JSON response.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.TextFormat.html">AgentResponseFormat.TextFormat</a></dt>
+      <dd><p>Unconstrained free-form text response.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentSessionStructuredExtensions.html">AgentSessionStructuredExtensions</a></dt>
+      <dd><p>Extensions on <a class="xref" href="MyAgents.Core.IAgentSession.html">IAgentSession</a> for strongly-typed structured output invocations.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentStructuredTurnResult-1.html">AgentStructuredTurnResult&lt;T&gt;</a></dt>
+      <dd><p>Strongly-typed structured result returned from an agent turn.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentTurnContext.html">AgentTurnContext</a></dt>
+      <dd><p>Context passed to an agent during a turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a></dt>
+      <dd><p>Result of an agent turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentTurnServices.html">AgentTurnServices</a></dt>
+      <dd><p>Services available to an agent during a turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AgentTurnTelemetry.html">AgentTurnTelemetry</a></dt>
+      <dd><p>Telemetry data captured during an agent turn.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AllowAllToolApprovalPolicy.html">AllowAllToolApprovalPolicy</a></dt>
+      <dd><p>Default approval policy that allows tool execution immediately.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AsyncSignalApprovalGate.html">AsyncSignalApprovalGate</a></dt>
+      <dd><p>Coordinates asynchronous out-of-band approvals (e.g. from webhooks, chat channels, or REST endpoints).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.AudioAgentContent.html">AudioAgentContent</a></dt>
+      <dd><p>Audio content part with optional metadata.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CallbackToolApprovalGate.html">CallbackToolApprovalGate</a></dt>
+      <dd><p>Delegates tool approval gate evaluation to a user-provided callback delegate.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CharacterTokenCounter.html">CharacterTokenCounter</a></dt>
+      <dd><p>Simple token counter that approximates 1 token per ~4 characters. This is
+the well‑known heuristic used by many BPE tokenizers when an exact
+tokenizer isn’t available.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CircuitBreakerMiddleware.html">CircuitBreakerMiddleware</a></dt>
+      <dd><p>Middleware that implements the circuit-breaker pattern to prevent cascading
+failures when a downstream dependency is unhealthy.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CircuitBreakerOpenException.html">CircuitBreakerOpenException</a></dt>
+      <dd><p>Thrown when a call is attempted against a circuit that is in the
+<a class="xref" href="MyAgents.Core.CircuitState.html#MyAgents_Core_CircuitState_Open">Open</a> state.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CircuitBreakerOptions.html">CircuitBreakerOptions</a></dt>
+      <dd><p>Configuration options for <a class="xref" href="MyAgents.Core.CircuitBreakerMiddleware.html">CircuitBreakerMiddleware</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ConsolePromptApprovalGate.html">ConsolePromptApprovalGate</a></dt>
+      <dd><p>Prompts the operator via standard console input/output for interactive tool approval decisions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ContextWindowMiddleware.html">ContextWindowMiddleware</a></dt>
+      <dd><p>Middleware that trims the incoming message history before forwarding the turn to
+the inner pipeline. This prevents context-window overflow on long-running
+conversations without modifying call-site code.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DataAgentContent.html">DataAgentContent</a></dt>
+      <dd><p>Arbitrary binary data content part (audio, video, PDF, etc.).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DeadLetter.html">DeadLetter</a></dt>
+      <dd><p>A dead-letter record capturing the context and exception of a failed agent turn.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DeadLetterFallbackPolicy.html">DeadLetterFallbackPolicy</a></dt>
+      <dd><p>Enqueues a <a class="xref" href="MyAgents.Core.DeadLetter.html">DeadLetter</a> to the provided queue and returns a fixed fallback message.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DefaultAgentSessionFactory.html">DefaultAgentSessionFactory</a></dt>
+      <dd><p>Default implementation of IAgentSessionFactory.
+Builds the assembly once at session creation time and passes it to the runtime,
+ensuring system prompt and tools flow correctly without duplicate assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DefaultTransientErrorClassifier.html">DefaultTransientErrorClassifier</a></dt>
+      <dd><p>Default error classifier that considers common transient exceptions (HttpRequestException, TimeoutException, IOException) as retryable.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.DocumentAgentContent.html">DocumentAgentContent</a></dt>
+      <dd><p>Document content part for files such as PDF and Office documents.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.FallbackMiddleware.html">FallbackMiddleware</a></dt>
+      <dd><p>Middleware that catches exceptions escaping the inner pipeline and delegates
+recovery to an <a class="xref" href="MyAgents.Core.IFallbackPolicy.html">IFallbackPolicy</a>.
+Place this at (or near) the outermost edge of the pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.FunctionCallingMiddleware.html">FunctionCallingMiddleware</a></dt>
+      <dd><p>Runtime-agnostic tool execution middleware.</p>
+<p>When the inner agent returns an assistant message containing a supported
+function-call envelope, the middleware resolves the requested tool from the
+session <a class="xref" href="MyAgents.Core.ToolCatalog.html">ToolCatalog</a>, invokes it, appends a tool message to the
+conversation, and reinvokes the inner pipeline until the agent returns a
+normal assistant response.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.GuardrailViolation.html">GuardrailViolation</a></dt>
+      <dd><p>Describes a guardrail policy violation returned by <a class="xref" href="MyAgents.Core.IGuardrailPolicy.html#MyAgents_Core_IGuardrailPolicy_EvaluateAsync_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_">EvaluateAsync(IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ImageAgentContent.html">ImageAgentContent</a></dt>
+      <dd><p>Binary or base-64 image content part.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.InMemoryDeadLetterQueue.html">InMemoryDeadLetterQueue</a></dt>
+      <dd><p>In-memory <a class="xref" href="MyAgents.Core.IDeadLetterQueue.html">IDeadLetterQueue</a> backed by a <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentqueue-1">ConcurrentQueue&lt;T&gt;</a>.
+Intended for testing and local development.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.InMemoryRunTraceSink.html">InMemoryRunTraceSink</a></dt>
+      <dd><p>In-memory implementation of <a class="xref" href="MyAgents.Core.IRunTraceSink.html">IRunTraceSink</a> for tests, samples, and local-only scenarios.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.InMemorySessionApprovalMemory.html">InMemorySessionApprovalMemory</a></dt>
+      <dd><p>Thread-safe in-memory implementation of <a class="xref" href="MyAgents.Core.ISessionApprovalMemory.html">ISessionApprovalMemory</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.InMemoryToolApprovalAuditSink.html">InMemoryToolApprovalAuditSink</a></dt>
+      <dd><p>Thread-safe in-memory sink for tool approval audit logging.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.InMemoryToolApprovalStore.html">InMemoryToolApprovalStore</a></dt>
+      <dd><p>In-memory approval storage for tests, samples, and local-only scenarios.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.MaxTurnsTermination.html">MaxTurnsTermination</a></dt>
+      <dd><p>Terminates the loop after a fixed number of turns.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.MyAgentsServiceExtensions.html">MyAgentsServiceExtensions</a></dt>
+      <dd><p>Extension methods for registering MyAgents framework services into an
+<a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection">IServiceCollection</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.MyAgentsTelemetry.html">MyAgentsTelemetry</a></dt>
+      <dd><p>Shared OpenTelemetry primitives for the MyAgents framework.
+Core middleware and higher-level features use these names so spans and
+metrics remain consistent across runtimes and packages.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.PendingToolApproval.html">PendingToolApproval</a></dt>
+      <dd><p>A persisted approval record for a tool invocation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.PipelineBuilder.html">PipelineBuilder</a></dt>
+      <dd><p>Builder for registering middleware during agent assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.PromptBuilder.html">PromptBuilder</a></dt>
+      <dd><p>Builder for registering system prompts during agent assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.RequireApprovalPolicy.html">RequireApprovalPolicy</a></dt>
+      <dd><p>Approval policy that always requires explicit approval before tool execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ResilienceMiddleware.html">ResilienceMiddleware</a></dt>
+      <dd><p>Middleware that provides retry resilience with exponential backoff and jitter.
+This should be placed at the outermost edge of the pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ResilienceOptions.html">ResilienceOptions</a></dt>
+      <dd><p>Configuration options for <a class="xref" href="MyAgents.Core.ResilienceMiddleware.html">ResilienceMiddleware</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.RuleBasedToolApprovalPolicy.html">RuleBasedToolApprovalPolicy</a></dt>
+      <dd><p>A rule-based tool approval policy that evaluates tool names, argument patterns, and custom predicates.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.RunTraceRecord.html">RunTraceRecord</a></dt>
+      <dd><p>A normalized run-trace event that can be stored locally, exported to CI artifacts,
+or projected into a local studio view.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.SlidingWindowTrimmer.html">SlidingWindowTrimmer</a></dt>
+      <dd><p>Trims the message history by removing the oldest <em>non-system</em> messages
+until the list contains at most <code>maxMessages</code> entries.
+System messages (role == &quot;system&quot;) are always retained at their original position.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.StaticFallbackPolicy.html">StaticFallbackPolicy</a></dt>
+      <dd><p>Returns a fixed assistant message on any exception. Never rethrows.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.TextAgentContent.html">TextAgentContent</a></dt>
+      <dd><p>Plain text content part.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.TextMentionTermination.html">TextMentionTermination</a></dt>
+      <dd><p>Terminates the loop when any agent message contains a specific phrase.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.TokenBudgetTermination.html">TokenBudgetTermination</a></dt>
+      <dd><p>Terminates the loop when the cumulative token usage exceeds a budget.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.TokenBudgetTrimmer.html">TokenBudgetTrimmer</a></dt>
+      <dd><p>Trimmer that ensures the total token count for a conversation stays within
+a specified budget. System messages are never removed and always count
+toward the budget; non‑system messages are dropped oldest‑first until the
+remaining history fits.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalAuditRecord.html">ToolApprovalAuditRecord</a></dt>
+      <dd><p>Structured audit record capturing a tool approval evaluation and its outcome.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalDecision.html">ToolApprovalDecision</a></dt>
+      <dd><p>Approval decision for a tool invocation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalEvaluator.html">ToolApprovalEvaluator</a></dt>
+      <dd><p>Pipeline orchestrator that evaluates tool approvals against session memory, persistent stores,
+policies, and interactive gates, producing audit and trace telemetry.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalRequest.html">ToolApprovalRequest</a></dt>
+      <dd><p>A request to run a tool invocation that may require human or policy approval.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalRequiredException.html">ToolApprovalRequiredException</a></dt>
+      <dd><p>Thrown when a tool invocation requires approval before it may run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolCatalog.html">ToolCatalog</a></dt>
+      <dd><p>Immutable lookup over the tools contributed during agent assembly.
+Exposed as a session-scoped service so middleware and custom runtimes can
+resolve tools by name without depending on a specific adapter.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolCatalogBuilder.html">ToolCatalogBuilder</a></dt>
+      <dd><p>Builder for registering tools during agent assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.TurnCapabilities.html">TurnCapabilities</a></dt>
+      <dd><p>Type-safe, mutable bag for storing arbitrary objects keyed by their type.
+Used by <a class="xref" href="MyAgents.Core.AgentTurnContext.html#MyAgents_Core_AgentTurnContext_Capabilities">Capabilities</a> to allow middleware and
+features to communicate per-turn information without polluting the core
+context object with lots of strongly typed properties.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.UriImageAgentContent.html">UriImageAgentContent</a></dt>
+      <dd><p>URI-based image content part.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.VideoAgentContent.html">VideoAgentContent</a></dt>
+      <dd><p>Video content part with optional metadata.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgent.html">IAgent</a></dt>
+      <dd><p>The core agent contract. All agents implement this interface.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentCapability.html">IAgentCapability</a></dt>
+      <dd><p>Declares a named capability that an agent supports.
+Capabilities are informational — they allow orchestrators, routers, and tooling to
+discover what an agent can do without inspecting its feature list directly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentFeature.html">IAgentFeature</a></dt>
+      <dd><p>A feature that contributes capabilities to an agent.
+Features are composed, not inherited.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentMiddleware.html">IAgentMiddleware</a></dt>
+      <dd><p>Middleware that intercepts agent turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentRuntime.html">IAgentRuntime</a></dt>
+      <dd><p>Runtime responsible for creating agents from definitions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentSession.html">IAgentSession</a></dt>
+      <dd><p>Represents an active agent session with conversation state.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IAgentSessionFactory.html">IAgentSessionFactory</a></dt>
+      <dd><p>Factory for creating agent sessions from definitions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IContextWindowTrimmer.html">IContextWindowTrimmer</a></dt>
+      <dd><p>Decides how an <a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a> sequence should be trimmed when the
+message history exceeds the configured window.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IDeadLetterQueue.html">IDeadLetterQueue</a></dt>
+      <dd><p>Abstraction for a dead-letter sink that stores failed agent turns for later
+inspection, replay, or alerting.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IFallbackPolicy.html">IFallbackPolicy</a></dt>
+      <dd><p>Abstraction for handling exceptions that escape the agent pipeline.
+Implementations decide whether to return a fallback result, enqueue a dead-letter,
+rethrow, or take any other recovery action.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IGuardrailPolicy.html">IGuardrailPolicy</a></dt>
+      <dd><p>A single, composable content-safety rule applied to the agent's output after
+each turn. Multiple policies are evaluated in registration order.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IRunTraceCatalog.html">IRunTraceCatalog</a></dt>
+      <dd><p>Optional query surface for enumerating known run IDs from a trace sink.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IRunTraceSink.html">IRunTraceSink</a></dt>
+      <dd><p>Persists normalized execution events for later inspection.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ISessionApprovalMemory.html">ISessionApprovalMemory</a></dt>
+      <dd><p>Maintains active session-scoped tool approval grants (e.g. &quot;Always allow this tool for this session&quot;).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ITerminationCondition.html">ITerminationCondition</a></dt>
+      <dd><p>Determines whether an agent loop or workflow handoff chain should terminate.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ITokenCounter.html">ITokenCounter</a></dt>
+      <dd><p>Counts tokens in a text string. Implementations may target a specific
+tokenizer or use a heuristic approximation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IToolApprovalAuditSink.html">IToolApprovalAuditSink</a></dt>
+      <dd><p>Sink for recording and auditing tool approval decisions across the platform.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IToolApprovalGate.html">IToolApprovalGate</a></dt>
+      <dd><p>Interactively or asynchronously resolves pending tool approvals (e.g., human-in-the-loop CLI prompts, webhooks, or external signals).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IToolApprovalInbox.html">IToolApprovalInbox</a></dt>
+      <dd><p>Optional query surface for enumerating approval records across sessions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IToolApprovalPolicy.html">IToolApprovalPolicy</a></dt>
+      <dd><p>Evaluates whether a tool invocation may proceed immediately or needs approval.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.IToolApprovalStore.html">IToolApprovalStore</a></dt>
+      <dd><p>Stores pending and resolved tool approvals for workflows, sessions, and local studio inspection.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ITransientErrorClassifier.html">ITransientErrorClassifier</a></dt>
+      <dd><p>Classifies exceptions as transient (retryable) or terminal.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ApprovalScope.html">ApprovalScope</a></dt>
+      <dd><p>Defines the lifetime and granularity of an approved tool decision.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.CircuitState.html">CircuitState</a></dt>
+      <dd><p>Represents the current state of a circuit breaker.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.RunEventKind.html">RunEventKind</a></dt>
+      <dd><p>Stable execution events emitted by runtimes, middleware, workflows, and tools.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.ToolApprovalStatus.html">ToolApprovalStatus</a></dt>
+      <dd><p>Approval outcome for a tool invocation.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

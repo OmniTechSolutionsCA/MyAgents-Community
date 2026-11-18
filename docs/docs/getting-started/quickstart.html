@@ -91,15 +91,16 @@
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
 <li><a href="https://dotnet.microsoft.com/download">.NET 10 SDK</a></li>
-<li>An API key for an LLM provider (e.g., OpenAI, Azure OpenAI, Ollama, or Anthropic) or an in-memory mock client.</li>
+<li>An API key for an LLM provider (e.g., OpenAI, Azure OpenAI, Ollama, or Anthropic) or an in-memory test runtime.</li>
 </ul>
 <h2 id="1-create-a-new-console-application">1. Create a New Console Application</h2>
 <pre><code class="lang-bash">dotnet new console -n MyFirstAgent
 cd MyFirstAgent
 </code></pre>
 <h2 id="2-add-required-nuget-packages">2. Add Required NuGet Packages</h2>
-<p>Install the core abstractions, chat runtime, and your preferred AI client:</p>
+<p>Install the core contracts, reusable agent features, chat runtime, and your preferred AI client:</p>
 <pre><code class="lang-bash">dotnet add package MyAgents.Core
+dotnet add package MyAgents.Agents
 dotnet add package MyAgents.Runtime.Chat
 dotnet add package Microsoft.Extensions.AI.OpenAI
 </code></pre>
@@ -112,38 +113,49 @@ dotnet add package Microsoft.Extensions.AI.OpenAI
 <pre><code class="lang-csharp">using System.ComponentModel;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Agents;
 using MyAgents.Core;
+using MyAgents.Core.Prompts;
 using MyAgents.Core.Tools;
 using MyAgents.Runtime.Chat;
 using OpenAI;
 
 // 1. Configure the AI Chat Client
 var apiKey = Environment.GetEnvironmentVariable(&quot;OPENAI_API_KEY&quot;) ?? &quot;your-api-key&quot;;
-var chatClient = new OpenAIClient(apiKey).GetChatClient(&quot;gpt-4o-mini&quot;);
+IChatClient chatClient = new OpenAIClient(apiKey)
+    .GetChatClient(&quot;gpt-4o-mini&quot;)
+    .AsIChatClient();
 
 // 2. Register MyAgents runtime in Dependency Injection
 var services = new ServiceCollection();
 services.AddSingleton&lt;IChatClient&gt;(chatClient);
-services.AddMyAgentsChatRuntime();
+services.AddMyAgentsChatRuntime(options =&gt;
+{
+    options.DefaultModelId = &quot;gpt-4o-mini&quot;;
+    options.MaxToolRoundTrips = 5;
+});
 
 await using var serviceProvider = services.BuildServiceProvider();
 var sessionFactory = serviceProvider.GetRequiredService&lt;IAgentSessionFactory&gt;();
 
-// 3. Define the Agent and its capabilities
-var weatherTool = DelegateTool.Create(
-    name: &quot;get_weather&quot;,
-    description: &quot;Gets the current temperature and conditions for a given city.&quot;,
-    handler: ([Description(&quot;The city name&quot;)] string city) =&gt;
-    {
-        return $&quot;Weather in {city}: 21°C (70°F), Clear Skies&quot;;
-    });
+// 3. Define the Agent and its capabilities using composable features
+var promptRegistry = new PromptRegistry()
+    .Register(new PromptTemplateDefinition(
+        Name: &quot;system.weather&quot;,
+        Version: &quot;1.0&quot;,
+        Template: &quot;You are a concise, helpful assistant. Always use tools to answer weather queries.&quot;,
+        Description: &quot;Weather assistant system prompt&quot;));
+
+var toolsFeature = new ToolsFeature()
+    .AddFunction(
+        ([Description(&quot;The city name&quot;)] string city) =&gt;
+            $&quot;Weather in {city}: 21°C (70°F), Clear Skies&quot;,
+        name: &quot;get_weather&quot;,
+        description: &quot;Gets the current temperature and conditions for a given city.&quot;);
 
 var definition = new AgentDefinition(&quot;weather-assistant&quot;, [
-    AgentFeature.Create(assembly =&gt;
-    {
-        assembly.Prompts.AddSystem(&quot;You are a concise, helpful assistant. Always use tools to answer weather queries.&quot;);
-        assembly.Tools.Add(weatherTool);
-    })
+    new PromptRegistryFeature(promptRegistry, systemTemplateName: &quot;system.weather&quot;),
+    toolsFeature
 ]);
 
 // 4. Create an isolated conversation session
@@ -155,11 +167,13 @@ var result = await session.InvokeAsync([
     AgentMessage.FromText(&quot;user&quot;, &quot;What's the weather in Vancouver?&quot;)
 ]);
 
-// 6. Display the assistant's response
+// 6. Display the assistant's response and turn telemetry
 foreach (var message in result.Output)
 {
     Console.WriteLine($&quot;Assistant: {message.Content}&quot;);
 }
+
+Console.WriteLine($&quot;Tool calls executed: {result.Telemetry.ToolCalls} (Duration: {result.Telemetry.TurnDuration.TotalMilliseconds:F0}ms)&quot;);
 </code></pre>
 <h2 id="4-run-the-application">4. Run the Application</h2>
 <pre><code class="lang-bash">dotnet run
@@ -167,13 +181,32 @@ foreach (var message in result.Output)
 <h3 id="expected-output">Expected Output</h3>
 <pre><code class="lang-text">User: What's the weather in Vancouver?
 Assistant: The current weather in Vancouver is 21°C (70°F) with clear skies.
+Tool calls executed: 1 (Duration: 420ms)
+</code></pre>
+<hr>
+<h2 id="authoring-a-custom-iagentfeature">Authoring a Custom <code>IAgentFeature</code></h2>
+<p>In addition to built-in features like <code>ToolsFeature</code> and <code>PromptRegistryFeature</code>, you can group related prompts, tools, capabilities, and middleware into a dedicated <code>IAgentFeature</code>:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Core.Tools;
+
+public sealed class UtcClockFeature : IAgentFeature
+{
+    public void Contribute(AgentAssembly assembly)
+    {
+        assembly.Prompts.AddSystem(&quot;Use the get_current_utc_time tool when asked for the current UTC time.&quot;);
+        assembly.Tools.Add(DelegateTool.Create(
+            () =&gt; DateTimeOffset.UtcNow.ToString(&quot;O&quot;),
+            name: &quot;get_current_utc_time&quot;,
+            description: &quot;Returns the current UTC date and time in ISO-8601 format.&quot;));
+    }
+}
 </code></pre>
 <hr>
 <h2 id="next-steps">Next Steps</h2>
 <ul>
 <li>Explore <a href="packages.html">Package Ecosystem</a> to discover additional modules like RAG, background workers, and source generators.</li>
 <li>Learn about <a href="../tools/nativeaot-tools.html">NativeAOT Tools</a> for compile-time reflection-free performance.</li>
-<li>Learn about <a href="../execution/durable-runs.html">Durable Runs</a> for crash-resilient background processing.</li>
+<li>Learn about <a href="../workflows/agent-graphs.html">Agent State Graphs</a> and <a href="../execution/durable-runs.html">Durable Runs</a> for crash-resilient background processing.</li>
 </ul>
 
 </article>

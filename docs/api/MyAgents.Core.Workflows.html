@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace MyAgents.Core.Workflows | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace MyAgents.Core.Workflows | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core.Workflows">
+
+  <h1 id="MyAgents_Core_Workflows" data-uid="MyAgents.Core.Workflows" class="text-break">Namespace MyAgents.Core.Workflows</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AdaptationContext.html">AdaptationContext</a></dt>
+      <dd><p>Adaptation evaluation context owned by the caller.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AdaptationHint.html">AdaptationHint</a></dt>
+      <dd><p>Bounded adaptation artifact returned by an adaptation policy.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AdaptationResult.html">AdaptationResult</a></dt>
+      <dd><p>Result returned by an adaptation policy.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AdaptationSteps.html">AdaptationSteps</a></dt>
+      <dd><p>Explicit helpers for recording adaptation inputs and evaluating hints.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html">AgentGraph&lt;TState&gt;</a></dt>
+      <dd><p>A directed graph that routes control flow between named agent nodes based on
+state transitions. Inspired by LangGraph's compile/run model but scoped to
+.NET idioms and the MyAgents <a class="xref" href="MyAgents.Core.IAgentSession.html">IAgentSession</a> contract.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AgentLoop.html">AgentLoop</a></dt>
+      <dd><p>A standalone ReAct-style agent loop that drives a single agent session until a
+termination condition is met or <code class="paramref">maxTurns</code> is exhausted.</p>
+<p>This is the building block for single-agent reasoning loops that don't require
+the full <a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html">WorkflowHost</a> / <a class="xref" href="MyAgents.Core.Workflows.IWorkflow-1.html">IWorkflow&lt;TState&gt;</a> machinery.
+For multi-agent orchestration use <a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html">WorkflowHost</a> instead.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AgentLoopResult.html">AgentLoopResult</a></dt>
+      <dd><p>The full output of a completed <a class="xref" href="MyAgents.Core.Workflows.AgentLoop.html#MyAgents_Core_Workflows_AgentLoop_RunAsync_MyAgents_Core_IAgentSession_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__MyAgents_Core_ITerminationCondition_System_Int32_System_Action_MyAgents_Core_AgentTurnResult_System_Int32__System_Threading_CancellationToken_">RunAsync(IAgentSession, IReadOnlyList&lt;AgentMessage&gt;, ITerminationCondition, int, Action&lt;AgentTurnResult, int&gt;?, CancellationToken)</a> call.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AgentLoopResult-1.html">AgentLoopResult&lt;TState&gt;</a></dt>
+      <dd><p>The full output of a completed <a class="xref" href="MyAgents.Core.Workflows.AgentLoop.html#MyAgents_Core_Workflows_AgentLoop_RunAsync__1_MyAgents_Core_IAgentSession___0_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Func___0_MyAgents_Core_AgentTurnResult___0__MyAgents_Core_ITerminationCondition_System_Int32_System_Action___0_MyAgents_Core_AgentTurnResult_System_Int32__System_Threading_CancellationToken_">RunAsync&lt;TState&gt;(IAgentSession, TState, IReadOnlyList&lt;AgentMessage&gt;, Func&lt;TState, AgentTurnResult, TState&gt;, ITerminationCondition, int, Action&lt;TState, AgentTurnResult, int&gt;?, CancellationToken)</a> call.
+Extends <a class="xref" href="MyAgents.Core.Workflows.AgentLoopResult.html">AgentLoopResult</a> with the final value of <code class="typeparamref">TState</code>
+after all reducer applications.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.CompositeAdaptationPolicy.html">CompositeAdaptationPolicy</a></dt>
+      <dd><p>Aggregates multiple adaptation policies into a single bounded result set.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.CompositeGoalPrioritizationPolicy.html">CompositeGoalPrioritizationPolicy</a></dt>
+      <dd><p>Aggregates multiple prioritization policies into a single weighted score.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.CompositeModelRoutingPolicy.html">CompositeModelRoutingPolicy</a></dt>
+      <dd><p>Aggregates multiple routing policies into a weighted score.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ConsensusCandidate.html">ConsensusCandidate</a></dt>
+      <dd><p>Candidate produced during deterministic consensus.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ConsensusResult.html">ConsensusResult</a></dt>
+      <dd><p>Result of a deterministic majority vote.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ConsensusSteps.html">ConsensusSteps</a></dt>
+      <dd><p>Explicit helpers for deterministic consensus and majority voting.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.DefaultAdaptationPolicy.html">DefaultAdaptationPolicy</a></dt>
+      <dd><p>Default deterministic adaptation policy.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.DefaultGoalPrioritizationPolicy.html">DefaultGoalPrioritizationPolicy</a></dt>
+      <dd><p>Default deterministic prioritization policy.
+Only ready goals are eligible; higher priority ranks first.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.DefaultModelRoutingPolicy.html">DefaultModelRoutingPolicy</a></dt>
+      <dd><p>Default deterministic routing policy.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.DistributedCacheCheckpointer.html">DistributedCacheCheckpointer</a></dt>
+      <dd><p>An <a class="xref" href="MyAgents.Core.Workflows.IWorkflowCheckpointer.html">IWorkflowCheckpointer</a> backed by any <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache">IDistributedCache</a>
+implementation (e.g. Redis, SQL Server, Azure Blob via Garnet, or in-memory for tests).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.FeedbackRecord.html">FeedbackRecord</a></dt>
+      <dd><p>Structured feedback input captured alongside execution outcomes.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.FileSystemCheckpointer.html">FileSystemCheckpointer</a></dt>
+      <dd><p><a class="xref" href="MyAgents.Core.Workflows.IWorkflowCheckpointer.html">IWorkflowCheckpointer</a> implementation that persists each
+<a class="xref" href="MyAgents.Core.Workflows.WorkflowSnapshot.html">WorkflowSnapshot</a> as a JSON file on the local file system.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.FileSystemGraphHistoryStore.html">FileSystemGraphHistoryStore</a></dt>
+      <dd><p><a class="xref" href="MyAgents.Core.Workflows.IGraphHistoryStore.html">IGraphHistoryStore</a> implementation that persists <a class="xref" href="MyAgents.Core.Workflows.GraphSnapshot.html">GraphSnapshot</a> records
+as JSON files on the local file system.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalCollection.html">GoalCollection</a></dt>
+      <dd><p>Lightweight goal container intended to live inside caller-managed workflow or graph state.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalDefinition.html">GoalDefinition</a></dt>
+      <dd><p>Immutable goal specification.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalPrioritizationContext.html">GoalPrioritizationContext</a></dt>
+      <dd><p>Context passed to goal prioritization policies.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalPrioritizationPolicyEntry.html">GoalPrioritizationPolicyEntry</a></dt>
+      <dd><p>Weighted policy entry used by <a class="xref" href="MyAgents.Core.Workflows.CompositeGoalPrioritizationPolicy.html">CompositeGoalPrioritizationPolicy</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalPrioritizationResult.html">GoalPrioritizationResult</a></dt>
+      <dd><p>Result returned from goal prioritization scoring.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalRecord.html">GoalRecord</a></dt>
+      <dd><p>Runtime goal record with mutable lifecycle state.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalSteps.html">GoalSteps</a></dt>
+      <dd><p>Workflow helpers for selecting and updating goals.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GraphRunResult-1.html">GraphRunResult&lt;TState&gt;</a></dt>
+      <dd><p>The full output of a completed <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html#MyAgents_Core_Workflows_AgentGraph_1_RunAsync_System_String__0_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_String_System_Threading_CancellationToken_">RunAsync(string, TState, IReadOnlyList&lt;AgentMessage&gt;, string?, CancellationToken)</a> call.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GraphSnapshot.html">GraphSnapshot</a></dt>
+      <dd><p>A versioned, immutable point-in-time snapshot of the graph state captured
+after a node completes execution. Used by the time-travel and branch-replay
+features of <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html">AgentGraph&lt;TState&gt;</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GraphStreamEvent-1.html">GraphStreamEvent&lt;TState&gt;</a></dt>
+      <dd><p>An event yielded by <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html#MyAgents_Core_Workflows_AgentGraph_1_RunStreamingAsync_System_String__0_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_String_System_Threading_CancellationToken_">RunStreamingAsync(string, TState, IReadOnlyList&lt;AgentMessage&gt;, string?, CancellationToken)</a> as each graph
+node (or parallel fan-out branch) completes.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.HumanInputRequest.html">HumanInputRequest</a></dt>
+      <dd><p>Represents a pending or completed human-input request within a paused workflow.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.HumanInputRequiredException.html">HumanInputRequiredException</a></dt>
+      <dd><p>Thrown by <a class="xref" href="MyAgents.Core.Workflows.WorkflowSteps.html#MyAgents_Core_Workflows_WorkflowSteps_RequestHumanInputAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_String_System_Threading_CancellationToken_">RequestHumanInputAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, string, string, CancellationToken)</a> to unwind the workflow
+execution stack and hand a serializable snapshot back to the caller.</p>
+<p>The caller pattern is:</p>
+<pre><code class="lang-csharp">try
+{
+    var state = await host.RunAsync(workflow, initialState);
+}
+catch (HumanInputRequiredException ex)
+{
+    // Persist ex.Snapshot — it contains the paused state and the prompt to show the user.
+    // Later, collect the human's reply and resume:
+    var finalState = await host.ResumeWithInputAsync(workflow, ex.Snapshot, humanReply);
+}</code></pre>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.InMemoryGraphHistoryStore.html">InMemoryGraphHistoryStore</a></dt>
+      <dd><p>In-process, in-memory implementation of <a class="xref" href="MyAgents.Core.Workflows.IGraphHistoryStore.html">IGraphHistoryStore</a>.
+Snapshots are stored for the lifetime of the object and lost when it is garbage-collected.
+Suitable for testing and single-process deployments; for distributed or durable scenarios
+replace with a database-backed implementation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorOptions.html">OrchestratorOptions</a></dt>
+      <dd><p>Configuration for orchestrated subagent execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorPlan.html">OrchestratorPlan</a></dt>
+      <dd><p>Planned set of orchestration steps.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorResult.html">OrchestratorResult</a></dt>
+      <dd><p>Result of a full orchestrated run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorStepModel.html">OrchestratorStepModel</a></dt>
+      <dd><p>Structured planner output for a single orchestration step.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorStepResult.html">OrchestratorStepResult</a></dt>
+      <dd><p>Result for an executed orchestration step.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OrchestratorSteps.html">OrchestratorSteps</a></dt>
+      <dd><p>Explicit orchestration helpers for planner-led subagent execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OutcomeRecord.html">OutcomeRecord</a></dt>
+      <dd><p>Structured record of a completed or attempted execution outcome.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ReflectionIteration.html">ReflectionIteration</a></dt>
+      <dd><p>Captures a single reflection iteration.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ReflectionOptions.html">ReflectionOptions</a></dt>
+      <dd><p>Options for running a reflection loop between a generator agent and a critic agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ReflectionResult.html">ReflectionResult</a></dt>
+      <dd><p>Result of a completed reflection loop.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.ReflectionSteps.html">ReflectionSteps</a></dt>
+      <dd><p>Workflow helpers for running an explicit generate/critique/refine loop.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingCandidate.html">RoutingCandidate</a></dt>
+      <dd><p>Candidate route that can be selected for the next workflow step.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingCapabilityRequirement.html">RoutingCapabilityRequirement</a></dt>
+      <dd><p>Simple capability requirement for route selection.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingContext.html">RoutingContext</a></dt>
+      <dd><p>Context passed into route selection policies.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingDecision.html">RoutingDecision</a></dt>
+      <dd><p>Selected route decision.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingPolicyEntry.html">RoutingPolicyEntry</a></dt>
+      <dd><p>Weighted routing policy entry.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingScoreResult.html">RoutingScoreResult</a></dt>
+      <dd><p>Result returned from route scoring.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.RoutingSteps.html">RoutingSteps</a></dt>
+      <dd><p>Explicit helpers for workflow-time route selection.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.SendPacket-1.html">SendPacket&lt;TState&gt;</a></dt>
+      <dd><p>Describes a dynamic Send API branch target for <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html">AgentGraph&lt;TState&gt;</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.SqliteCheckpointer.html">SqliteCheckpointer</a></dt>
+      <dd><p>SQLite-backed implementation of <a class="xref" href="MyAgents.Core.Workflows.IWorkflowCheckpointer.html">IWorkflowCheckpointer</a>.
+Stores workflow snapshots in a local SQLite database for durable persistence.
+Configures write-ahead logging (WAL) for high throughput.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html">WorkflowHost</a></dt>
+      <dd><p>Hosts and executes IWorkflow&lt;TState&gt; instances with a named registry of agents.
+Supports sequential, concurrent, and handoff execution patterns.</p>
+<p>Usage:
+var host = new WorkflowHost(sessionFactory);
+host.RegisterAgent(&quot;researcher&quot;, researcherDefinition);
+host.RegisterAgent(&quot;writer&quot;, writerDefinition);
+await host.RunAsync(myWorkflow, initialState);</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.WorkflowSnapshot.html">WorkflowSnapshot</a></dt>
+      <dd><p>A versioned, serializable snapshot of workflow state for checkpoint/resume.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.WorkflowSteps.html">WorkflowSteps</a></dt>
+      <dd><p>Orchestration helpers for common workflow patterns.
+Workflows call these from within their RunAsync implementation.</p>
+<p>Sequential:  steps run one after another, each receiving the prior output
+Concurrent:  steps run in parallel, results collected
+Handoff:     one agent processes and decides which agent to hand off to next</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IAdaptationPolicy.html">IAdaptationPolicy</a></dt>
+      <dd><p>Policy that converts structured outcomes and feedback into bounded hints.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IGoalPrioritizationPolicy.html">IGoalPrioritizationPolicy</a></dt>
+      <dd><p>Scores a goal against the current prioritization context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IGraphHistoryCatalog.html">IGraphHistoryCatalog</a></dt>
+      <dd><p>Optional query surface for enumerating graph-history sessions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IGraphHistoryStore.html">IGraphHistoryStore</a></dt>
+      <dd><p>Stores a versioned history of <a class="xref" href="MyAgents.Core.Workflows.GraphSnapshot.html">GraphSnapshot</a> records, enabling
+time-travel and branch-replay operations on <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html">AgentGraph&lt;TState&gt;</a> runs.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IModelRoutingPolicy.html">IModelRoutingPolicy</a></dt>
+      <dd><p>Scores routing candidates against a workflow context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IWorkflowApprovalContext.html">IWorkflowApprovalContext</a></dt>
+      <dd><p>Optional workflow-session interface that exposes a pending tool-approval request after resume.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IWorkflowCheckpointer.html">IWorkflowCheckpointer</a></dt>
+      <dd><p>Persists and restores <a class="xref" href="MyAgents.Core.Workflows.WorkflowSnapshot.html">WorkflowSnapshot</a> objects so that
+long-running workflows can survive process restarts.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession&lt;TState&gt;</a></dt>
+      <dd><p>Session context for workflow execution with typed state.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.IWorkflow-1.html">IWorkflow&lt;TState&gt;</a></dt>
+      <dd><p>A workflow that orchestrates multiple agents with typed state.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AdaptationHintKind.html">AdaptationHintKind</a></dt>
+      <dd><p>Target area that an adaptation hint is intended to influence.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.AgentLoopTerminationReason.html">AgentLoopTerminationReason</a></dt>
+      <dd><p>Why the <a class="xref" href="MyAgents.Core.Workflows.AgentLoop.html">AgentLoop</a> stopped.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.FeedbackKind.html">FeedbackKind</a></dt>
+      <dd><p>Source category for structured feedback.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalPriority.html">GoalPriority</a></dt>
+      <dd><p>Priority assigned to a goal definition.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GoalStatus.html">GoalStatus</a></dt>
+      <dd><p>Runtime lifecycle status for a goal.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GraphRunReason.html">GraphRunReason</a></dt>
+      <dd><p>Why an <a class="xref" href="MyAgents.Core.Workflows.AgentGraph-1.html">AgentGraph&lt;TState&gt;</a> run ended.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.OutcomeStatus.html">OutcomeStatus</a></dt>
+      <dd><p>High-level status for an observed workflow or agent outcome.</p>
+</dd>
+    </dl>
+    <h3 id="delegates">
+Delegates
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.GraphNodeDelegate-1.html">GraphNodeDelegate&lt;TState&gt;</a></dt>
+      <dd><p>A graph node: maps a node name to an agent invocation step.
+The node receives the current state and a session for the named agent,
+and returns the updated state after the agent has run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Workflows.SendRouter-1.html">SendRouter&lt;TState&gt;</a></dt>
+      <dd><p>Computes runtime parallel branch targets for a graph node.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class CapabilityRouter | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class CapabilityRouter | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Single-hop LLM-based router. Given a task description and a set of candidate s, calls the LLM once to select the best agent.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Agents_CapabilityRouter.md&amp;value=---%0Auid%3A%20MyAgents.Agents.CapabilityRouter%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Agents.CapabilityRouter">
+
+
+
+  <h1 id="MyAgents_Agents_CapabilityRouter" data-uid="MyAgents.Agents.CapabilityRouter" class="text-break">
+Class CapabilityRouter  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Agents/CapabilityRouter.cs/#L42"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Agents.html">Agents</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Agents.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Single-hop LLM-based router. Given a task description and a set of candidate
+<a class="xref" href="MyAgents.Core.AgentDefinition.html">AgentDefinition</a>s, calls the LLM once to select the best agent.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class CapabilityRouter</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">CapabilityRouter</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="MyAgents_Agents_CapabilityRouter_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>Scope: single-hop only — no multi-hop, no ensemble, no confidence scoring.</p>
+</div>
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="MyAgents_Agents_CapabilityRouter__ctor_" data-uid="MyAgents.Agents.CapabilityRouter.#ctor*"></a>
+
+  <h3 id="MyAgents_Agents_CapabilityRouter__ctor_Microsoft_Extensions_AI_IChatClient_System_Collections_Generic_IEnumerable_MyAgents_Core_AgentDefinition__Microsoft_Extensions_Logging_ILogger_MyAgents_Agents_CapabilityRouter__System_String_" data-uid="MyAgents.Agents.CapabilityRouter.#ctor(Microsoft.Extensions.AI.IChatClient,System.Collections.Generic.IEnumerable{MyAgents.Core.AgentDefinition},Microsoft.Extensions.Logging.ILogger{MyAgents.Agents.CapabilityRouter},System.String)">
+  CapabilityRouter(IChatClient, IEnumerable&lt;AgentDefinition&gt;, ILogger&lt;CapabilityRouter&gt;?, string?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Agents/CapabilityRouter.cs/#L73"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CapabilityRouter(IChatClient chatClient, IEnumerable&lt;AgentDefinition&gt; agents, ILogger&lt;CapabilityRouter&gt;? logger = null, string? fallbackAgentName = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>chatClient</code> <span class="xref">IChatClient</span></dt>
+    <dd><p>The <span class="xref">Microsoft.Extensions.AI.IChatClient</span> used for the routing LLM call.</p>
+</dd>
+    <dt><code>agents</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="MyAgents.Core.AgentDefinition.html">AgentDefinition</a>&gt;</dt>
+    <dd><p>Candidate agents the router may select from.</p>
+</dd>
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="MyAgents.Agents.CapabilityRouter.html">CapabilityRouter</a>&gt;</dt>
+    <dd><p>Optional logger; defaults to <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.abstractions.nulllogger">NullLogger</a>.</p>
+</dd>
+    <dt><code>fallbackAgentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>When set, the named agent is selected if the LLM returns an unrecognised response
+(opt-in backward-compatible behaviour).
+When <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> (default) a <a class="xref" href="MyAgents.Agents.RoutingException.html">RoutingException</a> is thrown on
+any unmatched response, forcing the caller to handle ambiguous routing explicitly.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Agents_CapabilityRouter_RouteAsync_" data-uid="MyAgents.Agents.CapabilityRouter.RouteAsync*"></a>
+
+  <h3 id="MyAgents_Agents_CapabilityRouter_RouteAsync_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Agents.CapabilityRouter.RouteAsync(System.String,System.Threading.CancellationToken)">
+  RouteAsync(string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Agents/CapabilityRouter.cs/#L106"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Selects the best agent for <code class="paramref">taskDescription</code> using a single LLM call.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;CapabilityRouterResult&gt; RouteAsync(string taskDescription, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>taskDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Agents.CapabilityRouterResult.html">CapabilityRouterResult</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Agents.RoutingException.html">RoutingException</a></dt>
+    <dd><p>Thrown when the LLM response cannot be matched to any registered agent and no
+<code>fallbackAgentName</code> was supplied to the constructor.</p>
+</dd>
+  </dl>
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Agents/CapabilityRouter.cs/#L42" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

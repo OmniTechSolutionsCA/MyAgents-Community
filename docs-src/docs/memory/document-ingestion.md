@@ -1,78 +1,117 @@
-# Document Ingestion & Chunking
+# Document Ingestion, Chunking & Knowledge Base Tools
 
-The `MyAgents.Memory` package includes built-in document readers and chunkers that ingest structured and unstructured files with **zero external parsing dependencies**.
+The `MyAgents.Memory` package includes a complete document ingestion pipeline with **zero third-party parsing dependencies**, boundary-aware chunkers, atomic source replacement, and agentic knowledge base tools.
 
-## Supported Document Formats
+## Supported Document Formats (`IDocumentReader`)
 
-- **Markdown (`.md`)**: Preserves heading hierarchy (`#`, `##`, `###`), list items, and code blocks.
-- **HTML (`.html`, `.htm`)**: Extracts title tags, removes navigation/script boilerplates, and strips tags while preserving structure.
-- **Plain Text (`.txt`)**: Splits text with sentence-boundary and paragraph awareness.
-- **JSON (`.json`)**: Splits JSON objects or array elements into discrete searchable records.
+`CompositeDocumentReader` and `HtmlDocumentReader` extract clean text and document titles directly from streams or files:
+- **Markdown (`.md`, `text/markdown`)**: Extracts YAML front-matter `title:` or the first `# H1` heading and preserves heading hierarchy and fenced code blocks.
+- **HTML (`.html`, `.htm`, `text/html`)**: Extracts `<title>` or `<h1>`, strips `<script>` / `<style>` / `<nav>` boilerplate, converts headings/lists/code/links into structured Markdown, and decodes HTML entities.
+- **Plain Text (`.txt`, `text/plain`)**: Reads UTF-8 text with paragraph and sentence-boundary chunking.
+- **JSON (`.json`, `application/json`)**: Formats and extracts structured JSON content.
 
 ---
 
-## 1. Registering Document Ingestion
+## 1. Configuring Document Ingestion in DI
+
+Use `AddDocumentIngestion` to register `IDocumentIngestor`, `IDocumentReader`, `ITextChunker`, `ITokenCounter`, and `KnowledgeBaseFeature`:
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
-using MyAgents.Memory.Ingestion;
+using MyAgents.Memory;
 
 var services = new ServiceCollection();
+services.AddSqliteMemoryStore("knowledge.db");
 
 services.AddDocumentIngestion(builder =>
 {
-    // Configure default chunk size and overlap in tokens/characters
+    // Configure chunk size, overlap, and optional token budget per chunk
     builder.WithChunkingOptions(new TextChunkingOptions(
         ChunkSize: 1000,
-        ChunkOverlap: 100,
-        PreserveHeadings: true));
+        ChunkOverlap: 150,
+        MaxTokens: 256));
 
-    // Register format-specific chunkers
-    builder.UseMarkdownChunker();
-    builder.UseHtmlChunker();
-    builder.UsePlainTextChunker();
+    // Use heading-aware Markdown chunker (prepends "# H1 > ## H2" breadcrumbs to chunks)
+    builder.UseMarkdownChunker(includeHeadingBreadcrumbs: true);
+
+    // Use zero-allocation approximate token counter (or register a custom ITokenCounter)
+    builder.UseTokenCounter(ApproximateTokenCounter.Instance);
 });
 
-var provider = services.BuildServiceProvider();
+await using var provider = services.BuildServiceProvider();
 var ingestor = provider.GetRequiredService<IDocumentIngestor>();
 ```
 
 ---
 
-## 2. Ingesting Files and Streams
+## 2. Ingesting Files, Streams, and Batches
 
-### Ingest a Local File
+### Ingest a Local File (`IngestFileAsync`)
+
 ```csharp
-var result = await ingestor.IngestFileAsync(
+DocumentIngestionResult fileResult = await ingestor.IngestFileAsync(
+    ns: "project-docs",
     filePath: "docs/architecture.md",
-    targetNamespace: "project-knowledge",
+    source: "docs/architecture.md",
     metadata: new Dictionary<string, string>
     {
-        ["author"] = "Platform Team",
-        ["version"] = "1.0.0"
+        ["version"] = "1.0.0",
+        ["team"] = "platform"
     },
     cancellationToken: cancellationToken);
 
-Console.WriteLine($"Ingested {result.DocumentId} into {result.ChunkCount} chunks.");
+Console.WriteLine($"Ingested '{fileResult.Source}' into {fileResult.Chunks.Count} chunks (replaced {fileResult.ReplacedChunkCount} prior chunks).");
 ```
 
-### Ingest an In-Memory Stream
-```csharp
-using var stream = File.OpenRead("webpage.html");
+### Ingest a Stream (`IngestStreamAsync`)
 
-var result = await ingestor.IngestStreamAsync(
-    stream: stream,
-    contentType: "text/html",
-    documentId: "release-notes-v1",
-    targetNamespace: "project-knowledge",
+```csharp
+await using var htmlStream = File.OpenRead("release-notes.html");
+
+DocumentIngestionResult streamResult = await ingestor.IngestStreamAsync(
+    ns: "project-docs",
+    content: htmlStream,
+    source: "https://example.com/release-notes",
+    contentTypeOrExtension: "text/html",
     cancellationToken: cancellationToken);
+```
+
+### Batch Ingestion & Atomic Source Replacement (`IngestBatchAsync`)
+
+Re-ingesting a document with the same `Source` automatically removes stale chunks, reuses embeddings for unchanged chunks (via SHA-256 content hashes), and updates the `BM25Index`:
+
+```csharp
+BatchDocumentIngestionResult batchResult = await ingestor.IngestBatchAsync(
+    ns: "project-docs",
+    documents:
+    [
+        new IngestDocument(Source: "guide-1", Content: "# Intro\nWelcome to MyAgents.", Title: "Intro Guide"),
+        new IngestDocument(Source: "guide-2", Content: "# Security\nAlways configure tool policies.", Title: "Security Guide")
+    ],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($"Total chunks: {batchResult.TotalChunks}, Replaced: {batchResult.TotalReplacedChunks}");
+
+// Delete all chunks for a document source
+int deletedChunks = await ingestor.DeleteDocumentAsync("project-docs", source: "guide-1", cancellationToken);
 ```
 
 ---
 
-## 3. Chunking Strategies
+## 3. Agentic Knowledge Base Tools (`KnowledgeBaseFeature`)
 
-The chunker automatically guarantees that chunks respect natural content boundaries:
-- Markdown chunking never splits inside a fenced code block (` ``` `).
-- Heading paths (`# Guide > ## Architecture`) are prepended to each chunk as context metadata to improve semantic search relevance.
-- Token counts are calculated accurately without requiring heavyweight native tokenizers.
+In addition to passive middleware injection (`RetrievalAugmentationFeature`), you can give an agent active tools to search and ingest documents on demand using `KnowledgeBaseFeature`:
+
+- `search_knowledge_base`: Executes a hybrid semantic + BM25 search with optional `source` filtering and returns numbered citations with provenance metadata.
+- `ingest_knowledge_document`: Chunks, embeds, and indexes a document into the knowledge base namespace.
+
+```csharp
+using MyAgents.Core;
+using MyAgents.Memory;
+
+var kbFeature = provider.GetRequiredService<KnowledgeBaseFeature>();
+
+var definition = new AgentDefinition("knowledge-curator", [
+    kbFeature
+]);
+```

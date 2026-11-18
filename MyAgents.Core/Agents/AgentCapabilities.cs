@@ -37,7 +37,7 @@ public static class AgentCapabilities
         "telemetry",
         "Agent emits OpenTelemetry traces and metrics via TelemetryFeature.");
 
-    /// <summary>The agent is connected to an <see cref=\"MyAgents.Core.Messaging.IAgentChannel\"/> message bus.</summary>
+    /// <summary>The agent is connected to an <see cref="MyAgents.Core.Messaging.IAgentChannel"/> message bus.</summary>
     public static readonly IAgentCapability Channel = new BuiltInCapability(
         "channel",
         "Agent is connected to an IAgentChannel pub/sub message bus.");

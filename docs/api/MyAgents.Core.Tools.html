@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace MyAgents.Core.Tools | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace MyAgents.Core.Tools | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core.Tools">
+
+  <h1 id="MyAgents_Core_Tools" data-uid="MyAgents.Core.Tools" class="text-break">Namespace MyAgents.Core.Tools</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.AgentFunctionCall.html">AgentFunctionCall</a></dt>
+      <dd><p>Canonical framework-level representation of a model-emitted function call.</p>
+<p>The normalized JSON envelope emitted by <a class="xref" href="MyAgents.Core.Tools.AgentFunctionCallSerializer.html">AgentFunctionCallSerializer</a>
+is:</p>
+<pre><code class="lang-csharp">{
+  "type": "function_call",
+  "id": "call-1",
+  "name": "tool_name",
+  "arguments": { ... }
+}</code></pre>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.AgentFunctionCallSerializer.html">AgentFunctionCallSerializer</a></dt>
+      <dd><p>Serializes and parses canonical function-call envelopes.
+Parsers accept both the canonical schema and the legacy aliases already
+supported by the framework middleware.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.AgentToolAttribute.html">AgentToolAttribute</a></dt>
+      <dd><p>Marks a method as an agent tool to be generated at compile time by the Roslyn source generator.
+The generated tool embeds its JSON schema as a compile-time constant and binds primitive
+arguments (<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a>,
+<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.single">float</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a>) without reflection or boxing.
+Other parameter and return types use reflection-based System.Text.Json serialization unless
+<a class="xref" href="MyAgents.Core.Tools.AgentToolAttribute.html#MyAgents_Core_Tools_AgentToolAttribute_JsonContext">JsonContext</a> supplies source-generated serialization metadata.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.DefaultProcessRunner.html">DefaultProcessRunner</a></dt>
+      <dd><p>Default <a class="xref" href="MyAgents.Core.Tools.IProcessRunner.html">IProcessRunner</a> implementation that uses <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.diagnostics.process">Process</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.DelegateTool.html">DelegateTool</a></dt>
+      <dd><p>An <a class="xref" href="MyAgents.Core.Tools.ITool.html">ITool</a> implementation backed by a C# <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.delegate">Delegate</a> (such as a method, lambda, or local function)
+with automatic JSON schema generation, compiled invocation, and zero-reflection argument deserialization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.HandoffTool.html">HandoffTool</a></dt>
+      <dd><p>A tool that allows an agent to explicitly hand off the conversation to another agent.
+The orchestrator (e.g., <a class="xref" href="MyAgents.Core.Workflows.WorkflowSteps.html#MyAgents_Core_Workflows_WorkflowSteps_RunHandoffAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Func_MyAgents_Core_AgentTurnResult_System_Int32_System_String__MyAgents_Core_ITerminationCondition_System_Int32_System_Threading_CancellationToken_">RunHandoffAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, string, IReadOnlyList&lt;AgentMessage&gt;, Func&lt;AgentTurnResult, int, string?&gt;, ITerminationCondition?, int, CancellationToken)</a>)
+can detect this tool call and perform the switch.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.ProcessResult.html">ProcessResult</a></dt>
+      <dd><p>Result returned by <a class="xref" href="MyAgents.Core.Tools.IProcessRunner.html">IProcessRunner</a> after a process exits.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.ToolCallObservation.html">ToolCallObservation</a></dt>
+      <dd><p>Describes a tool call that was about to be (or was) invoked by the agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.ToolResultObservation.html">ToolResultObservation</a></dt>
+      <dd><p>Describes the result of a completed tool call.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.IProcessRunner.html">IProcessRunner</a></dt>
+      <dd><p>Abstraction for running a child process and capturing its output.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.ITool.html">ITool</a></dt>
+      <dd><p>A tool that can be invoked by an agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.Tools.IToolCallObserver.html">IToolCallObserver</a></dt>
+      <dd><p>Intercepts tool call/result pairs at the framework layer.
+Observers are called for every function call the model emits, regardless
+of which tool it targets.</p>
+<p>
+Add observers to <a class="xref" href="MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_ToolObservers">ToolObservers</a> from an
+<a class="xref" href="MyAgents.Core.IAgentFeature.html#MyAgents_Core_IAgentFeature_Contribute_MyAgents_Core_AgentAssembly_">Contribute(AgentAssembly)</a> implementation,
+or directly on the assembly before session creation.
+</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

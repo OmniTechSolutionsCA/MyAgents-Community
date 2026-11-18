@@ -29,28 +29,28 @@ public sealed class AgentAssembly
     public PromptBuilder Prompts { get; } = new();
 
     /// <summary>
-    /// Optional memory store contributed by <see cref="MemoryFeature"/>.
+    /// Optional memory store contributed by <c>MemoryFeature</c>.
     /// When set, the store is made available as <see cref="IMemoryStore"/> via
     /// <see cref="AgentTurnServices"/> during every turn.
     /// </summary>
     public IMemoryStore? Memory { get; set; }
 
     /// <summary>
-    /// Optional prompt registry contributed by <see cref="PromptRegistryFeature"/>.
+    /// Optional prompt registry contributed by <c>PromptRegistryFeature</c>.
     /// When set, the registry is made available as <see cref="PromptRegistry"/> via
     /// <see cref="AgentTurnServices"/> during every turn.
     /// </summary>
     public PromptRegistry? PromptRegistry { get; set; }
     /// <summary>
     /// Mutable list of capabilities declared by features during assembly.
-    /// <see cref="CapabilityFeature"/> (or any feature) may add entries here.
+    /// <c>CapabilityFeature</c> (or any feature) may add entries here.
     /// The final list is used to populate <see cref="AgentDefinition.Capabilities"/> at
     /// query time via <see cref="AgentDefinition.HasCapability(string)"/>.
     /// </summary>
     public List<IAgentCapability> Capabilities { get; } = new();
 
     /// <summary>
-    /// Optional agent channel contributed by <see cref="AgentChannelFeature"/>.
+    /// Optional agent channel contributed by <c>AgentChannelFeature</c>.
     /// When set, the channel is made available as <see cref="IAgentChannel"/> via
     /// <see cref="AgentTurnServices"/> during every turn.
     /// </summary>

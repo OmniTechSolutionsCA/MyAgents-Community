@@ -6,7 +6,7 @@ namespace MyAgents.Memory;
 /// <param name="ChunkSize">Maximum number of characters per chunk. Must be greater than zero.</param>
 /// <param name="ChunkOverlap">Number of overlapping characters shared between consecutive chunks. Must be non-negative and less than <paramref name="ChunkSize"/>.</param>
 /// <param name="Separators">Ordered list of preferred boundary separators from highest to lowest priority.</param>
-/// <param name="MaxTokens">Optional maximum token budget per chunk evaluated via <see cref="ITokenCounter"/>.</param>
+/// <param name="MaxTokens">Optional maximum token budget per chunk evaluated via <see cref="MyAgents.Core.ITokenCounter"/>.</param>
 public sealed record TextChunkingOptions(
     int ChunkSize = 1000,
     int ChunkOverlap = 100,

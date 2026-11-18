@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class AgentResponseFormat | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class AgentResponseFormat | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Specifies the expected response format for an agent turn or session.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Core_AgentResponseFormat.md&amp;value=---%0Auid%3A%20MyAgents.Core.AgentResponseFormat%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core.AgentResponseFormat">
+
+
+
+  <h1 id="MyAgents_Core_AgentResponseFormat" data-uid="MyAgents.Core.AgentResponseFormat" class="text-break">
+Class AgentResponseFormat  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L10"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Core.html">Core</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Specifies the expected response format for an agent turn or session.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public abstract record AgentResponseFormat : IEquatable&lt;AgentResponseFormat&gt;</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">AgentResponseFormat</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a>&gt;</div>
+    </dd>
+  </dl>
+
+  <dl class="typelist derived">
+    <dt>Derived</dt>
+    <dd>
+      <div><a class="xref" href="MyAgents.Core.AgentResponseFormat.JsonObjectFormat.html">AgentResponseFormat.JsonObjectFormat</a></div>
+      <div><a class="xref" href="MyAgents.Core.AgentResponseFormat.JsonSchemaFormat.html">AgentResponseFormat.JsonSchemaFormat</a></div>
+      <div><a class="xref" href="MyAgents.Core.AgentResponseFormat.TextFormat.html">AgentResponseFormat.TextFormat</a></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="MyAgents_Core_AgentResponseFormat_JsonObject_" data-uid="MyAgents.Core.AgentResponseFormat.JsonObject*"></a>
+
+  <h3 id="MyAgents_Core_AgentResponseFormat_JsonObject" data-uid="MyAgents.Core.AgentResponseFormat.JsonObject">
+  JsonObject
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L16"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generic JSON object response without a schema constraint.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static AgentResponseFormat JsonObject { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_AgentResponseFormat_Text_" data-uid="MyAgents.Core.AgentResponseFormat.Text*"></a>
+
+  <h3 id="MyAgents_Core_AgentResponseFormat_Text" data-uid="MyAgents.Core.AgentResponseFormat.Text">
+  Text
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L13"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Unconstrained free-form text response (default).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static AgentResponseFormat Text { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Core_AgentResponseFormat_ForJsonSchema_" data-uid="MyAgents.Core.AgentResponseFormat.ForJsonSchema*"></a>
+
+  <h3 id="MyAgents_Core_AgentResponseFormat_ForJsonSchema_System_String_System_String_System_String_System_Nullable_System_Boolean__" data-uid="MyAgents.Core.AgentResponseFormat.ForJsonSchema(System.String,System.String,System.String,System.Nullable{System.Boolean})">
+  ForJsonSchema(string, string, string?, bool?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L25"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a schema-constrained JSON response format with a pre-rendered JSON schema string.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static AgentResponseFormat ForJsonSchema(string schemaName, string schemaJson, string? schemaDescription = null, bool? strict = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>schemaName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name identifying the schema.</p>
+</dd>
+    <dt><code>schemaJson</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>JSON Schema definition string.</p>
+</dd>
+    <dt><code>schemaDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Optional human-readable description of the schema.</p>
+</dd>
+    <dt><code>strict</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>?</dt>
+    <dd><p>Whether the model provider should enforce strict schema adherence.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_AgentResponseFormat_ForType_" data-uid="MyAgents.Core.AgentResponseFormat.ForType*"></a>
+
+  <h3 id="MyAgents_Core_AgentResponseFormat_ForType_System_Type_System_String_System_String_System_Text_Json_JsonSerializerOptions_System_Nullable_System_Boolean__" data-uid="MyAgents.Core.AgentResponseFormat.ForType(System.Type,System.String,System.String,System.Text.Json.JsonSerializerOptions,System.Nullable{System.Boolean})">
+  ForType(Type, string?, string?, JsonSerializerOptions?, bool?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L59"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a schema-constrained JSON response format for a given .NET type.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static AgentResponseFormat ForType(Type type, string? schemaName = null, string? schemaDescription = null, JsonSerializerOptions? options = null, bool? strict = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>type</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.type">Type</a></dt>
+    <dd><p>The type to generate a JSON schema for.</p>
+</dd>
+    <dt><code>schemaName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Optional schema name. Defaults to type.Name.</p>
+</dd>
+    <dt><code>schemaDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Optional human-readable description of the schema.</p>
+</dd>
+    <dt><code>options</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.jsonserializeroptions">JsonSerializerOptions</a></dt>
+    <dd><p>Optional JSON serializer options for schema generation.</p>
+</dd>
+    <dt><code>strict</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>?</dt>
+    <dd><p>Whether the model provider should enforce strict schema adherence.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_AgentResponseFormat_ForType_" data-uid="MyAgents.Core.AgentResponseFormat.ForType*"></a>
+
+  <h3 id="MyAgents_Core_AgentResponseFormat_ForType__1_System_String_System_String_System_Text_Json_JsonSerializerOptions_System_Nullable_System_Boolean__" data-uid="MyAgents.Core.AgentResponseFormat.ForType``1(System.String,System.String,System.Text.Json.JsonSerializerOptions,System.Nullable{System.Boolean})">
+  ForType&lt;T&gt;(string?, string?, JsonSerializerOptions?, bool?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L44"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a schema-constrained JSON response format for a strongly-typed .NET model type.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static AgentResponseFormat ForType&lt;T&gt;(string? schemaName = null, string? schemaDescription = null, JsonSerializerOptions? options = null, bool? strict = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>schemaName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Optional schema name. Defaults to typeof(T).Name.</p>
+</dd>
+    <dt><code>schemaDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Optional human-readable description of the schema.</p>
+</dd>
+    <dt><code>options</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.jsonserializeroptions">JsonSerializerOptions</a></dt>
+    <dd><p>Optional JSON serializer options for schema generation.</p>
+</dd>
+    <dt><code>strict</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>?</dt>
+    <dd><p>Whether the model provider should enforce strict schema adherence.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd><p>The type to generate a JSON schema for.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/AgentResponseFormat.cs/#L10" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

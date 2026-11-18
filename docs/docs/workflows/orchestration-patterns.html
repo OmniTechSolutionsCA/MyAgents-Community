@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Orchestration Patterns: Loops, Reflection, Consensus &amp; Goals | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Orchestration Patterns: Loops, Reflection, Consensus &amp; Goals | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/workflows/orchestration-patterns.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="orchestration-patterns-loops-reflection-consensus--goals">Orchestration Patterns: Loops, Reflection, Consensus &amp; Goals</h1>
+
+<p><code>MyAgents.Core.Workflows</code> ships ready-to-use building blocks for higher-level agentic reasoning patterns: iterative <code>AgentLoop</code> reductions, planner-worker-synthesizer orchestration (<code>OrchestratorSteps</code>), generator-critic self-refinement (<code>ReflectionSteps</code>), multi-agent majority voting (<code>ConsensusSteps</code>), and dynamic goal prioritization (<code>GoalSteps</code> &amp; <code>AdaptationSteps</code>).</p>
+<hr>
+<h2 id="1-iterative-agent-loops-agentloop--iterminationcondition">1. Iterative Agent Loops (<code>AgentLoop</code> &amp; <code>ITerminationCondition</code>)</h2>
+<p><code>AgentLoop.RunAsync</code> repeatedly invokes an <code>IAgentSession</code>, reducing state across turns until an <code>ITerminationCondition</code> is satisfied or <code>maxTurns</code> is reached.</p>
+<h3 id="built-in-termination-conditions">Built-in Termination Conditions</h3>
+<ul>
+<li><code>MaxTurnsTermination(maxTurns)</code></li>
+<li><code>TextMentionTermination(phrase, StringComparison)</code></li>
+<li><code>TokenBudgetTermination(maxTokens)</code></li>
+<li>Combinators: <code>ITerminationCondition.Any(...)</code> and <code>ITerminationCondition.All(...)</code></li>
+</ul>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Core.Workflows;
+
+var termination = ITerminationCondition.Any(
+    new TextMentionTermination(&quot;TASK_COMPLETE&quot;),
+    new TokenBudgetTermination(maxTokens: 8000));
+
+AgentLoopResult&lt;int&gt; loopResult = await AgentLoop.RunAsync(
+    session: session,
+    initialState: 0,
+    initialMessages: [AgentMessage.FromText(&quot;user&quot;, &quot;Iteratively refine the SQL schema until complete.&quot;)],
+    reducer: (stepCount, turnResult) =&gt; stepCount + 1,
+    termination: termination,
+    maxTurns: 5,
+    onTurnCompleted: (state, turn, idx) =&gt; Console.WriteLine($&quot;Completed turn {idx}&quot;),
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Stopped because: {loopResult.Reason} after {loopResult.TurnsCompleted} turns.&quot;);
+</code></pre>
+<hr>
+<h2 id="2-generator-critic-self-refinement-reflectionsteps">2. Generator-Critic Self-Refinement (<code>ReflectionSteps</code>)</h2>
+<p><code>ReflectionSteps.RunAsync</code> pairs a <strong>generator</strong> agent with a <strong>critic</strong> agent in a feedback loop until the critic approves the candidate output (or <code>MaxIterations</code> is reached):</p>
+<pre><code class="lang-mermaid">sequenceDiagram
+    participant Gen as Generator Agent
+    participant Critic as Critic Agent
+    loop Up to MaxIterations
+        Gen-&gt;&gt;Critic: Candidate Draft
+        Critic--&gt;&gt;Gen: Critique (or &quot;APPROVED&quot;)
+    end
+</code></pre>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Core.Workflows;
+
+var options = new ReflectionOptions(
+    GeneratorAgentName: &quot;code-author&quot;,
+    CriticAgentName: &quot;security-reviewer&quot;,
+    MaxIterations: 3,
+    ApprovalPredicate: ReflectionSteps.ContainsApprovedCritique);
+
+ReflectionResult reflection = await ReflectionSteps.RunAsync(
+    session: workflowSession,
+    options: options,
+    initialMessages: [AgentMessage.FromText(&quot;user&quot;, &quot;Write a JWT validation middleware in C#.&quot;)],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Approved: {reflection.Approved} in {reflection.IterationsCompleted} iteration(s).&quot;);
+Console.WriteLine(reflection.FinalCandidate.Output[0].Content);
+</code></pre>
+<hr>
+<h2 id="3-planner-worker-synthesizer-orchestratorsteps">3. Planner-Worker-Synthesizer (<code>OrchestratorSteps</code>)</h2>
+<p><code>OrchestratorSteps.RunAsync</code> asks a <strong>planner</strong> agent to decompose a complex objective into a structured <code>OrchestratorPlan</code> of steps, dispatches steps (sequentially or in parallel batches) to specialized <strong>worker</strong> agents, and invokes a <strong>synthesizer</strong> agent to produce the final answer:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Core.Workflows;
+
+var orchestratorOptions = new OrchestratorOptions(
+    PlannerAgentName: &quot;lead-planner&quot;,
+    WorkerAgentNames: [&quot;db-specialist&quot;, &quot;api-specialist&quot;, &quot;frontend-specialist&quot;],
+    SynthesizerAgentName: &quot;tech-lead&quot;,
+    MaxSteps: 6,
+    MaxRepairAttempts: 2,
+    AllowParallelExecution: true);
+
+OrchestratorResult result = await OrchestratorSteps.RunAsync(
+    session: workflowSession,
+    options: orchestratorOptions,
+    initialMessages: [AgentMessage.FromText(&quot;user&quot;, &quot;Design an end-to-end audit logging feature.&quot;)],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Executed {result.StepResults.Count} planned steps.&quot;);
+Console.WriteLine(result.FinalResult.Output[0].Content);
+</code></pre>
+<hr>
+<h2 id="4-multi-agent-majority-voting-consensussteps">4. Multi-Agent Majority Voting (<code>ConsensusSteps</code>)</h2>
+<p>When high reliability is needed for classification or decision-making, <code>ConsensusSteps.RunMajorityVoteAsync</code> queries multiple agents in parallel, extracts each agent's discrete choice, and computes the majority winner (with optional tie-breaker):</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Core.Workflows;
+
+ConsensusResult consensus = await ConsensusSteps.RunMajorityVoteAsync(
+    session: workflowSession,
+    agentNames: [&quot;auditor-1&quot;, &quot;auditor-2&quot;, &quot;auditor-3&quot;],
+    messages: [AgentMessage.FromText(&quot;user&quot;, &quot;Is this transaction fraudulent? Reply SAFE or FRAUD.&quot;)],
+    choiceSelector: turn =&gt; turn.Output[0].Content.Trim().ToUpperInvariant(),
+    tieBreaker: tied =&gt; tied[0],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Winning decision: {consensus.WinningChoice} (Tie broken: {consensus.TieBroken})&quot;);
+</code></pre>
+<hr>
+<h2 id="5-goal-prioritization--runtime-adaptation-goalsteps--adaptationsteps">5. Goal Prioritization &amp; Runtime Adaptation (<code>GoalSteps</code> &amp; <code>AdaptationSteps</code>)</h2>
+<p>For autonomous agents managing a backlog of goals and adapting to runtime outcomes or human feedback:</p>
+<ul>
+<li><strong><code>GoalCollection</code> &amp; <code>GoalSteps</code></strong>: Register <code>GoalDefinition</code> items with priorities (<code>Critical</code>, <code>High</code>, <code>Normal</code>, <code>Low</code>), transition statuses (<code>Ready</code>, <code>Active</code>, <code>Blocked</code>, <code>Completed</code>, <code>Failed</code>), and select the highest-scoring ready goal via <code>GoalSteps.SelectNextAsync(goals, policy)</code>.</li>
+<li><strong><code>AdaptationSteps</code> &amp; <code>DefaultAdaptationPolicy</code></strong>: Record <code>OutcomeRecord</code> and <code>FeedbackRecord</code> entries during execution and call <code>AdaptationSteps.EvaluateAsync(...)</code> to generate <code>AdaptationHint</code> prompt adjustments when outcome scores drop below threshold.</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/workflows/orchestration-patterns.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

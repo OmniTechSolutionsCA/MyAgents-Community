@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class InMemoryAgentRuntime | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class InMemoryAgentRuntime | MyAgents Community Documentation ">
+      
+      <meta name="description" content="An in-memory  for unit testing. Creates  instances keyed by agent name. Each named agent has its own response queue; all created agents are tracked so tests can assert on invocation counts and received messages.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Testing_InMemoryAgentRuntime.md&amp;value=---%0Auid%3A%20MyAgents.Testing.InMemoryAgentRuntime%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Testing.InMemoryAgentRuntime">
+
+
+
+  <h1 id="MyAgents_Testing_InMemoryAgentRuntime" data-uid="MyAgents.Testing.InMemoryAgentRuntime" class="text-break">
+Class InMemoryAgentRuntime  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L31"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Testing.html">Testing</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Testing.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>An in-memory <a class="xref" href="MyAgents.Core.IAgentRuntime.html">IAgentRuntime</a> for unit testing.
+Creates <a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a> instances keyed by agent name.
+Each named agent has its own response queue; all created agents are tracked
+so tests can assert on invocation counts and received messages.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class InMemoryAgentRuntime : IAgentRuntime</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">InMemoryAgentRuntime</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="MyAgents.Core.IAgentRuntime.html">IAgentRuntime</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="MyAgents_Testing_InMemoryAgentRuntime_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>Typical usage with <a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html">WorkflowHost</a>:</p>
+<pre><code class="lang-csharp">var runtime = new InMemoryAgentRuntime()
+    .ForAgent("researcher", q =&gt; q
+        .EnqueueResponse("Paris is the capital of France."))
+    .ForAgent("writer", q =&gt; q
+        .EnqueueResponse("The capital is Paris."));
+
+var factory = new DefaultAgentSessionFactory(runtime, serviceProvider);
+var host = new WorkflowHost(factory);
+host.RegisterAgent("researcher", researcherDef);
+host.RegisterAgent("writer", writerDef);
+
+var result = await host.RunAsync(new MyWorkflow(), initialState);
+
+Assert.Equal(1, runtime.GetAgent("researcher").InvocationCount);</code></pre>
+</div>
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_CreatedAgents_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.CreatedAgents*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_CreatedAgents" data-uid="MyAgents.Testing.InMemoryAgentRuntime.CreatedAgents">
+  CreatedAgents
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L42"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>All unique agents created by this runtime, in first-seen order.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyList&lt;InMemoryAgent&gt; CreatedAgents { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_CreateAgent_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.CreateAgent*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_CreateAgent_MyAgents_Core_AgentDefinition_MyAgents_Core_AgentAssembly_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.CreateAgent(MyAgents.Core.AgentDefinition,MyAgents.Core.AgentAssembly)">
+  CreateAgent(AgentDefinition, AgentAssembly)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L91"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates an agent instance from the given definition and its pre-built assembly.
+The assembly is built once by the session factory and passed here so the runtime
+can access tools and system prompts without rebuilding them.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IAgent CreateAgent(AgentDefinition definition, AgentAssembly assembly)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>definition</code> <a class="xref" href="MyAgents.Core.AgentDefinition.html">AgentDefinition</a></dt>
+    <dd><p>The agent definition (name, description).</p>
+</dd>
+    <dt><code>assembly</code> <a class="xref" href="MyAgents.Core.AgentAssembly.html">AgentAssembly</a></dt>
+    <dd><p>The pre-built assembly containing tools, pipeline, and system prompt.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.IAgent.html">IAgent</a></dt>
+    <dd><p>An agent instance ready for invocation.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+  <h4 class="section" id="MyAgents_Testing_InMemoryAgentRuntime_CreateAgent_MyAgents_Core_AgentDefinition_MyAgents_Core_AgentAssembly__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>If a pre-configured agent exists for <a class="xref" href="MyAgents.Core.AgentDefinition.html#MyAgents_Core_AgentDefinition_Name">Name</a>, that agent
+is returned (and tracked in <a class="xref" href="MyAgents.Testing.InMemoryAgentRuntime.html#MyAgents_Testing_InMemoryAgentRuntime_CreatedAgents">CreatedAgents</a> once). Otherwise a new
+<a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a> with an empty queue (returns empty responses) is created.</p>
+</div>
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_ForAgent_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.ForAgent*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_ForAgent_System_String_System_Action_MyAgents_Testing_InMemoryAgent__" data-uid="MyAgents.Testing.InMemoryAgentRuntime.ForAgent(System.String,System.Action{MyAgents.Testing.InMemoryAgent})">
+  ForAgent(string, Action&lt;InMemoryAgent&gt;)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L49"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Configures the response queue for the agent with the given name.
+The <code class="paramref">configure</code> callback receives the pre-created
+<a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a> so you can call <code>EnqueueResponse</code> etc.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InMemoryAgentRuntime ForAgent(string agentName, Action&lt;InMemoryAgent&gt; configure)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>configure</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Testing.InMemoryAgentRuntime.html">InMemoryAgentRuntime</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_GetAgent_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.GetAgent*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_GetAgent_System_String_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.GetAgent(System.String)">
+  GetAgent(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L68"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Retrieves the <a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a> registered for <code class="paramref">agentName</code>,
+or throws if it was never configured.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InMemoryAgent GetAgent(string agentName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_ResetAll_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.ResetAll*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_ResetAll" data-uid="MyAgents.Testing.InMemoryAgentRuntime.ResetAll">
+  ResetAll()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L112"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Resets all tracked invocations on every registered agent.
+Useful between test cases when reusing the same runtime.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ResetAll()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRuntime_TryGetAgent_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.TryGetAgent*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRuntime_TryGetAgent_System_String_" data-uid="MyAgents.Testing.InMemoryAgentRuntime.TryGetAgent(System.String)">
+  TryGetAgent(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L82"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns the <a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a> for <code class="paramref">agentName</code>,
+or <code>null</code> if it was never configured.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InMemoryAgent? TryGetAgent(string agentName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Testing.InMemoryAgent.html">InMemoryAgent</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRuntime.cs/#L31" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

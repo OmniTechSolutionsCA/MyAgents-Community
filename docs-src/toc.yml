@@ -1,5 +1,7 @@
 - name: Docs
   href: docs/
+- name: API Reference
+  href: api/
 - name: Quick Start
   href: docs/getting-started/quickstart.md
 - name: NuGet Packages

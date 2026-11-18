@@ -87,71 +87,84 @@
         <article data-uid="">
 <h1 id="architecture--execution-lifecycle">Architecture &amp; Execution Lifecycle</h1>
 
-<p>MyAgents Community is designed with a strict separation of concerns between <strong>agent definitions</strong>, <strong>runtime execution loops</strong>, <strong>tool invocation policies</strong>, and <strong>state persistence</strong>.</p>
+<p>MyAgents Community is designed with a strict separation of concerns between <strong>agent definitions</strong>, <strong>feature assembly</strong>, <strong>middleware pipelines</strong>, <strong>runtime execution loops</strong>, <strong>tool invocation policies</strong>, and <strong>state persistence</strong>.</p>
 <h2 id="architecture-overview">Architecture Overview</h2>
 <pre><code class="lang-mermaid">flowchart TD
     subgraph Client Application
-        App[Host Application / Web API]
-        Factory[IAgentSessionFactory]
+        App[&quot;Host Application / Web API&quot;]
+        Factory[&quot;IAgentSessionFactory&quot;]
     end
 
     subgraph Assembly &amp; Definition
-        Definition[AgentDefinition]
-        Features[Feature Pipeline: Prompts, Tools, Capabilities]
+        Definition[&quot;AgentDefinition&quot;]
+        Features[&quot;IAgentFeature Pipeline&quot;]
+        Assembly[&quot;AgentAssembly: Prompts, Tools, Middleware, Capabilities&quot;]
     end
 
     subgraph Turn Execution Loop
-        Session[IAgentSession]
-        Runtime[MyAgents.Runtime.Chat]
-        ChatClient[Microsoft.Extensions.AI IChatClient]
-        LLM[Model Provider: OpenAI, Ollama, Azure, etc.]
+        Session[&quot;IAgentSession&quot;]
+        Middleware[&quot;AgentPipeline (Middleware Chain)&quot;]
+        Runtime[&quot;MyAgents.Runtime.Chat (ChatClientRuntime)&quot;]
+        ChatClient[&quot;Microsoft.Extensions.AI IChatClient&quot;]
+        LLM[&quot;Model Provider: OpenAI, Ollama, Azure, etc.&quot;]
     end
 
     subgraph Governance &amp; Tools
-        Approval[IToolApprovalPolicy]
-        ToolRegistry[ITool Catalog]
-        NativeTools[NativeAOT Generated Tools]
-        McpTools[Model Context Protocol Tools]
-        DelegateTools[In-Process Delegate Tools]
+        Approval[&quot;ToolApprovalEvaluator &amp; IToolApprovalPolicy&quot;]
+        Gate[&quot;IToolApprovalGate &amp; ISessionApprovalMemory&quot;]
+        ToolRegistry[&quot;ToolCatalog (ITool)&quot;]
+        Observers[&quot;IToolCallObserver&quot;]
     end
 
     App --&gt; Factory
     Factory --&gt;|Creates| Session
-    Definition --&gt;|Configures| Session
-    Features --&gt;|Contributes| Definition
-    Session --&gt; Runtime
+    Definition --&gt;|Configures| Assembly
+    Features --&gt;|Contributes| Assembly
+    Assembly --&gt; Session
+    Session --&gt; Middleware
+    Middleware --&gt; Runtime
     Runtime &lt;--&gt; ChatClient
     ChatClient &lt;--&gt; LLM
     Runtime --&gt; Approval
+    Approval &lt;--&gt; Gate
     Approval --&gt;|Approved| ToolRegistry
-    ToolRegistry --&gt; NativeTools
-    ToolRegistry --&gt; McpTools
-    ToolRegistry --&gt; DelegateTools
+    Runtime --&gt; Observers
 </code></pre>
 <hr>
 <h2 id="core-abstractions">Core Abstractions</h2>
 <h3 id="1-agentdefinition">1. <code>AgentDefinition</code></h3>
-<p>An immutable description of an agent's identity, metadata, and capabilities. Built modularly using <code>IAgentFeature</code>:</p>
-<pre><code class="lang-csharp">var definition = new AgentDefinition(&quot;financial-analyst&quot;, [
-    new PromptRegistryFeature(...),
-    new ToolApprovalFeature(policy),
-    new RetrievalAugmentationFeature(retriever)
-]);
+<p>An immutable description of an agent's identity, description, features, and capabilities:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+using MyAgents.Memory;
+
+var definition = new AgentDefinition(
+    Name: &quot;financial-analyst&quot;,
+    Features:
+    [
+        new PromptRegistryFeature(promptRegistry, &quot;system.analyst&quot;),
+        new ToolsFeature(marketDataTool),
+        new RetrievalAugmentationFeature(new RetrievalAugmentationOptions(&quot;sec-filings&quot;)),
+        new GuardrailsFeature(),
+        new TelemetryFeature()
+    ],
+    Description: &quot;Analyzes quarterly financial filings with grounded citations.&quot;);
 </code></pre>
-<h3 id="2-iagentfeature">2. <code>IAgentFeature</code></h3>
-<p>Features are the primary unit of extensibility. When an agent session initializes, every feature participates in an assembly phase to contribute:</p>
+<h3 id="2-iagentfeature--agentassembly">2. <code>IAgentFeature</code> &amp; <code>AgentAssembly</code></h3>
+<p>Features are the primary unit of composition (<code>Features are composed, not inherited</code>). When an agent session is created, every feature's <code>Contribute(AgentAssembly)</code> or <code>ContributeAsync(AgentAssembly, CancellationToken)</code> method populates an <code>AgentAssembly</code>:</p>
 <ul>
-<li><strong>System Prompts</strong>: Injected into the prompt chain before model invocation.</li>
-<li><strong>Tools</strong>: Registers available functions (<code>ITool</code>) with JSON schema descriptions.</li>
-<li><strong>Context Augmentation</strong>: Intercepts turns before/after model requests (e.g. RAG, guardrails, memory).</li>
-<li><strong>Tool Interception</strong>: Wraps tool executions to enforce policies, caching, or rate limits.</li>
+<li><strong><code>assembly.Prompts</code></strong> (<code>PromptBuilder</code>): Appends system instructions injected before model invocation.</li>
+<li><strong><code>assembly.Tools</code></strong> (<code>ToolCatalogBuilder</code>): Registers <code>ITool</code> implementations or delegate functions.</li>
+<li><strong><code>assembly.Pipeline</code></strong> (<code>PipelineBuilder</code>): Adds <code>IAgentMiddleware</code> interceptors around each turn (RAG context augmentation, context window trimming, retries, circuit breakers, structured output validation, guardrails, telemetry).</li>
+<li><strong><code>assembly.ToolObservers</code></strong>: Attaches <code>IToolCallObserver</code> listeners for pre/post tool call auditing.</li>
+<li><strong><code>assembly.Capabilities</code></strong>: Advertises <code>AgentCapabilities</code> (<code>Tools</code>, <code>Streaming</code>, <code>StructuredOutput</code>, <code>Memory</code>, <code>MultiModal</code>, <code>Telemetry</code>, <code>Channel</code>, <code>Workflow</code>) or <code>AgentModelCapability</code>.</li>
+<li><strong><code>assembly.RegisterSessionService&lt;T&gt;(service)</code></strong>: Registers session-scoped services accessible via <code>context.Services</code>.</li>
 </ul>
 <h3 id="3-iagentsessionfactory--iagentsession">3. <code>IAgentSessionFactory</code> &amp; <code>IAgentSession</code></h3>
-<p><code>IAgentSessionFactory</code> is registered in Microsoft Dependency Injection and manufactures <code>IAgentSession</code> instances.</p>
+<p><code>IAgentSessionFactory</code> (implemented by <code>DefaultAgentSessionFactory</code>) is registered in Dependency Injection via <code>services.AddMyAgentsChatRuntime()</code> or <code>services.AddMyAgents(...)</code>.</p>
 <ul>
-<li>Each <code>IAgentSession</code> represents an active conversation.</li>
-<li>Maintains isolated message history.</li>
-<li>Disposes resources cleanly when the conversation finishes (<code>IAsyncDisposable</code>).</li>
+<li>Calling <code>factory.CreateSession(sessionId, definition)</code> or <code>await factory.CreateSessionAsync(sessionId, definition, ct)</code> runs the feature assembly phase and builds the middleware pipeline.</li>
+<li>Each <code>IAgentSession</code> manages isolated conversation state and implements <code>IAsyncDisposable</code> to clean up session-owned resources (such as MCP connections) when disposed.</li>
 </ul>
 <hr>
 <h2 id="the-turn-execution-lifecycle">The Turn Execution Lifecycle</h2>
@@ -160,43 +173,43 @@
     autonumber
     actor User
     participant Session as IAgentSession
-    participant Feature as Feature Pipeline
-    participant Runtime as ChatRuntime
+    participant Pipeline as AgentPipeline (Middleware)
+    participant Runtime as ChatClientRuntime
     participant LLM as IChatClient
-    participant Policy as IToolApprovalPolicy
+    participant Eval as ToolApprovalEvaluator
     participant Tool as ITool
 
     User-&gt;&gt;Session: InvokeAsync(messages)
-    Session-&gt;&gt;Feature: AugmentContextAsync(context)
-    Feature--&gt;&gt;Session: Augmented Context
-    Session-&gt;&gt;Runtime: ExecuteTurnAsync(context)
+    Session-&gt;&gt;Pipeline: InvokeAsync(AgentTurnContext)
+    Pipeline-&gt;&gt;Runtime: InvokeAsync(augmentedContext)
     
-    loop Model &amp; Tool Loop
-        Runtime-&gt;&gt;LLM: GetResponseAsync(history, tools)
-        LLM--&gt;&gt;Runtime: ChatResponse (ToolCall request)
-        Runtime-&gt;&gt;Policy: EvaluateAsync(toolCall)
-        alt Approved
-            Policy--&gt;&gt;Runtime: Allow
-            Runtime-&gt;&gt;Tool: InvokeAsync(arguments)
-            Tool--&gt;&gt;Runtime: ToolResult
-            Runtime-&gt;&gt;Runtime: Append ToolResult to history
-        else Rejected / Requires Human
-            Policy--&gt;&gt;Runtime: Reject / Wait
-            Runtime-&gt;&gt;Runtime: Handle Rejection or Pause
+    loop Model &amp; Tool Loop (up to MaxToolRoundTrips)
+        Runtime-&gt;&gt;LLM: GetResponseAsync(history, ChatOptions)
+        LLM--&gt;&gt;Runtime: ChatResponse
+        alt Contains FunctionCallContent
+            Runtime-&gt;&gt;Eval: EvaluateAsync(ToolApprovalRequest)
+            alt Approved
+                Eval--&gt;&gt;Runtime: ToolApprovalDecision (Approved)
+                Runtime-&gt;&gt;Tool: InvokeAsync(argumentsJson)
+                Tool--&gt;&gt;Runtime: string result
+                Runtime-&gt;&gt;Runtime: Notify IToolCallObserver &amp; append FunctionResultContent
+            else Rejected or Pending without Gate Approval
+                Eval--&gt;&gt;Runtime: Rejected / Throw ToolApprovalRequiredException
+            end
+        else Final Assistant Response
+            Runtime--&gt;&gt;Pipeline: AgentTurnResult (Output + AgentTurnTelemetry)
         end
     end
 
-    Runtime--&gt;&gt;Session: Final AgentTurnResult
-    Session--&gt;&gt;User: Output Messages
+    Pipeline--&gt;&gt;Session: Validated AgentTurnResult
+    Session--&gt;&gt;User: AgentTurnResult
 </code></pre>
 <ol>
-<li><strong>Context Augmentation</strong>: Any registered features (e.g. memory retrieval, guardrails) augment input messages.</li>
-<li><strong>Model Request</strong>: The <code>ChatRuntime</code> serializes messages and tool schemas to <code>IChatClient</code>.</li>
-<li><strong>Tool Call Detection</strong>: If the model requests one or more tool calls, the runtime parses the request.</li>
-<li><strong>Approval Check</strong>: Before executing any tool, <code>IToolApprovalPolicy</code> verifies the tool name and arguments.</li>
-<li><strong>Tool Execution</strong>: Approved tools execute asynchronously with cancellation token support.</li>
-<li><strong>Result Feedback</strong>: Tool outputs are formatted as tool messages and sent back to the model.</li>
-<li><strong>Completion</strong>: When the model finishes generating its final response, the turn completes and returns <code>AgentTurnResult</code>.</li>
+<li><strong>Middleware Pipeline Pre-Processing</strong>: Registered <code>IAgentMiddleware</code> components execute in order—trimming the context window (<code>ContextWindowMiddleware</code>), injecting hybrid RAG citations (<code>RetrievalAugmentationMiddleware</code>), setting structured output schemas (<code>StructuredOutputMiddleware&lt;T&gt;</code>), and starting OpenTelemetry activities (<code>TelemetryMiddleware</code>).</li>
+<li><strong>Model Request</strong>: <code>ChatClientRuntime</code> converts <code>AgentMessage</code> records (including multi-modal <code>ContentParts</code>) and <code>ITool</code> declarations into <code>Microsoft.Extensions.AI</code> primitives and invokes <code>IChatClient</code>.</li>
+<li><strong>Tool Call Detection &amp; Parallel Execution</strong>: If the model requests one or more tool calls, the runtime evaluates them (supporting concurrent tool calls up to <code>ChatClientRuntimeOptions.MaxParallelToolCalls</code>).</li>
+<li><strong>Approval &amp; Observation</strong>: <code>ToolApprovalEvaluator</code> checks <code>ISessionApprovalMemory</code>, <code>IToolApprovalPolicy</code>, and <code>IToolApprovalGate</code>, recording an audit trail to <code>IToolApprovalAuditSink</code>. Approved calls notify <code>IToolCallObserver.OnToolCallingAsync</code>, execute <code>ITool.InvokeAsync</code>, and notify <code>OnToolCalledAsync</code>.</li>
+<li><strong>Post-Turn Validation</strong>: Output flows back through the middleware pipeline—verifying citation grounding (<code>CitationGrounder</code>), validating JSON schemas (<code>StructuredOutputMiddleware&lt;T&gt;</code>), and checking safety policies (<code>GuardrailMiddleware</code>)—before returning the final <code>AgentTurnResult</code>.</li>
 </ol>
 
 </article>

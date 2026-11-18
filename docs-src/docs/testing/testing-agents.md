@@ -1,8 +1,6 @@
-# Unit Testing Agents
+# Unit Testing Agents, Sessions & Durable Runs
 
-Testing conversational AI applications can be challenging because real LLM API calls are nondeterministic, slow, and incur token costs.
-
-The `MyAgents.Testing` package provides deterministic, in-memory mocks for testing agent definitions, prompt templates, and tool pipelines without hitting external APIs.
+Testing conversational AI applications against live LLM endpoints is slow, nondeterministic, and expensive. The `MyAgents.Testing` package provides deterministic, in-memory test doubles for agents, sessions, middleware pipelines, and durable run backends.
 
 ## Installation
 
@@ -12,96 +10,140 @@ dotnet add package MyAgents.Testing
 
 ---
 
-## 1. Using `InMemoryAgent`
+## 1. Testing Agents with `InMemoryAgent`
 
-`InMemoryAgent` is a deterministic mock agent that returns pre-queued responses and records all incoming turn contexts:
+`InMemoryAgent` implements `IAgent` with a FIFO queue of scripted responses and records every `AgentTurnContext` it receives:
 
 ```csharp
+using Microsoft.Extensions.DependencyInjection;
 using MyAgents.Core;
 using MyAgents.Testing;
-using Xunit;
+using NUnit.Framework;
 
-public sealed class AgentWorkflowTests
+[TestFixture]
+public sealed class AgentTests
 {
-    [Fact]
-    public async Task Agent_Returns_Expected_Sequence()
+    [Test]
+    public async Task InMemoryAgent_Returns_Queued_Responses_In_Order()
     {
-        // 1. Arrange a mock agent with queued responses
-        var mockAgent = new InMemoryAgent("MockReviewer")
-            .EnqueueResponse("Step 1: Code verified.")
-            .EnqueueResponse("Step 2: Ready for production.");
+        // 1. Arrange a deterministic agent with queued responses and token counts
+        using var agent = new InMemoryAgent("MockReviewer")
+            .EnqueueResponse("Step 1: Static analysis passed.", promptTokens: 40, completionTokens: 12)
+            .EnqueueResponse("Step 2: Ready to merge.", promptTokens: 55, completionTokens: 8)
+            .WithFallbackResponse("Default fallback response");
 
-        var context1 = new AgentTurnContext("session-1", [AgentMessage.FromText("user", "Check PR #42")]);
-        var context2 = new AgentTurnContext("session-1", [AgentMessage.FromText("user", "Proceed?")]);
+        var services = new AgentTurnServices(new ServiceCollection().BuildServiceProvider());
+        var context1 = new AgentTurnContext("session-1", [AgentMessage.FromText("user", "Check PR #42")], services);
+        var context2 = new AgentTurnContext("session-1", [AgentMessage.FromText("user", "Approve?")], services);
 
         // 2. Act
-        var result1 = await mockAgent.InvokeAsync(context1);
-        var result2 = await mockAgent.InvokeAsync(context2);
+        var result1 = await agent.InvokeAsync(context1);
+        var result2 = await agent.InvokeAsync(context2);
 
         // 3. Assert
-        Assert.Equal("Step 1: Code verified.", result1.Output[0].Content);
-        Assert.Equal("Step 2: Ready for production.", result2.Output[0].Content);
-        Assert.Equal(2, mockAgent.InvocationCount);
+        Assert.That(result1.Output[0].Content, Is.EqualTo("Step 1: Static analysis passed."));
+        Assert.That(result1.Telemetry.TotalTokens, Is.EqualTo(52));
+        Assert.That(result2.Output[0].Content, Is.EqualTo("Step 2: Ready to merge."));
+        Assert.That(agent.InvocationCount, Is.EqualTo(2));
+        Assert.That(agent.ReceivedContexts, Has.Count.EqualTo(2));
     }
 }
 ```
 
 ---
 
-## 2. Testing with `InMemoryAgentRuntime`
+## 2. Testing Middleware Pipelines with `FakeAgentSession`
 
-To test the entire session and feature pipeline (including tool execution and feature interceptors) with a fake model backend:
+`FakeAgentSession` wraps an `InMemoryAgent` inside an `IAgentSession` so you can unit-test middleware (`CircuitBreakerMiddleware`, `ContextWindowMiddleware`, `GuardrailMiddleware`, etc.) in isolation:
 
 ```csharp
+using MyAgents.Agents;
 using MyAgents.Core;
 using MyAgents.Testing;
-using Xunit;
+using NUnit.Framework;
 
-public sealed class SessionTurnTests
+[Test]
+public async Task FakeAgentSession_Executes_Middleware_Pipeline()
 {
-    [Fact]
-    public async Task Session_Applies_SystemPrompts_And_Tools()
-    {
-        var runtime = new InMemoryAgentRuntime();
-        runtime.SetModelResponse("The current weather is sunny.");
+    var guardrail = new GuardrailMiddleware([new BlocklistGuardrailPolicy(["secret-token"])]);
 
-        var definition = new AgentDefinition("assistant", [
-            AgentFeature.Create(assembly =>
-            {
-                assembly.Prompts.AddSystem("You are a helpful assistant.");
-            })
-        ]);
+    await using var session = FakeAgentSession.CreateWithMiddleware("test-session", guardrail)
+        .EnqueueResponse("Here is the leaked secret-token value.");
 
-        var session = runtime.CreateSession("test-session", definition);
-        var turnResult = await session.InvokeAsync([AgentMessage.FromText("user", "Hello")]);
+    var turn = await session.InvokeAsync([AgentMessage.FromText("user", "Show config")]);
 
-        Assert.Equal("The current weather is sunny.", turnResult.Output[0].Content);
-    }
+    // GuardrailMiddleware intercepts the response and substitutes the safe fallback message
+    Assert.That(turn.Output[0].Content, Does.Not.Contain("secret-token"));
+    Assert.That(session.InvocationCount, Is.EqualTo(1));
 }
 ```
 
 ---
 
-## 3. Testing Durable Run Handlers
+## 3. Testing Full Agent Definitions with `InMemoryAgentRuntime`
 
-Use `InMemoryAgentRunBackend` to test durable worker handlers without spinning up a real SQLite database file:
+Use `InMemoryAgentRuntime` alongside `DefaultAgentSessionFactory` (or `services.AddMyAgents(runtime)`) to test complete `AgentDefinition` compositions, multi-agent `GroupChat`, or `AgentGraph<TState>` workflows:
 
 ```csharp
-[Fact]
-public async Task DurableRun_Deduplicates_Duplicate_Keys()
+using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[Test]
+public async Task InMemoryAgentRuntime_Creates_And_Configures_Named_Agents()
 {
-    var backend = new InMemoryAgentRunBackend();
+    var runtime = new InMemoryAgentRuntime()
+        .ForAgent("researcher", agent => agent.WithFallbackResponse("Research findings complete."))
+        .ForAgent("writer", agent => agent.WithFallbackResponse("Final article draft."));
+
+    var services = new ServiceCollection()
+        .AddMyAgents(runtime)
+        .BuildServiceProvider();
+
+    var factory = services.GetRequiredService<IAgentSessionFactory>();
+
+    await using var session = factory.CreateSession(
+        "session-1",
+        new AgentDefinition("researcher", []));
+
+    var turn = await session.InvokeAsync([AgentMessage.FromText("user", "Start research")]);
+
+    Assert.That(turn.Output[0].Content, Is.EqualTo("Research findings complete."));
+    Assert.That(runtime.GetAgent("researcher").InvocationCount, Is.EqualTo(1));
+}
+```
+
+---
+
+## 4. Testing Durable Runs with `InMemoryAgentRunBackend`
+
+`InMemoryAgentRunBackend` implements `IAgentRunBackend`, `IAgentRunBatchCatalog`, and `IAgentRunBatchController` in memory and accepts a custom `TimeProvider` (such as `FakeTimeProvider`) for deterministic lease expiration and retry testing:
+
+```csharp
+using MyAgents.Core.Execution;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[Test]
+public async Task InMemoryAgentRunBackend_Deduplicates_IdempotencyKeys()
+{
+    var backend = new InMemoryAgentRunBackend(TimeProvider.System);
 
     var request = new AgentRunRequest(
         HandlerId: "report-generator",
-        InputJson: "{}",
-        IdempotencyKey: "unique-key-101");
+        InputJson: """{"quarter":"Q3"}""",
+        IdempotencyKey: "q3-report-2026",
+        ScopeKey: "tenant-1");
 
-    var firstSubmission = await backend.SubmitAsync(request);
-    var secondSubmission = await backend.SubmitAsync(request);
+    var first = await backend.SubmitAsync(request);
+    var second = await backend.SubmitAsync(request);
 
-    Assert.False(firstSubmission.WasDeduplicated);
-    Assert.True(secondSubmission.WasDeduplicated);
-    Assert.Equal(firstSubmission.RunId, secondSubmission.RunId);
+    Assert.Multiple(() =>
+    {
+        Assert.That(first.WasDeduplicated, Is.False);
+        Assert.That(second.WasDeduplicated, Is.True);
+        Assert.That(second.RunId, Is.EqualTo(first.RunId));
+    });
 }
 ```

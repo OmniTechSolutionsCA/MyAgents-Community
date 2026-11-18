@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class WorkflowSteps | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class WorkflowSteps | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Orchestration helpers for common workflow patterns. Workflows call these from within their RunAsync implementation. Sequential:  steps run one after another, each receiving the prior output Concurrent:  steps run in parallel, results collected Handoff:     one agent processes and decides which agent to hand off to next">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Core_Workflows_WorkflowSteps.md&amp;value=---%0Auid%3A%20MyAgents.Core.Workflows.WorkflowSteps%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core.Workflows.WorkflowSteps">
+
+
+
+  <h1 id="MyAgents_Core_Workflows_WorkflowSteps" data-uid="MyAgents.Core.Workflows.WorkflowSteps" class="text-break">
+Class WorkflowSteps  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Core.html">Core</a>.<a class="xref" href="MyAgents.Core.Workflows.html">Workflows</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Orchestration helpers for common workflow patterns.
+Workflows call these from within their RunAsync implementation.</p>
+<p>Sequential:  steps run one after another, each receiving the prior output
+Concurrent:  steps run in parallel, results collected
+Handoff:     one agent processes and decides which agent to hand off to next</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class WorkflowSteps</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">WorkflowSteps</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RequestHumanInputAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RequestHumanInputAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RequestHumanInputAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RequestHumanInputAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},System.String,System.String,System.Threading.CancellationToken)">
+  RequestHumanInputAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, string, string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L229"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Pauses the workflow to request a human reply, serialising current state into a snapshot.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask RequestHumanInputAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, string stepId, string prompt, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd><p>The current workflow session.</p>
+</dd>
+    <dt><code>stepId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>A stable identifier for the pause point (used for diagnostics and routing).</p>
+</dd>
+    <dt><code>prompt</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The question or instruction to present to the human.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token (checked before throwing).</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask">ValueTask</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd><p>The workflow state type.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+  <h4 class="section" id="MyAgents_Core_Workflows_WorkflowSteps_RequestHumanInputAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_String_System_Threading_CancellationToken__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>This method always throws <a class="xref" href="MyAgents.Core.Workflows.HumanInputRequiredException.html">HumanInputRequiredException</a>.
+The workflow execution unwinds — no code after this call runs until the workflow is
+resumed via <a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html#MyAgents_Core_Workflows_WorkflowHost_ResumeWithInputAsync__1_MyAgents_Core_Workflows_IWorkflow___0__MyAgents_Core_Workflows_WorkflowSnapshot_System_String_System_Text_Json_JsonSerializerOptions_System_Threading_CancellationToken_">ResumeWithInputAsync&lt;TState&gt;(IWorkflow&lt;TState&gt;, WorkflowSnapshot, string, JsonSerializerOptions?, CancellationToken)</a>.</p>
+</div>
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.Workflows.HumanInputRequiredException.html">HumanInputRequiredException</a></dt>
+    <dd><p>Always thrown to unwind the workflow.</p>
+</dd>
+  </dl>
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RequestToolApprovalAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RequestToolApprovalAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RequestToolApprovalAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__MyAgents_Core_PendingToolApproval_System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RequestToolApprovalAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},MyAgents.Core.PendingToolApproval,System.Threading.CancellationToken)">
+  RequestToolApprovalAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, PendingToolApproval, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L250"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Pauses the workflow until a tool approval has been decided.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask RequestToolApprovalAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, PendingToolApproval approval, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd></dd>
+    <dt><code>approval</code> <a class="xref" href="MyAgents.Core.PendingToolApproval.html">PendingToolApproval</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask">ValueTask</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RunConcurrentAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunConcurrentAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RunConcurrentAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_Collections_Generic_IReadOnlyList_System_String__System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunConcurrentAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  RunConcurrentAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, IReadOnlyList&lt;string&gt;, IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L80"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Runs multiple agent calls concurrently with the same input messages.
+Returns all results in order matching the input agent names.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask&lt;IReadOnlyList&lt;AgentTurnResult&gt;&gt; RunConcurrentAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, IReadOnlyList&lt;string&gt; agentNames, IReadOnlyList&lt;AgentMessage&gt; messages, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd><p>The workflow session.</p>
+</dd>
+    <dt><code>agentNames</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd><p>Agent names to invoke concurrently.</p>
+</dd>
+    <dt><code>messages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Messages sent to every agent.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;&gt;</dt>
+    <dd><p>Results in the same order as <code class="paramref">agentNames</code>.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RunHandoffAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunHandoffAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RunHandoffAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Func_MyAgents_Core_AgentTurnResult_System_Int32_System_String__MyAgents_Core_ITerminationCondition_System_Int32_System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunHandoffAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},System.String,System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Func{MyAgents.Core.AgentTurnResult,System.Int32,System.String},MyAgents.Core.ITerminationCondition,System.Int32,System.Threading.CancellationToken)">
+  RunHandoffAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, string, IReadOnlyList&lt;AgentMessage&gt;, Func&lt;AgentTurnResult, int, string?&gt;, ITerminationCondition?, int, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L116"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Handoff pattern: calls an initial agent, then uses a selector function to
+decide which agent to hand off to next, repeating until the selector returns null.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask&lt;AgentTurnResult&gt; RunHandoffAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, string firstAgentName, IReadOnlyList&lt;AgentMessage&gt; initialMessages, Func&lt;AgentTurnResult, int, string?&gt; nextAgentSelector, ITerminationCondition? termination = null, int maxHops = 10, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd><p>The workflow session.</p>
+</dd>
+    <dt><code>firstAgentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The first agent to invoke.</p>
+</dd>
+    <dt><code>initialMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Initial input messages.</p>
+</dd>
+    <dt><code>nextAgentSelector</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.func-3">Func</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd><p>Returns the name of the next agent to invoke, or null to stop.
+Receives the current result and the number of hops completed so far.</p>
+</dd>
+    <dt><code>termination</code> <a class="xref" href="MyAgents.Core.ITerminationCondition.html">ITerminationCondition</a></dt>
+    <dd><p>Optional termination condition checked after every turn.
+If it returns <code>true</code>, the loop stops immediately.
+Works alongside <code class="paramref">maxHops</code> — whichever triggers first wins.</p>
+</dd>
+    <dt><code>maxHops</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd><p>Safety cap on total handoffs (default: 10).</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>The final agent's result.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RunSequentialAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunSequentialAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RunSequentialAsync_MyAgents_Core_Workflows_IWorkflowSession_System_Object__System_Collections_Generic_IReadOnlyList_System_String__System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunSequentialAsync(MyAgents.Core.Workflows.IWorkflowSession{System.Object},System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  RunSequentialAsync(IWorkflowSession&lt;object?&gt;, IReadOnlyList&lt;string&gt;, IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L22"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Runs a sequence of agent calls where each step's output messages become
+the input for the next step.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask&lt;AgentTurnResult&gt; RunSequentialAsync(IWorkflowSession&lt;object?&gt; session, IReadOnlyList&lt;string&gt; agentNames, IReadOnlyList&lt;AgentMessage&gt; initialMessages, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a>&gt;</dt>
+    <dd><p>The workflow session.</p>
+</dd>
+    <dt><code>agentNames</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd><p>Agent names to invoke in order.</p>
+</dd>
+    <dt><code>initialMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Messages for the first agent.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>The result from the final agent in the sequence.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RunSequentialAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunSequentialAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RunSequentialAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_Collections_Generic_IReadOnlyList_System_String__System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunSequentialAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  RunSequentialAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, IReadOnlyList&lt;string&gt;, IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L49"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generic version that works with any TState.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask&lt;AgentTurnResult&gt; RunSequentialAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, IReadOnlyList&lt;string&gt; agentNames, IReadOnlyList&lt;AgentMessage&gt; initialMessages, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd></dd>
+    <dt><code>agentNames</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>initialMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_WorkflowSteps_RunStreamingBridgeAsync_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunStreamingBridgeAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_WorkflowSteps_RunStreamingBridgeAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_Collections_Generic_IReadOnlyList_System_String__System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Action_MyAgents_Core_AgentTurnResult__System_Func_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.WorkflowSteps.RunStreamingBridgeAsync``1(MyAgents.Core.Workflows.IWorkflowSession{``0},System.String,System.Collections.Generic.IReadOnlyList{System.String},System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Action{MyAgents.Core.AgentTurnResult},System.Func{System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  RunStreamingBridgeAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt;, string, IReadOnlyList&lt;string&gt;, IReadOnlyList&lt;AgentMessage&gt;, Action&lt;AgentTurnResult&gt;?, Func&lt;IReadOnlyList&lt;AgentMessage&gt;, AgentMessage&gt;?, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L171"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Streaming bridge pattern.
+Streams the source agent live (yielding each chunk to the <code class="paramref">onChunk</code> observer),
+compacts the buffered output into a single message, then runs the downstream agents
+sequentially using the compacted content as input.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ValueTask&lt;AgentTurnResult&gt; RunStreamingBridgeAsync&lt;TState&gt;(IWorkflowSession&lt;TState&gt; session, string sourceAgentName, IReadOnlyList&lt;string&gt; downstreamAgentNames, IReadOnlyList&lt;AgentMessage&gt; initialMessages, Action&lt;AgentTurnResult&gt;? onChunk = null, Func&lt;IReadOnlyList&lt;AgentMessage&gt;, AgentMessage&gt;? compact = null, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>session</code> <a class="xref" href="MyAgents.Core.Workflows.IWorkflowSession-1.html">IWorkflowSession</a>&lt;TState&gt;</dt>
+    <dd><p>The workflow session.</p>
+</dd>
+    <dt><code>sourceAgentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Agent to invoke with streaming.</p>
+</dd>
+    <dt><code>downstreamAgentNames</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd><p>Agents to invoke sequentially after streaming completes.</p>
+</dd>
+    <dt><code>initialMessages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Messages for the source agent.</p>
+</dd>
+    <dt><code>onChunk</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>Called with each streamed chunk for real-time UI delivery. May be null.</p>
+</dd>
+    <dt><code>compact</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.func-2">Func</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;, <a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Optional function to compact the buffered stream into a single context message.
+Defaults to joining all chunk text with newlines.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>The final downstream agent result.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+  <h4 class="section" id="MyAgents_Core_Workflows_WorkflowSteps_RunStreamingBridgeAsync__1_MyAgents_Core_Workflows_IWorkflowSession___0__System_String_System_Collections_Generic_IReadOnlyList_System_String__System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Action_MyAgents_Core_AgentTurnResult__System_Func_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__MyAgents_Core_AgentMessage__System_Threading_CancellationToken__remarks">Remarks</h4>
+  <div class="markdown level1 remarks"><p>Use this instead of RunSequentialAsync when you need the first agent's output to appear
+in real-time on a UI while the pipeline continues to completion.</p>
+</div>
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/WorkflowSteps.cs/#L11" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

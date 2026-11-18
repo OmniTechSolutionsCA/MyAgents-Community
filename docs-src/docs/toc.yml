@@ -8,10 +8,14 @@
       href: getting-started/packages.md
 - name: Core Concepts
   items:
-    - name: Architecture
+    - name: Architecture & Lifecycle
       href: core/architecture.md
     - name: Sessions & Turns
       href: core/sessions-and-turns.md
+    - name: Structured Output & Multi-Modal
+      href: core/structured-output-and-multimodal.md
+    - name: Prompt Registry & Templates
+      href: core/prompt-registry.md
 - name: Tools & Extensibility
   items:
     - name: NativeAOT Tools
@@ -20,29 +24,39 @@
       href: tools/delegate-tools.md
     - name: Model Context Protocol (MCP)
       href: tools/mcp.md
+- name: Workflows & State Graphs
+  items:
+    - name: Agent State Graphs
+      href: workflows/agent-graphs.md
+    - name: Checkpointed Workflows & HITL
+      href: workflows/checkpointed-workflows.md
+    - name: Orchestration Patterns
+      href: workflows/orchestration-patterns.md
 - name: Durable Execution
   items:
-    - name: Background Workers & SQLite Leases
+    - name: Durable Runs & Batch Workers
       href: execution/durable-runs.md
 - name: Memory & RAG
   items:
-    - name: Hybrid RAG (SIMD + BM25)
+    - name: Hybrid RAG & Vector Stores
       href: memory/hybrid-rag.md
-    - name: Episodic Memory
-      href: memory/episodic-memory.md
-    - name: Document Ingestion
+    - name: Document Ingestion & Chunking
       href: memory/document-ingestion.md
+    - name: Episodic Memory & Retention
+      href: memory/episodic-memory.md
 - name: Safety & Governance
   items:
-    - name: Tool Approvals
+    - name: Tool Approvals & Gates
       href: governance/tool-approval.md
+    - name: Guardrails, Fallbacks & Resilience
+      href: governance/guardrails-and-resilience.md
     - name: Circuit Breakers & Observability
       href: governance/circuit-breakers.md
 - name: Multi-Agent Systems
   items:
-    - name: Subagents & Teams
+    - name: Subagents, Group Chat & Routing
       href: agents/multi-agent-and-subagents.md
 - name: Testing
   items:
-    - name: Testing Agents & Turns
+    - name: Unit Testing Agents & Runs
       href: testing/testing-agents.md

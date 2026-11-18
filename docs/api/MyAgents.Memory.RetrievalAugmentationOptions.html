@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class RetrievalAugmentationOptions | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class RetrievalAugmentationOptions | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Options for retrieval augmentation.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Memory_RetrievalAugmentationOptions.md&amp;value=---%0Auid%3A%20MyAgents.Memory.RetrievalAugmentationOptions%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Memory.RetrievalAugmentationOptions">
+
+
+
+  <h1 id="MyAgents_Memory_RetrievalAugmentationOptions" data-uid="MyAgents.Memory.RetrievalAugmentationOptions" class="text-break">
+Class RetrievalAugmentationOptions  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Memory.html">Memory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Memory.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Options for retrieval augmentation.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed record RetrievalAugmentationOptions : IEquatable&lt;RetrievalAugmentationOptions&gt;</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">RetrievalAugmentationOptions</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="MyAgents.Memory.RetrievalAugmentationOptions.html">RetrievalAugmentationOptions</a>&gt;</div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions__ctor_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.#ctor*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions__ctor_System_String_System_Int32_System_Double_System_Collections_Generic_IReadOnlyDictionary_System_String_System_String__System_String_System_Nullable_System_Int32__System_Boolean_System_Nullable_System_Int32__System_Int32_System_Action_MyAgents_Memory_CitationGroundingResult__System_Boolean_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.#ctor(System.String,System.Int32,System.Double,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.String,System.Nullable{System.Int32},System.Boolean,System.Nullable{System.Int32},System.Int32,System.Action{MyAgents.Memory.CitationGroundingResult},System.Boolean)">
+  RetrievalAugmentationOptions(string, int, double, IReadOnlyDictionary&lt;string, string&gt;?, string?, int?, bool, int?, int, Action&lt;CitationGroundingResult&gt;?, bool)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Options for retrieval augmentation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RetrievalAugmentationOptions(string Namespace, int MaxResults = 5, double MinScore = 0, IReadOnlyDictionary&lt;string, string&gt;? MetadataFilters = null, string? Instruction = null, int? MaxContextCharacters = null, bool DeduplicateAcrossTurns = false, int? MaxContextTokens = null, int AdjacentChunkWindow = 0, Action&lt;CitationGroundingResult&gt;? OnCitationsEvaluated = null, bool AppendCitationReferences = false)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>Namespace</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>MaxResults</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>MinScore</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+    <dt><code>MetadataFilters</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2">IReadOnlyDictionary</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>Instruction</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>MaxContextCharacters</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+    <dt><code>DeduplicateAcrossTurns</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+    <dt><code>MaxContextTokens</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+    <dt><code>AdjacentChunkWindow</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>OnCitationsEvaluated</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="MyAgents.Memory.CitationGroundingResult.html">CitationGroundingResult</a>&gt;</dt>
+    <dd></dd>
+    <dt><code>AppendCitationReferences</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_AdjacentChunkWindow_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.AdjacentChunkWindow*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_AdjacentChunkWindow" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.AdjacentChunkWindow">
+  AdjacentChunkWindow
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L20"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int AdjacentChunkWindow { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_AppendCitationReferences_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.AppendCitationReferences*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_AppendCitationReferences" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.AppendCitationReferences">
+  AppendCitationReferences
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L22"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AppendCitationReferences { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_DeduplicateAcrossTurns_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.DeduplicateAcrossTurns*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_DeduplicateAcrossTurns" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.DeduplicateAcrossTurns">
+  DeduplicateAcrossTurns
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L18"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool DeduplicateAcrossTurns { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_Instruction_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.Instruction*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_Instruction" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.Instruction">
+  Instruction
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L16"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? Instruction { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_MaxContextCharacters_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxContextCharacters*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_MaxContextCharacters" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxContextCharacters">
+  MaxContextCharacters
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L17"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? MaxContextCharacters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_MaxContextTokens_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxContextTokens*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_MaxContextTokens" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxContextTokens">
+  MaxContextTokens
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L19"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? MaxContextTokens { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_MaxResults_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxResults*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_MaxResults" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MaxResults">
+  MaxResults
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L13"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int MaxResults { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_MetadataFilters_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MetadataFilters*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_MetadataFilters" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MetadataFilters">
+  MetadataFilters
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L15"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyDictionary&lt;string, string&gt;? MetadataFilters { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2">IReadOnlyDictionary</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>, <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_MinScore_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MinScore*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_MinScore" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.MinScore">
+  MinScore
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L14"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double MinScore { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_Namespace_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.Namespace*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_Namespace" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.Namespace">
+  Namespace
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L12"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Namespace { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Memory_RetrievalAugmentationOptions_OnCitationsEvaluated_" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.OnCitationsEvaluated*"></a>
+
+  <h3 id="MyAgents_Memory_RetrievalAugmentationOptions_OnCitationsEvaluated" data-uid="MyAgents.Memory.RetrievalAugmentationOptions.OnCitationsEvaluated">
+  OnCitationsEvaluated
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L21"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;CitationGroundingResult&gt;? OnCitationsEvaluated { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.action-1">Action</a>&lt;<a class="xref" href="MyAgents.Memory.CitationGroundingResult.html">CitationGroundingResult</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Memory/RetrievalAugmentationFeature.cs/#L11" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

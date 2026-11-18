@@ -87,76 +87,90 @@
         <article data-uid="">
 <h1 id="nativeaot-compile-time-tools">NativeAOT Compile-Time Tools</h1>
 
-<p>The <code>MyAgents.Generators</code> package provides a Roslyn incremental source generator that translates C# methods marked with <code>[AgentTool]</code> into zero-reflection, compile-time tool bindings.</p>
+<p>The <code>MyAgents.Generators</code> package provides a Roslyn incremental source generator that translates C# methods marked with <code>[AgentTool]</code> into zero-reflection, compile-time <code>ITool</code> bindings.</p>
 <h2 id="why-compile-time-tools">Why Compile-Time Tools?</h2>
-<p>Traditional agent frameworks rely on runtime reflection and <code>System.Text.Json</code> runtime schema generation to discover method signatures, serialize parameters, and invoke functions.</p>
-<p>In modern cloud, serverless, and edge environments, runtime reflection introduces:</p>
+<p>Traditional agent frameworks rely on runtime reflection and <code>System.Text.Json</code> runtime schema reflection to discover method signatures, serialize parameters, and invoke functions.</p>
+<p>In cloud, serverless, CLI, and edge environments, runtime reflection introduces:</p>
 <ol>
-<li><strong>Trimming and NativeAOT Incompatibility</strong>: Reflection-based serializers risk trimming warnings or runtime crashes when compiled with <code>PublishAot=true</code>.</li>
-<li><strong>Cold Start Latency</strong>: Reflection and JIT overhead add latency to the first tool execution.</li>
-<li><strong>Allocation Overhead</strong>: Dynamic method invocation allocates on every call.</li>
+<li><strong>Trimming and NativeAOT Incompatibility</strong>: Reflection-based serializers trigger <code>IL2026</code> / <code>IL3050</code> warnings or fail at runtime when compiled with <code>&lt;PublishAot&gt;true&lt;/PublishAot&gt;</code>.</li>
+<li><strong>Cold Start Latency</strong>: Dynamic reflection and expression tree compilation add startup overhead.</li>
+<li><strong>Allocation Overhead</strong>: Boxing and <code>MethodInfo.Invoke</code> allocate on every tool call.</li>
 </ol>
-<p><code>MyAgents.Generators</code> solves this by emitting:</p>
+<p><code>MyAgents.Generators</code> solves this at compile time by emitting:</p>
 <ul>
-<li>Fully static <code>ITool</code> classes.</li>
-<li>Compile-time constant strings for <code>ParametersSchemaJson</code>.</li>
-<li>Strongly-typed JSON context bindings.</li>
+<li>Strongly-typed <code>ITool</code> wrapper classes (<code>&lt;ClassName&gt;_&lt;MethodName&gt;_AgentTool</code>).</li>
+<li>Extension methods (<code>As&lt;MethodName&gt;Tool()</code>) for one-line registration.</li>
+<li>Compile-time JSON schemas (<code>ParametersSchemaJson</code>) and NativeAOT-safe serialization via your <code>JsonSerializerContext</code>.</li>
 </ul>
 <hr>
-<h2 id="authoring-an-agenttool">Authoring an [AgentTool]</h2>
+<h2 id="authoring-an-agenttool">Authoring an <code>[AgentTool]</code></h2>
 <h3 id="1-define-request-and-response-models">1. Define Request and Response Models</h3>
-<p>Ensure types are serializable via <code>System.Text.Json</code>:</p>
+<p>For complex parameter and return types, declare a <code>JsonSerializerContext</code> so <code>System.Text.Json</code> generates source-generated metadata at compile time:</p>
 <pre><code class="lang-csharp">using System.ComponentModel;
 using System.Text.Json.Serialization;
 using MyAgents.Core.Tools;
 
-public sealed record CustomerInfoRequest(
-    [Description(&quot;The unique customer ID&quot;)] string CustomerId);
+public sealed record TicketRequest(string Subject, int Priority = 3);
 
-public sealed record CustomerInfoResponse(
-    string Name,
-    string Tier,
-    int OpenTickets);
+public sealed record TicketReport(int Id, string Subject, int Priority, string Status);
 
-[JsonSerializable(typeof(CustomerInfoRequest))]
-[JsonSerializable(typeof(CustomerInfoResponse))]
-internal sealed partial class CustomerJsonContext : JsonSerializerContext;
+[JsonSerializable(typeof(TicketRequest))]
+[JsonSerializable(typeof(TicketReport))]
+[JsonSerializable(typeof(TicketReport[]))]
+internal sealed partial class TicketJsonContext : JsonSerializerContext;
 </code></pre>
-<h3 id="2-implement-the-tool-method">2. Implement the Tool Method</h3>
-<p>Annotate a static or instance method with <code>[AgentTool]</code>:</p>
-<pre><code class="lang-csharp">public static class CustomerServiceTools
+<h3 id="2-annotate-tool-methods-with-agenttool">2. Annotate Tool Methods with <code>[AgentTool]</code></h3>
+<p>Annotate static or instance methods with <code>[AgentTool]</code> and point <code>JsonContext</code> to your <code>JsonSerializerContext</code>:</p>
+<pre><code class="lang-csharp">public static class SupportTools
 {
-    [AgentTool(
-        Description = &quot;Retrieves account tier and open ticket counts for a customer.&quot;,
-        JsonContext = typeof(CustomerJsonContext))]
-    public static CustomerInfoResponse GetCustomerInfo(CustomerInfoRequest request)
+    [AgentTool(Description = &quot;Creates a support ticket&quot;, JsonContext = typeof(TicketJsonContext))]
+    public static TicketReport CreateTicket(
+        [Description(&quot;The ticket request&quot;)] TicketRequest request)
+        =&gt; new(Id: 42, request.Subject, request.Priority, &quot;open&quot;);
+
+    [AgentTool(Description = &quot;Lists open support tickets&quot;, JsonContext = typeof(TicketJsonContext))]
+    public static async Task&lt;TicketReport[]&gt; ListOpenTicketsAsync(
+        CancellationToken cancellationToken = default)
     {
-        return new CustomerInfoResponse(
-            Name: &quot;Acme Corp&quot;,
-            Tier: &quot;Enterprise&quot;,
-            OpenTickets: 2);
+        await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
+        return [new(42, &quot;Printer on fire&quot;, 1, &quot;open&quot;)];
     }
 }
 </code></pre>
-<h3 id="3-register-the-generated-tool">3. Register the Generated Tool</h3>
-<p>The source generator automatically creates an extension method <code>AsGetCustomerInfoTool()</code>:</p>
-<pre><code class="lang-csharp">var definition = new AgentDefinition(&quot;support-agent&quot;, [
-    AgentFeature.Create(assembly =&gt;
-    {
-        // Add the generated compile-time tool
-        assembly.Tools.Add(CustomerServiceToolsAgentToolsExtensions.AsGetCustomerInfoTool());
-    })
+<div class="TIP">
+<h5>Tip</h5>
+<p>Primitive parameters (<code>string</code>, <code>int</code>, <code>long</code>, <code>double</code>, <code>bool</code>, enums, etc.) are bound directly from <code>JsonDocument</code> with zero reflection even without a <code>JsonContext</code>. When using complex record or class types, <code>MyAgents.Generators</code> emits analyzer diagnostics (<code>MYAG001</code> / <code>MYAG002</code>) if a <code>JsonSerializerContext</code> registration is missing.</p>
+</div>
+<h3 id="3-register-the-generated-tools">3. Register the Generated Tools</h3>
+<p>The source generator emits an extension class <code>&lt;ContainingClass&gt;AgentToolsExtensions</code> with <code>As&lt;MethodName&gt;Tool()</code> helper methods:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var definition = new AgentDefinition(&quot;support-agent&quot;, [
+    new ToolsFeature(
+        SupportToolsAgentToolsExtensions.AsCreateTicketTool(),
+        SupportToolsAgentToolsExtensions.AsListOpenTicketsAsyncTool())
 ]);
 </code></pre>
+<p>If your tool methods are instance methods on a service class (for example <code>CustomerService</code>), pass the instance to the generated extension method:</p>
+<pre><code class="lang-csharp">var customerService = serviceProvider.GetRequiredService&lt;CustomerService&gt;();
+var tool = customerService.AsGetCustomerInfoTool();
+</code></pre>
 <hr>
-<h2 id="performance--trimming-verification">Performance &amp; Trimming Verification</h2>
-<p>Because the generated code references <code>CustomerJsonContext</code> directly, the .NET trimming analyzer detects that all types are statically known:</p>
+<h2 id="publishing-as-a-nativeaot-executable">Publishing as a NativeAOT Executable</h2>
+<p>Enable NativeAOT in your <code>.csproj</code>:</p>
 <pre><code class="lang-xml">&lt;PropertyGroup&gt;
-    &lt;PublishAot&gt;true&lt;/PublishAot&gt;
-    &lt;EnableTrimAnalyzer&gt;true&lt;/EnableTrimAnalyzer&gt;
+  &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+  &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+  &lt;PublishAot&gt;true&lt;/PublishAot&gt;
+  &lt;EnableTrimAnalyzer&gt;true&lt;/EnableTrimAnalyzer&gt;
 &lt;/PropertyGroup&gt;
 </code></pre>
-<p>When building with <code>dotnet publish -c Release</code>, the compilation completes with <strong>0 trim warnings and 0 AOT warnings</strong>.</p>
+<p>Publish and run the native binary (see <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/tree/main/community/samples/NativeAotTools"><code>community/samples/NativeAotTools</code></a>):</p>
+<pre><code class="lang-bash">dotnet publish community/samples/NativeAotTools -c Release
+</code></pre>
+<p>The compilation finishes with <strong>0 trim warnings and 0 AOT warnings</strong>.</p>
 
 </article>
 

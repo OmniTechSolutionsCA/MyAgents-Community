@@ -1,15 +1,15 @@
-# Durable Agent Runs
+# Durable Agent Runs & Batch Execution
 
-`MyAgents.Runtime.Workers` and `MyAgents.Runtime.Workers.Sqlite` provide a durable, asynchronous task execution engine for long-running agent workloads.
+`MyAgents.Runtime.Workers` and `MyAgents.Runtime.Workers.Sqlite` provide a crash-resilient, lease-based background execution engine for long-running agent workloads, batch evaluations, and stateful workflows.
 
 ## Why Durable Runs?
 
-In production, agents often execute complex, multi-minute tasks such as crawling web pages, ingesting datasets, or conducting multi-step research. Running these inside a standard HTTP request is brittle:
-- Server deployments or container restarts kill in-flight requests.
-- Transient network drops cause duplicate agent executions.
-- Load spikes can overwhelm LLM provider rate limits.
+In production, agents often execute multi-minute tasks such as crawling documentation, processing batch datasets, or waiting on human approvals. Running these inside an HTTP request is fragile:
+- Container restarts or deployments terminate in-flight turns.
+- Client retries cause duplicate agent executions and wasted token spend.
+- Traffic spikes can overwhelm provider rate limits without scope-based admission throttling.
 
-Durable Runs decouple submission from execution using a **lease-based background worker pool**.
+Durable Runs decouple **submission** from **execution** using a persistent `IAgentRunBackend`, fencing tokens, lease heartbeats, and automatic crash recovery.
 
 ---
 
@@ -17,18 +17,18 @@ Durable Runs decouple submission from execution using a **lease-based background
 
 ```mermaid
 flowchart TD
-    subgraph Submission
-        Client[Web API / CLI] -->|SubmitAsync| Backend[IAgentRunBackend (Sqlite)]
-        Backend -->|Write Pending Record| Table[(Persistent Runs Store)]
+    subgraph Submission & Control
+        Client["Web API / CLI / Batch Submitter"] -->|SubmitAsync| Backend["IAgentRunBackend (SqliteAgentRunBackend)"]
+        Backend -->|Transactional Write| Table[("SQLite WAL Store")]
     end
 
     subgraph Worker Pool
-        WorkerService[AgentRunWorkerService] -->|TryAcquireLeaseAsync| Table
-        Table -->|Leased to Worker 1| WorkerService
-        WorkerService -->|Heartbeat Renewal| Table
-        WorkerService -->|Execute| Handler[IAgentRunHandler]
-        Handler -->|Output Result| Result[AgentRunHandlerResult]
-        Result -->|Mark Completed / Failed| Table
+        WorkerService["AgentRunWorkerService"] -->|ClaimAsync| Table
+        Table -->|AgentRunLease + FencingToken| WorkerService
+        WorkerService -->|RenewLeaseAsync Heartbeat| Table
+        WorkerService -->|ExecuteAsync| Handler["IAgentRunHandler"]
+        Handler -->|Completed / WaitingForInput| Result["AgentRunHandlerResult"]
+        Result -->|CompleteAsync / WaitForInputAsync / RetryAsync| Table
     end
 ```
 
@@ -36,7 +36,7 @@ flowchart TD
 
 ## 1. Configuring the Durable Worker Host
 
-Configure your background service using standard .NET Generic Host:
+Register the SQLite backend, your `IAgentRunHandler` implementations, and the Generic Host worker service:
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -47,16 +47,24 @@ using MyAgents.Runtime.Workers.Sqlite;
 
 var builder = Host.CreateApplicationBuilder();
 
-// 1. Register SQLite persistence backend
-builder.Services.AddSingleton<IAgentRunBackend>(_ => 
-    new SqliteAgentRunBackend("agent-runs.db"));
+// 1. Register SQLite persistence backend with optional scope throttling
+builder.Services.AddSingleton<IAgentRunBackend>(_ =>
+    new SqliteAgentRunBackend(
+        databasePath: "agent-runs.db",
+        options: new AgentRunBackendOptions
+        {
+            MaxLeasedRunsPerScope = 4,
+            MaxOutstandingRunsPerScope = 100
+        }));
 
-// 2. Register your custom run handler
+// 2. Register your run handler(s)
 builder.Services.AddSingleton<IAgentRunHandler, DataProcessingAgentHandler>();
 
-// 3. Register the durable worker service
+// 3. Register the hosted worker service
 builder.Services.AddMyAgentsRunWorker(options =>
 {
+    options.WorkerId = Environment.MachineName;
+    options.MaxConcurrentRuns = 4;
     options.IdlePollInterval = TimeSpan.FromMilliseconds(250);
     options.LeaseDuration = TimeSpan.FromSeconds(30);
     options.LeaseRenewalInterval = TimeSpan.FromSeconds(10);
@@ -72,65 +80,125 @@ await host.RunAsync();
 
 ## 2. Implementing `IAgentRunHandler`
 
-A run handler executes the actual business logic for an agent run:
+Each `IAgentRunHandler` declares a stable `HandlerId` and implements `ExecuteAsync(AgentRunContext, CancellationToken)`:
 
 ```csharp
+using MyAgents.Core;
+using MyAgents.Core.Execution;
+
 public sealed class DataProcessingAgentHandler : IAgentRunHandler
 {
-    private readonly IAgentSessionFactory _sessionFactory;
+    public const string StableHandlerId = "data-processing";
 
-    public DataProcessingAgentHandler(IAgentSessionFactory sessionFactory)
+    private readonly IAgentSessionFactory _sessionFactory;
+    private readonly AgentDefinition _definition;
+
+    public DataProcessingAgentHandler(
+        IAgentSessionFactory sessionFactory,
+        AgentDefinition definition)
     {
         _sessionFactory = sessionFactory;
+        _definition = definition;
     }
 
-    public async ValueTask<AgentRunHandlerResult> HandleAsync(
+    public string HandlerId => StableHandlerId;
+
+    public async ValueTask<AgentRunHandlerResult> ExecuteAsync(
         AgentRunContext context,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        // Create an isolated session for this durable run
-        await using var session = _sessionFactory.CreateSession(context.RunId, MyAgentDefinitions.Default);
+        // Optionally inspect or save intermediate checkpoints during multi-step work
+        if (context.CheckpointJson is null)
+        {
+            await context.SaveCheckpointAsync("""{"stage":"started"}""", cancellationToken);
+        }
 
-        var userMessage = AgentMessage.FromText("user", context.InputJson);
-        var result = await session.InvokeAsync([userMessage], cancellationToken);
+        await using var session = _sessionFactory.CreateSession(context.RunId, _definition);
+        var turn = await session.InvokeAsync(
+            [AgentMessage.FromText("user", context.InputJson)],
+            cancellationToken);
 
-        return AgentRunHandlerResult.Completed(result.Output.Last().Content);
+        var output = turn.Output.LastOrDefault()?.Content ?? string.Empty;
+        return AgentRunHandlerResult.Completed(output);
     }
 }
 ```
 
+### Pausing a Run for External Input (`WaitingForInput`)
+
+A handler can pause a durable run and release its worker slot while waiting for a human or webhook signal:
+
+```csharp
+// Inside ExecuteAsync:
+if (context.ResumeInputJson is null)
+{
+    return AgentRunHandlerResult.WaitingForInput(
+        checkpointJson: """{"step":"awaiting-manager-signoff"}""",
+        pendingInputDescription: "Approve Q3 audit report publication?");
+}
+
+// Later, when the external signal arrives, resume the run on the backend:
+await backend.ResumeAsync(runId, resumeInputJson: """{"approved":true}""", cancellationToken);
+```
+
 ---
 
-## 3. Submitting Runs with Idempotency
-
-Submissions are resilient to duplicate calls:
+## 3. Submitting Runs with Idempotency & Scope Throttling
 
 ```csharp
 var backend = serviceProvider.GetRequiredService<IAgentRunBackend>();
 
 var request = new AgentRunRequest(
-    HandlerId: "data-processing",
+    HandlerId: DataProcessingAgentHandler.StableHandlerId,
     InputJson: """{"dataset": "sales-q3", "action": "audit"}""",
     IdempotencyKey: "sales-q3-audit-2026",
-    ScopeKey: "tenant-acme"
-);
+    ScopeKey: "tenant-acme",
+    Deadline: DateTimeOffset.UtcNow.AddMinutes(15),
+    MaxAttempts: 3);
 
-var submission = await backend.SubmitAsync(request, cancellationToken);
+AgentRunSubmission submission = await backend.SubmitAsync(request, cancellationToken);
 
 if (submission.WasDeduplicated)
 {
-    Console.WriteLine($"Duplicate request detected. Returning existing RunId: {submission.RunId}");
+    Console.WriteLine($"Duplicate request deduplicated. Existing RunId: {submission.RunId}");
 }
 else
 {
-    Console.WriteLine($"New Run enqueued: {submission.RunId}");
+    Console.WriteLine($"Enqueued new RunId: {submission.RunId}");
 }
 ```
 
 ---
 
-## Crash Recovery & Lease Management
+## 4. Batch Submission, Reporting & Cancellation
 
-1. **Lease Acquisition**: A worker acquires a lease on a run with an expiration timestamp (`LeaseExpiresAt`).
-2. **Heartbeats**: While processing, the worker automatically renews its lease every `LeaseRenewalInterval`.
-3. **Automatic Recovery**: If the host process is killed or panics, the lease expires. Another worker claims the expired lease, increments the attempt count, and retries or resumes execution.
+`MyAgents.Runtime.Workers` includes `AgentRunBatchSubmitter`, `AgentRunBatchReporter`, and `AgentRunBatchController` for managing large batches of durable runs:
+
+```csharp
+using MyAgents.Core.Execution;
+using MyAgents.Runtime.Workers;
+
+var submitter = new AgentRunBatchSubmitter(backend);
+var reporter = new AgentRunBatchReporter((IAgentRunBatchCatalog)backend);
+var controller = new AgentRunBatchController((IAgentRunBatchController)backend);
+
+// 1. Stream batch cases into the backend
+async IAsyncEnumerable<AgentRunBatchCase> GenerateCasesAsync()
+{
+    yield return new AgentRunBatchCase("case-1", new AgentRunRequest("data-processing", """{"id":1}"""));
+    yield return new AgentRunBatchCase("case-2", new AgentRunRequest("data-processing", """{"id":2}"""));
+    await Task.CompletedTask;
+}
+
+await foreach (var sub in submitter.SubmitAsync("batch-2026-11", GenerateCasesAsync(), cancellationToken))
+{
+    Console.WriteLine($"Submitted run {sub.RunId} for batch-2026-11");
+}
+
+// 2. Query aggregated batch progress and success rate
+AgentRunBatchSummary summary = await reporter.GetSummaryAsync("batch-2026-11", cancellationToken);
+Console.WriteLine($"Total: {summary.RunCount}, Succeeded: {summary.SucceededCount}, Pending: {summary.PendingCount}, Complete: {summary.IsComplete}");
+
+// 3. Cancel remaining runs in the batch if needed
+int cancelled = await controller.CancelAsync("batch-2026-11", cancellationToken);
+```

@@ -87,28 +87,32 @@
         <article data-uid="">
 <h1 id="sessions--turns">Sessions &amp; Turns</h1>
 
-<p>An agent interaction in MyAgents Community consists of <strong>Sessions</strong> and <strong>Turns</strong>.</p>
+<p>An agent interaction in MyAgents Community consists of <strong>Sessions</strong> (<code>IAgentSession</code>) and <strong>Turns</strong> (<code>AgentTurnContext</code> / <code>AgentTurnResult</code>).</p>
 <h2 id="understanding-sessions">Understanding Sessions</h2>
-<p>An <code>IAgentSession</code> manages an ongoing conversation between a user and an agent. It provides:</p>
+<p>An <code>IAgentSession</code> manages an ongoing interaction with an agent definition. It provides:</p>
 <ol>
-<li><strong>Isolated State</strong>: Conversation history, variables, and session-owned resources.</li>
-<li><strong>Resource Lifetime</strong>: Any tools or connections opened during a session (such as local MCP child processes or database connections) are automatically disposed when the session is disposed.</li>
-<li><strong>Turn Invocation</strong>: Synchronous and streaming invocation methods.</li>
+<li><strong>Isolated Pipeline &amp; Capabilities</strong>: Assembled prompts, tools, middleware, and session-scoped services (<code>AgentAssembly.SessionServices</code>).</li>
+<li><strong>Resource Lifetime</strong>: Implements <code>IAsyncDisposable</code> and <code>IDisposable</code> so session-owned resources (such as local MCP child processes or network transports) are cleaned up deterministically.</li>
+<li><strong>Turn Invocation</strong>: Blocking (<code>InvokeAsync</code>), strongly-typed structured (<code>InvokeAsync&lt;T&gt;</code>), and streaming (<code>InvokeStreamingAsync</code>) methods.</li>
 </ol>
 <h3 id="creating-a-session">Creating a Session</h3>
-<pre><code class="lang-csharp">using MyAgents.Core;
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
 
-// Resolve the session factory from DI
 var factory = serviceProvider.GetRequiredService&lt;IAgentSessionFactory&gt;();
 
-// Create a named session with a specific definition
+// Synchronous session creation
 await using var session = factory.CreateSession(&quot;user-1001-conversation&quot;, definition);
+
+// Or asynchronous session creation (recommended when using async features like McpFeature)
+await using var asyncSession = await ((DefaultAgentSessionFactory)factory)
+    .CreateSessionAsync(&quot;user-1002-conversation&quot;, definition, cancellationToken);
 </code></pre>
 <hr>
 <h2 id="executing-conversational-turns">Executing Conversational Turns</h2>
-<p>A <strong>turn</strong> represents a single input/output cycle: the user supplies one or more messages, and the agent processes them (including zero or more tool calls) to produce an output.</p>
+<p>A <strong>turn</strong> represents a complete input-to-output cycle: the caller supplies one or more <code>AgentMessage</code> instances, and the runtime executes the middleware pipeline and any model-requested tool round-trips to produce an <code>AgentTurnResult</code>.</p>
 <h3 id="standard-invocation-invokeasync">Standard Invocation (<code>InvokeAsync</code>)</h3>
-<p>Use <code>InvokeAsync</code> when you want the complete final response once all tool calls and reasoning steps are finished:</p>
+<p>Use <code>InvokeAsync</code> when you want the complete final response and telemetry once all tool calls and reasoning steps finish:</p>
 <pre><code class="lang-csharp">var input = AgentMessage.FromText(&quot;user&quot;, &quot;Summarize our quarterly metrics.&quot;);
 AgentTurnResult turn = await session.InvokeAsync([input], cancellationToken);
 
@@ -116,45 +120,82 @@ foreach (var message in turn.Output)
 {
     Console.WriteLine($&quot;[{message.Role}]: {message.Content}&quot;);
 }
+
+// Inspect turn telemetry
+Console.WriteLine($&quot;Duration: {turn.Telemetry.TurnDuration.TotalMilliseconds:F0}ms&quot;);
+Console.WriteLine($&quot;Tool Calls: {turn.Telemetry.ToolCalls}&quot;);
+Console.WriteLine($&quot;Tokens: {turn.Telemetry.PromptTokens} in / {turn.Telemetry.CompletionTokens} out ({turn.Telemetry.TotalTokens} total)&quot;);
+</code></pre>
+<p>You can also customize the <code>AgentTurnContext</code> per turn using the <code>configureContext</code> overload:</p>
+<pre><code class="lang-csharp">var turn = await session.InvokeAsync(
+    [AgentMessage.FromText(&quot;user&quot;, &quot;Return the result as a JSON object.&quot;)],
+    configureContext: ctx =&gt; ctx.Capabilities.Set(AgentResponseFormat.JsonObject),
+    cancellationToken: cancellationToken);
 </code></pre>
 <h3 id="streaming-invocation-invokestreamingasync">Streaming Invocation (<code>InvokeStreamingAsync</code>)</h3>
-<p>Use <code>InvokeStreamingAsync</code> for low-latency interactive applications (like chat web UIs or CLI spinners) where tokens should be rendered as they arrive:</p>
+<p>Use <code>InvokeStreamingAsync</code> for low-latency interactive applications where response chunks should be rendered as they arrive:</p>
 <pre><code class="lang-csharp">var input = AgentMessage.FromText(&quot;user&quot;, &quot;Draft an email to the engineering team.&quot;);
 
-await foreach (AgentTurnResult update in session.InvokeStreamingAsync([input], cancellationToken))
+await foreach (AgentTurnResult chunk in session.InvokeStreamingAsync([input], cancellationToken))
 {
-    foreach (var message in update.Output)
+    foreach (var message in chunk.Output)
     {
         Console.Write(message.Content);
     }
 }
 Console.WriteLine();
 </code></pre>
-<div class="TIP">
-<h5>Tip</h5>
-<p>Even during streaming, MyAgents Community maintains strict tool approval safety. If a tool requires human approval or triggers a policy rejection, the stream handles the pause/rejection cleanly before continuing.</p>
-</div>
+<p>If you want to fold streamed chunks into a single consolidated <code>AgentTurnResult</code> (summing token counts and concatenating assistant output), use <code>AgentOutputAccumulator.Fold</code>:</p>
+<pre><code class="lang-csharp">var chunks = new List&lt;AgentTurnResult&gt;();
+await foreach (var chunk in session.InvokeStreamingAsync([input], cancellationToken))
+{
+    chunks.Add(chunk);
+}
+
+AgentTurnResult? fullResult = AgentOutputAccumulator.Fold(chunks);
+</code></pre>
 <hr>
-<h2 id="session-messages--roles">Session Messages &amp; Roles</h2>
-<p>MyAgents Community uses strongly-typed <code>AgentMessage</code> records with standard roles:</p>
-<ul>
-<li><code>AgentMessage.FromText(&quot;user&quot;, &quot;Hello!&quot;)</code>: User prompt.</li>
-<li><code>AgentMessage.FromText(&quot;assistant&quot;, &quot;How can I help?&quot;)</code>: Model output.</li>
-<li><code>AgentMessage.FromText(&quot;system&quot;, &quot;Instructions here.&quot;)</code>: System prompt.</li>
-<li><code>AgentMessage.FromToolResult(toolCallId, &quot;42&quot;)</code>: Tool execution result payload.</li>
-</ul>
+<h2 id="messages-metadata--roles">Messages, Metadata &amp; Roles</h2>
+<p><code>AgentMessage</code> is an immutable record supporting correlation metadata and multi-modal content parts:</p>
+<pre><code class="lang-csharp">// Simple text message
+var userMsg = AgentMessage.FromText(
+    role: &quot;user&quot;,
+    text: &quot;Hello!&quot;,
+    correlationId: &quot;corr-101&quot;,
+    threadId: &quot;thread-42&quot;,
+    senderId: &quot;user-alice&quot;);
+
+// Multi-modal message with text and image bytes
+var multiModalMsg = AgentMessage.FromParts(
+    role: &quot;user&quot;,
+    parts:
+    [
+        new TextAgentContent(&quot;What is shown in this architecture diagram?&quot;),
+        new ImageAgentContent(imageBytes, &quot;image/png&quot;)
+    ],
+    textSummary: &quot;What is shown in this architecture diagram?&quot;);
+</code></pre>
 <hr>
-<h2 id="session-history--trimming">Session History &amp; Trimming</h2>
-<p>To prevent sessions from exceeding LLM context windows in long-running conversations, you can register a <code>ContextWindowFeature</code>:</p>
+<h2 id="context-window-management--trimming">Context Window Management &amp; Trimming</h2>
+<p>To prevent long-running conversations from exceeding model token limits, add <code>ContextWindowFeature</code> (or <code>ContextWindowMiddleware</code> directly). System messages are always preserved at the start of the conversation while older non-system messages are trimmed:</p>
+<h3 id="sliding-message-count-window">Sliding Message Count Window</h3>
 <pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
 
 var definition = new AgentDefinition(&quot;chat-agent&quot;, [
-    new ContextWindowFeature(new ContextWindowOptions
-    {
-        MaxTokens = 8000,
-        PreserveSystemPrompt = true,
-        KeepLatestUserMessages = 4
-    })
+    // Retains all system prompts plus the most recent 10 user/assistant messages
+    new ContextWindowFeature(maxMessages: 10)
+]);
+</code></pre>
+<h3 id="token-budget-trimming">Token Budget Trimming</h3>
+<p>Chain <code>.WithTokenBudget(...)</code> or pass a <code>TokenBudgetTrimmer</code> to trim messages based on a maximum token budget:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+using MyAgents.Memory;
+
+var definition = new AgentDefinition(&quot;token-bounded-agent&quot;, [
+    new ContextWindowFeature(maxMessages: 50)
+        .WithTokenBudget(maxTokens: 4000, tokenCounter: ApproximateTokenCounter.Instance)
 ]);
 </code></pre>
 

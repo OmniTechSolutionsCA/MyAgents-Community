@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Hybrid RAG &amp; Memory Retrieval | MyAgents Community Documentation </title>
+      <title>Hybrid RAG &amp; Vector Memory Stores | MyAgents Community Documentation </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Hybrid RAG &amp; Memory Retrieval | MyAgents Community Documentation ">
+      <meta name="title" content="Hybrid RAG &amp; Vector Memory Stores | MyAgents Community Documentation ">
       
       
       <link rel="icon" href="../../favicon.ico">
@@ -85,55 +85,69 @@
         </div>
 
         <article data-uid="">
-<h1 id="hybrid-rag--memory-retrieval">Hybrid RAG &amp; Memory Retrieval</h1>
+<h1 id="hybrid-rag--vector-memory-stores">Hybrid RAG &amp; Vector Memory Stores</h1>
 
-<p><code>MyAgents.Memory</code> delivers an enterprise-grade retrieval-augmented generation (RAG) system with zero external vector database dependencies.</p>
+<p><code>MyAgents.Memory</code> delivers an enterprise-grade retrieval-augmented generation (RAG) and memory system with <strong>zero mandatory external database dependencies</strong>, while also supporting persistent SQLite storage and <code>Microsoft.Extensions.VectorData</code> providers.</p>
 <h2 id="why-hybrid-retrieval">Why Hybrid Retrieval?</h2>
-<p>Pure vector search (dense embeddings) excels at semantic understanding and conceptual matches, but struggles with exact identifiers, SKU numbers, code keywords, or rare terminology. Pure keyword search (BM25) excels at exact matches but lacks semantic awareness.</p>
-<p>MyAgents Community combines both using <strong>Reciprocal Rank Fusion (RRF)</strong>:</p>
+<p>Pure vector search (dense embeddings) excels at semantic similarity and conceptual queries, but can miss exact product SKUs, error codes, C# type names, or rare identifiers. Pure keyword search (BM25) excels at exact token matching but lacks semantic understanding.</p>
+<p>MyAgents Community combines both using <strong>Reciprocal Rank Fusion (RRF)</strong> or <strong>Weighted Linear Combination</strong>:</p>
 <pre><code class="lang-mermaid">flowchart TD
-    Query[User Query: 'NativeAOT source generator'] --&gt; Dense[Dense Vector Search]
-    Query --&gt; Sparse[BM25 Lexical Search]
+    Query[&quot;User Query: 'NativeAOT source generator MYAG001'&quot;] --&gt; Dense[&quot;Dense Vector Search (IVectorMemoryStore)&quot;]
+    Query --&gt; Sparse[&quot;BM25 Lexical Search (BM25Index)&quot;]
 
-    Dense --&gt;|TensorPrimitives.Dot SIMD| DenseRanks[Dense Ranked List]
-    Sparse --&gt;|Inverted Index TF-IDF| SparseRanks[Sparse Ranked List]
+    Dense --&gt;|&quot;Pre-normalized TensorPrimitives.Dot SIMD&quot;| DenseRanks[&quot;Dense Ranked List&quot;]
+    Sparse --&gt;|&quot;Zero-Regex Span Tokenization + TF-IDF&quot;| SparseRanks[&quot;Sparse Ranked List&quot;]
 
-    DenseRanks --&gt; RRF[Reciprocal Rank Fusion]
+    DenseRanks --&gt; RRF[&quot;Reciprocal Rank Fusion / Linear Combination&quot;]
     SparseRanks --&gt; RRF
 
-    RRF --&gt; FusedResults[Fused Grounded Context Results]
+    RRF --&gt; FusedResults[&quot;Fused Grounded Context &amp; Citations&quot;]
 </code></pre>
 <hr>
-<h2 id="1-configuring-hybrid-memory">1. Configuring Hybrid Memory</h2>
+<h2 id="1-choosing-a-memory-store">1. Choosing a Memory Store</h2>
+<p><code>MyAgents.Memory</code> ships with three <code>IVectorMemoryStore</code> implementations that all support <code>IMemoryStoreChangeNotifier</code> (automatically keeping the <code>BM25Index</code> synchronized on writes and deletes) and SHA-256 content-hash deduplication:</p>
+<h3 id="option-a-durable-sqlite-vector-store-sqlitememorystore">Option A: Durable SQLite Vector Store (<code>SqliteMemoryStore</code>)</h3>
+<p>Persists entries, JSON metadata, and binary float embeddings in WAL-mode SQLite while executing SIMD <code>TensorPrimitives.Dot</code> similarity in memory:</p>
 <pre><code class="lang-csharp">using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using MyAgents.Memory;
 
 var services = new ServiceCollection();
-
-// Register your embedding generator (e.g. OpenAI or local ONNX)
 services.AddSingleton&lt;IEmbeddingGenerator&lt;string, Embedding&lt;float&gt;&gt;&gt;(embeddingGenerator);
 
-// Register in-memory or SQLite vector store
-services.AddSingleton&lt;IMemoryStore, SqliteMemoryStore&gt;(sp =&gt; 
-    new SqliteMemoryStore(&quot;vectors.db&quot;, sp.GetRequiredService&lt;IEmbeddingGenerator&lt;string, Embedding&lt;float&gt;&gt;&gt;()));
+// Registers SqliteMemoryStore as IMemoryStore + IVectorMemoryStore and adds HybridMemoryRetriever
+services.AddSqliteMemoryStore(&quot;knowledge.db&quot;);
+</code></pre>
+<h3 id="option-b-in-memory-simd-vector-store-with-snapshots-vectormemorystore">Option B: In-Memory SIMD Vector Store with Snapshots (<code>VectorMemoryStore</code>)</h3>
+<p>High-speed in-memory vector store with binary stream/file snapshot persistence:</p>
+<pre><code class="lang-csharp">var vectorStore = new VectorMemoryStore(embeddingGenerator);
 
-// Add Hybrid Memory Retrieval with BM25 indexing
-services.AddHybridMemoryRetrieval();
-
-var provider = services.BuildServiceProvider();
-var retriever = provider.GetRequiredService&lt;IHybridMemoryRetriever&gt;();
+// Save and restore binary snapshots for fast warm starts
+await vectorStore.SaveToFileAsync(&quot;vectors.snapshot&quot;, cancellationToken);
+int loadedCount = await vectorStore.LoadFromFileAsync(&quot;vectors.snapshot&quot;, cancellationToken);
+</code></pre>
+<h3 id="option-c-microsoftextensionsvectordata-bridge-vectordatamemorystore">Option C: <code>Microsoft.Extensions.VectorData</code> Bridge (<code>VectorDataMemoryStore</code>)</h3>
+<p>Bridges any <code>VectorStoreCollection&lt;string, VectorDataMemoryRecord&gt;</code> from the <code>Microsoft.Extensions.VectorData</code> ecosystem:</p>
+<pre><code class="lang-csharp">services.AddVectorDataMemoryStore(vectorStoreCollection);
+</code></pre>
+<h3 id="content-hash-embedding-caching-cachingembeddinggenerator">Content-Hash Embedding Caching (<code>CachingEmbeddingGenerator</code>)</h3>
+<p>Wrap any <code>IEmbeddingGenerator&lt;string, Embedding&lt;float&gt;&gt;</code> in <code>CachingEmbeddingGenerator</code> to avoid re-computing embeddings for repeated queries or unchanged chunks:</p>
+<pre><code class="lang-csharp">var cachedEmbedder = new CachingEmbeddingGenerator(innerEmbeddingGenerator, maxCacheEntries: 4096);
+Console.WriteLine($&quot;Cache Hits: {cachedEmbedder.CacheHits}, Misses: {cachedEmbedder.CacheMisses}&quot;);
 </code></pre>
 <hr>
-<h2 id="2-executing-a-hybrid-query">2. Executing a Hybrid Query</h2>
-<pre><code class="lang-csharp">var query = new HybridMemoryQuery(
+<h2 id="2-executing-a-hybrid-search-query">2. Executing a Hybrid Search Query</h2>
+<pre><code class="lang-csharp">var retriever = provider.GetRequiredService&lt;IHybridMemoryRetriever&gt;();
+
+var query = new HybridMemoryQuery(
     QueryText: &quot;NativeAOT source generator&quot;,
     MaxResults: 5,
-    RankingMode: HybridRankingMode.ReciprocalRankFusion,
     DenseWeight: 0.5,
     SparseWeight: 0.5,
-    RrfK: 60
-);
+    RrfK: 60,
+    RankingMode: HybridRankingMode.ReciprocalRankFusion,
+    MinScore: 0.0,
+    MetadataFilters: new Dictionary&lt;string, string&gt; { [&quot;category&quot;] = &quot;tools&quot; });
 
 IReadOnlyList&lt;HybridMemorySearchResult&gt; results = await retriever.SearchHybridAsync(
     ns: &quot;technical-docs&quot;,
@@ -142,24 +156,33 @@ IReadOnlyList&lt;HybridMemorySearchResult&gt; results = await retriever.SearchHy
 
 foreach (var hit in results)
 {
-    Console.WriteLine($&quot;[Score: {hit.FusedScore:F4}] {hit.Entry.Key}: {hit.Entry.Content}&quot;);
+    Console.WriteLine($&quot;[Fused: {hit.FusedScore:F4} | DenseRank: {hit.DenseRank} | SparseRank: {hit.SparseRank}] {hit.Entry.Key}&quot;);
 }
 </code></pre>
 <hr>
-<h2 id="3-grounded-citation-feature">3. Grounded Citation Feature</h2>
-<p>Inject retrieved context directly into the agent prompt with automatic citation markers (<code>[1]</code>, <code>[2]</code>):</p>
-<pre><code class="lang-csharp">var ragOptions = new RetrievalAugmentationOptions
-{
-    MaxResults = 5,
-    MaxContextTokens = 2000,
-    AdjacentChunkWindow = 1,
-    AppendCitationReferences = true
-};
+<h2 id="3-automatic-context-injection--grounded-citations-retrievalaugmentationfeature">3. Automatic Context Injection &amp; Grounded Citations (<code>RetrievalAugmentationFeature</code>)</h2>
+<p>Register <code>RetrievalAugmentationFeature</code> on an agent to automatically retrieve relevant chunks before each turn, expand adjacent neighbor chunks, enforce token budgets, and verify citation grounding (<code>[1]</code>, <code>[2]</code>) on the assistant's response:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Memory;
+
+var ragOptions = new RetrievalAugmentationOptions(
+    Namespace: &quot;technical-docs&quot;,
+    MaxResults: 5,
+    MinScore: 0.1,
+    MaxContextTokens: 2000,
+    DeduplicateAcrossTurns: true,
+    AdjacentChunkWindow: 1,
+    AppendCitationReferences: true,
+    OnCitationsEvaluated: grounding =&gt;
+    {
+        Console.WriteLine($&quot;Grounded: {grounding.IsGrounded}, Cited sources: {grounding.CitedSources.Count}&quot;);
+    });
 
 var definition = new AgentDefinition(&quot;grounded-assistant&quot;, [
-    new RetrievalAugmentationFeature(retriever, ragOptions)
+    new RetrievalAugmentationFeature(ragOptions)
 ]);
 </code></pre>
+<p>When <code>AppendCitationReferences: true</code> is enabled and the model cites <code>[1]</code> in its answer, <code>RetrievalAugmentationFeature</code> automatically appends a formatted <code>References:</code> footer with the document title and source provenance.</p>
 
 </article>
 

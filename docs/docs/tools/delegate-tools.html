@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Delegate Tools &amp; Custom Tools | MyAgents Community Documentation </title>
+      <title>Delegate Tools, Custom Tools &amp; Built-in Capabilities | MyAgents Community Documentation </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Delegate Tools &amp; Custom Tools | MyAgents Community Documentation ">
+      <meta name="title" content="Delegate Tools, Custom Tools &amp; Built-in Capabilities | MyAgents Community Documentation ">
       
       
       <link rel="icon" href="../../favicon.ico">
@@ -85,57 +85,60 @@
         </div>
 
         <article data-uid="">
-<h1 id="delegate-tools--custom-tools">Delegate Tools &amp; Custom Tools</h1>
+<h1 id="delegate-tools-custom-tools--built-in-capabilities">Delegate Tools, Custom Tools &amp; Built-in Capabilities</h1>
 
-<p>In addition to compile-time source generated tools, MyAgents Community allows you to define dynamic in-process tools using <code>DelegateTool</code> or implement the <code>ITool</code> interface directly.</p>
-<h2 id="using-delegatetool">Using <code>DelegateTool</code></h2>
-<p><code>DelegateTool</code> is the fastest way to expose existing C# lambdas or methods as tools:</p>
+<p>In addition to compile-time <code>[AgentTool]</code> source generation, MyAgents Community lets you register in-process C# delegates via <code>ToolsFeature</code> and <code>DelegateTool</code>, implement <code>ITool</code> directly, or attach built-in web search and process-execution tools.</p>
+<h2 id="1-using-toolsfeature-and-delegatetool">1. Using <code>ToolsFeature</code> and <code>DelegateTool</code></h2>
+<p><code>ToolsFeature</code> (in <code>MyAgents.Agents</code>) and <code>DelegateTool.Create</code> (in <code>MyAgents.Core.Tools</code>) wrap any synchronous or asynchronous C# <code>Delegate</code>:</p>
 <pre><code class="lang-csharp">using System.ComponentModel;
+using MyAgents.Agents;
+using MyAgents.Core;
 using MyAgents.Core.Tools;
 
-// Parameterless tool
+// 1. Create a DelegateTool directly
 var timeTool = DelegateTool.Create(
+    method: () =&gt; DateTimeOffset.UtcNow.ToString(&quot;O&quot;),
     name: &quot;get_current_utc_time&quot;,
-    description: &quot;Returns the current UTC date and time in ISO 8601 format.&quot;,
-    handler: () =&gt; DateTimeOffset.UtcNow.ToString(&quot;O&quot;)
-);
+    description: &quot;Returns the current UTC date and time in ISO 8601 format.&quot;);
 
-// Tool with parameters and descriptions
-var calculatorTool = DelegateTool.Create(
-    name: &quot;calculate_tax&quot;,
-    description: &quot;Calculates total price after tax.&quot;,
-    handler: (
-        [Description(&quot;Subtotal in dollars&quot;)] decimal subtotal,
-        [Description(&quot;Tax rate percentage (e.g. 0.05 for 5%)&quot;)] decimal taxRate) =&gt;
-    {
-        var tax = subtotal * taxRate;
-        return new { Subtotal = subtotal, Tax = tax, Total = subtotal + tax };
-    }
-);
+// 2. Or register functions fluently on ToolsFeature
+var toolsFeature = new ToolsFeature(timeTool)
+    .AddFunction(
+        ([Description(&quot;Subtotal in dollars&quot;)] decimal subtotal,
+         [Description(&quot;Tax rate (e.g. 0.05 for 5%)&quot;)] decimal taxRate) =&gt;
+        {
+            var tax = subtotal * taxRate;
+            return new { Subtotal = subtotal, Tax = tax, Total = subtotal + tax };
+        },
+        name: &quot;calculate_tax&quot;,
+        description: &quot;Calculates total price after tax.&quot;);
+
+var definition = new AgentDefinition(&quot;billing-assistant&quot;, [toolsFeature]);
 </code></pre>
-<h3 id="async-handlers-and-cancellation-tokens">Async Handlers and Cancellation Tokens</h3>
-<p>Delegate tools support asynchronous methods and automatically receive a <code>CancellationToken</code>:</p>
-<pre><code class="lang-csharp">var searchTool = DelegateTool.Create(
-    name: &quot;query_database&quot;,
-    description: &quot;Queries the customer database asynchronously.&quot;,
-    handler: async (string query, CancellationToken ct) =&gt;
+<h3 id="async-handlers--cancellationtoken-injection">Async Handlers &amp; <code>CancellationToken</code> Injection</h3>
+<p><code>DelegateTool</code> automatically binds <code>CancellationToken</code> parameters from the turn's cancellation token and awaits <code>Task&lt;T&gt;</code> or <code>ValueTask&lt;T&gt;</code> return values:</p>
+<pre><code class="lang-csharp">var queryTool = DelegateTool.Create(
+    method: async ([Description(&quot;Search keyword&quot;)] string query, CancellationToken ct) =&gt;
     {
-        return await myDbService.ExecuteQueryAsync(query, ct);
-    }
-);
+        var rows = await myRepository.SearchAsync(query, ct);
+        return rows;
+    },
+    name: &quot;query_customers&quot;,
+    description: &quot;Searches customer records asynchronously.&quot;);
 </code></pre>
 <hr>
-<h2 id="implementing-itool-directly">Implementing <code>ITool</code> Directly</h2>
-<p>For complex stateful tools or reusable tool libraries, implement <code>ITool</code>:</p>
+<h2 id="2-implementing-itool-directly">2. Implementing <code>ITool</code> Directly</h2>
+<p>For stateful tools, custom JSON parsing, or zero-reflection libraries without source generators, implement <code>MyAgents.Core.Tools.ITool</code>:</p>
 <pre><code class="lang-csharp">using System.Text.Json;
 using MyAgents.Core.Tools;
 
-public sealed class DatabaseQueryTool : ITool
+public sealed class SqlQueryTool : ITool
 {
-    public string Name =&gt; &quot;execute_sql&quot;;
-    public string Description =&gt; &quot;Executes a read-only SQL query against the analytics database.&quot;;
-    
-    public string ParametersSchemaJson =&gt; &quot;&quot;&quot;
+    public string Name =&gt; &quot;execute_readonly_sql&quot;;
+
+    public string? Description =&gt; &quot;Executes a read-only SELECT query against the reporting database.&quot;;
+
+    public string? ParametersSchemaJson =&gt; &quot;&quot;&quot;
     {
       &quot;type&quot;: &quot;object&quot;,
       &quot;properties&quot;: {
@@ -144,34 +147,72 @@ public sealed class DatabaseQueryTool : ITool
           &quot;description&quot;: &quot;The read-only SELECT query&quot;
         }
       },
-      &quot;required&quot;: [&quot;sql&quot;]
+      &quot;required&quot;: [&quot;sql&quot;],
+      &quot;additionalProperties&quot;: false
     }
     &quot;&quot;&quot;;
 
-    private readonly DbConnection _connection;
-
-    public DatabaseQueryTool(DbConnection connection)
-    {
-        _connection = connection;
-    }
-
-    public async ValueTask&lt;ToolExecutionResult&gt; InvokeAsync(
-        string argumentsJson,
+    public async ValueTask&lt;string&gt; InvokeAsync(
+        string jsonArguments,
         CancellationToken cancellationToken = default)
     {
-        using var doc = JsonDocument.Parse(argumentsJson);
-        var sql = doc.RootElement.GetProperty(&quot;sql&quot;).GetString();
+        using var doc = JsonDocument.Parse(jsonArguments);
+        var sql = doc.RootElement.GetProperty(&quot;sql&quot;).GetString()
+            ?? throw new ArgumentException(&quot;Missing required 'sql' property.&quot;);
 
-        var result = await _connection.QueryAsync(sql, cancellationToken);
-        return ToolExecutionResult.Success(JsonSerializer.Serialize(result));
+        // Execute query and return serialized JSON string
+        var rows = await ExecuteQueryAsync(sql, cancellationToken);
+        return JsonSerializer.Serialize(rows);
+    }
+
+    private static Task&lt;object[]&gt; ExecuteQueryAsync(string sql, CancellationToken ct)
+        =&gt; Task.FromResult&lt;object[]&gt;([new { RowCount = 1, Query = sql }]);
+}
+</code></pre>
+<hr>
+<h2 id="3-built-in-web-search-websearchfeature">3. Built-in Web Search (<code>WebSearchFeature</code>)</h2>
+<p><code>MyAgents.Agents.WebSearch</code> provides <code>IWebSearchProvider</code>, <code>BraveSearchProvider</code>, and <code>WebSearchFeature</code> to equip an agent with a <code>web_search</code> tool:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents.WebSearch;
+using MyAgents.Core;
+
+using var httpClient = new HttpClient();
+var searchProvider = new BraveSearchProvider(
+    httpClient,
+    apiKey: Environment.GetEnvironmentVariable(&quot;BRAVE_API_KEY&quot;)!);
+
+var definition = new AgentDefinition(&quot;research-agent&quot;, [
+    new WebSearchFeature(searchProvider)
+]);
+</code></pre>
+<p>You can also implement <code>IWebSearchProvider</code> to plug in any custom search engine or internal enterprise search API:</p>
+<pre><code class="lang-csharp">public sealed class InternalWikiSearchProvider : IWebSearchProvider
+{
+    public Task&lt;IReadOnlyList&lt;SearchResult&gt;&gt; SearchAsync(
+        string query,
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList&lt;SearchResult&gt; results =
+        [
+            new SearchResult(
+                Title: &quot;Runbook: Database Failover&quot;,
+                Url: &quot;https://wiki.internal/db-failover&quot;,
+                Snippet: &quot;Step-by-step instructions for regional failover.&quot;)
+        ];
+        return Task.FromResult(results);
     }
 }
 </code></pre>
 <hr>
-<h2 id="tool-categories-and-tags">Tool Categories and Tags</h2>
-<p>You can tag tools to group them for permission policies or telemetry:</p>
-<pre><code class="lang-csharp">assembly.Tools.Add(timeTool);
-assembly.Tools.Add(calculatorTool);
+<h2 id="4-subprocess--crawler-tools-iprocessrunner--scrapaifeature">4. Subprocess &amp; Crawler Tools (<code>IProcessRunner</code> &amp; <code>ScrapaiFeature</code>)</h2>
+<p><code>MyAgents.Core.Tools</code> includes <code>IProcessRunner</code> and <code>DefaultProcessRunner</code> for safe, testable CLI subprocess execution, which powers <code>ScrapaiFeature</code> (<code>scrapai_crawl</code>, <code>scrapai_list_spiders</code>, <code>scrapai_run</code>):</p>
+<pre><code class="lang-csharp">using MyAgents.Agents.Scrapai;
+using MyAgents.Core;
+using MyAgents.Core.Tools;
+
+var runner = new DefaultProcessRunner();
+var definition = new AgentDefinition(&quot;crawler-agent&quot;, [
+    new ScrapaiFeature(runner, executablePath: &quot;scrapai&quot;)
+]);
 </code></pre>
 
 </article>

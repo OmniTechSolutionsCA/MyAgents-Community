@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace MyAgents.Agents | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace MyAgents.Agents | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Agents">
+
+  <h1 id="MyAgents_Agents" data-uid="MyAgents.Agents" class="text-break">Namespace MyAgents.Agents</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.AgentChannelFeature.html">AgentChannelFeature</a></dt>
+      <dd><p>Feature that wires an <a class="xref" href="MyAgents.Core.Messaging.IAgentChannel.html">IAgentChannel</a> into the agent's session DI overlay,
+making it available to tools and middleware via
+<code>context.Services.GetService&lt;IAgentChannel&gt;()</code>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.BlocklistGuardrailPolicy.html">BlocklistGuardrailPolicy</a></dt>
+      <dd><p>Flags turns whose output contains any of the configured blocked phrases
+(case-insensitive).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.CapabilityFeature.html">CapabilityFeature</a></dt>
+      <dd><p>Feature that declares one or more <a class="xref" href="MyAgents.Core.IAgentCapability.html">IAgentCapability</a> entries for an agent.
+Capabilities are stored on <a class="xref" href="MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_Capabilities">Capabilities</a> so that orchestrators,
+routers, and tooling can discover what the agent supports at runtime without inspecting
+the full feature list.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.CapabilityRouter.html">CapabilityRouter</a></dt>
+      <dd><p>Single-hop LLM-based router. Given a task description and a set of candidate
+<a class="xref" href="MyAgents.Core.AgentDefinition.html">AgentDefinition</a>s, calls the LLM once to select the best agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.CapabilityRouterResult.html">CapabilityRouterResult</a></dt>
+      <dd><p>The result of a single-hop routing decision.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ContextWindowFeature.html">ContextWindowFeature</a></dt>
+      <dd><p>Feature that adds <a class="xref" href="MyAgents.Core.ContextWindowMiddleware.html">ContextWindowMiddleware</a> to the agent pipeline.
+Trims the incoming message history on every turn so the inner pipeline never
+sees more messages than the configured window allows.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.DelegateToSubagentTool.html">DelegateToSubagentTool</a></dt>
+      <dd><p>Tool that enables an agent to synchronously delegate a specialized task to a subagent
+and receive its distilled execution result.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.EmptyResponseGuardrailPolicy.html">EmptyResponseGuardrailPolicy</a></dt>
+      <dd><p>Flags turns whose combined output is empty or contains nothing but whitespace.
+This policy is always included in the default <a class="xref" href="MyAgents.Agents.GuardrailsFeature.html">GuardrailsFeature</a> configuration.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.FallbackFeature.html">FallbackFeature</a></dt>
+      <dd><p>Feature that wires a <a class="xref" href="MyAgents.Core.FallbackMiddleware.html">FallbackMiddleware</a> into the agent pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ForkSubagentTool.html">ForkSubagentTool</a></dt>
+      <dd><p>Tool that enables an agent to fork a subagent task asynchronously in the background.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.FunctionCallingFeature.html">FunctionCallingFeature</a></dt>
+      <dd><p>Enables framework-level function calling for runtimes that return tool-call
+envelopes as assistant messages instead of invoking tools natively.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GetSubagentTaskStatusTool.html">GetSubagentTaskStatusTool</a></dt>
+      <dd><p>Tool that allows an agent to check the status or retrieve the result of an asynchronously forked subagent task.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GroupChat.html">GroupChat</a></dt>
+      <dd><p>A group chat where all registered agents receive each message and take turns responding.
+This is the simplest multi-agent pattern — round-robin or random selection among agents.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GroupChatOptions.html">GroupChatOptions</a></dt>
+      <dd><p>Configuration for <a class="xref" href="MyAgents.Agents.GroupChat.html">GroupChat</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GroupChatResult.html">GroupChatResult</a></dt>
+      <dd><p>Result of a <a class="xref" href="MyAgents.Agents.GroupChat.html">GroupChat</a> run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GuardrailMiddleware.html">GuardrailMiddleware</a></dt>
+      <dd><p>Middleware that applies a ordered sequence of <a class="xref" href="MyAgents.Core.IGuardrailPolicy.html">IGuardrailPolicy</a> checks
+to each agent turn's output. On the first violation the output is replaced with
+the policy's <a class="xref" href="MyAgents.Core.GuardrailViolation.html#MyAgents_Core_GuardrailViolation_ReplacementMessage">ReplacementMessage</a> (or a generic
+fallback if none is supplied) and no further policies are evaluated.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.GuardrailsFeature.html">GuardrailsFeature</a></dt>
+      <dd><p>Feature that adds content-safety guardrails to the agent pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.HierarchicalSubagentDispatcher.html">HierarchicalSubagentDispatcher</a></dt>
+      <dd><p>Hierarchical subagent dispatcher that manages child agent sessions,
+isolated context execution, delegation depth recursion guards, and background task forking.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.InMemoryTokenCostTelemetrySink.html">InMemoryTokenCostTelemetrySink</a></dt>
+      <dd><p>In-memory accumulator of model routing cost telemetry records.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.LoggingFeature.html">LoggingFeature</a></dt>
+      <dd><p>Feature that adds logging middleware to the agent pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.LoggingMiddleware.html">LoggingMiddleware</a></dt>
+      <dd><p>Middleware that logs agent turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MaxDelegationDepthExceededException.html">MaxDelegationDepthExceededException</a></dt>
+      <dd><p>Exception thrown when a recursive subagent delegation exceeds the maximum allowable depth.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MaxLengthGuardrailPolicy.html">MaxLengthGuardrailPolicy</a></dt>
+      <dd><p>Flags turns whose combined output text exceeds <code>maxLength</code> characters.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MemoryFeature.html">MemoryFeature</a></dt>
+      <dd><p>Feature that wires an <a class="xref" href="MyAgents.Core.Memory.IMemoryStore.html">IMemoryStore</a> into the agent session.
+After contributing, the store is available to middleware and tools via
+<code>context.Services.GetService&lt;IMemoryStore&gt;()</code>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ModelCandidate.html">ModelCandidate</a></dt>
+      <dd><p>A registered model candidate available for adaptive multi-model routing.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ModelFeature.html">ModelFeature</a></dt>
+      <dd><p>Declares a preferred model for the current agent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ModelPricing.html">ModelPricing</a></dt>
+      <dd><p>Pricing specifications for a model candidate (USD per 1,000,000 tokens).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ModelRoutingCostMetrics.html">ModelRoutingCostMetrics</a></dt>
+      <dd><p>Structured telemetry recording for model selection, token consumption, and estimated cost.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MultiModelRoutingBuilder.html">MultiModelRoutingBuilder</a></dt>
+      <dd><p>Builder for configuring multi-model routing candidates and policies.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MultiModelRoutingChatClient.html">MultiModelRoutingChatClient</a></dt>
+      <dd><p>Adaptive multi-model routing and token/cost optimizing chat client.
+Routes turns between Economy, Standard, and Advanced models based on prompt complexity,
+cascades to fallback models on failure, and tracks tokens and dollar spend against budgets.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MultiModelRoutingOptions.html">MultiModelRoutingOptions</a></dt>
+      <dd><p>Configuration options for multi-model routing and token/cost optimization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MultiModelRoutingServiceExtensions.html">MultiModelRoutingServiceExtensions</a></dt>
+      <dd><p>Service collection extensions for registering multi-model routing and token/cost optimization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MyAgentsActivitySource.html">MyAgentsActivitySource</a></dt>
+      <dd><p>Framework-level OpenTelemetry activity source.
+Emits spans under the &quot;MyAgents&quot; source name, complementing MEAI's
+&quot;Microsoft.Extensions.AI&quot; source which covers the LLM call layer.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.MyAgentsOtelExtensions.html">MyAgentsOtelExtensions</a></dt>
+      <dd><p>Extension methods for registering MyAgents telemetry with OpenTelemetry.
+Designed to work with both the standard OTel SDK and .NET Aspire's
+automatic OTLP export pipeline.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.PromptRegistryFeature.html">PromptRegistryFeature</a></dt>
+      <dd><p>Feature that wires a <a class="xref" href="MyAgents.Core.Prompts.PromptRegistry.html">PromptRegistry</a> into the agent session and
+optionally renders selected templates into the agent's system prompt at assembly time.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.RoutingException.html">RoutingException</a></dt>
+      <dd><p>Thrown when <a class="xref" href="MyAgents.Agents.CapabilityRouter.html">CapabilityRouter</a> cannot match the LLM response to any
+registered agent and no fallback policy is configured.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SelectorGroupChat.html">SelectorGroupChat</a></dt>
+      <dd><p>A group chat where an LLM selects which agent should speak next based on
+the conversation context. This is the AutoGen <code>SelectorGroupChat</code> pattern.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SelectorGroupChatOptions.html">SelectorGroupChatOptions</a></dt>
+      <dd><p>Configuration for <a class="xref" href="MyAgents.Agents.SelectorGroupChat.html">SelectorGroupChat</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SelectorGroupChatResult.html">SelectorGroupChatResult</a></dt>
+      <dd><p>Result of a <a class="xref" href="MyAgents.Agents.SelectorGroupChat.html">SelectorGroupChat</a> run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.StructuredOutputFeature-1.html">StructuredOutputFeature&lt;T&gt;</a></dt>
+      <dd><p>Feature that enables strongly-typed structured output for an agent, configuring
+the agent's schema and providing self-correction retries if the response is invalid JSON.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.StructuredOutputMiddleware-1.html">StructuredOutputMiddleware&lt;T&gt;</a></dt>
+      <dd><p>Middleware that sets the <a class="xref" href="MyAgents.Core.AgentResponseFormat.html">AgentResponseFormat</a> on each turn and validates/retries
+if the model response does not conform to <code class="typeparamref">T</code>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentDelegationFeature.html">SubagentDelegationFeature</a></dt>
+      <dd><p>Feature that equips an agent with subagent delegation tools (<code>delegate_to_subagent</code>, <code>fork_subagent</code>, <code>get_subagent_task_status</code>).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentOrchestratorBuilder.html">SubagentOrchestratorBuilder</a></dt>
+      <dd><p>Builder for configuring hierarchical subagent registrations.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentOrchestratorOptions.html">SubagentOrchestratorOptions</a></dt>
+      <dd><p>Configuration options for hierarchical subagent orchestration and handoff execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentResult.html">SubagentResult</a></dt>
+      <dd><p>The final execution outcome and distilled output of a subagent turn or multi-turn execution.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentServiceExtensions.html">SubagentServiceExtensions</a></dt>
+      <dd><p>Service collection extensions for hierarchical subagent orchestration.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentTask.html">SubagentTask</a></dt>
+      <dd><p>Task definition dispatched to a specialized subagent.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentTaskHandle.html">SubagentTaskHandle</a></dt>
+      <dd><p>Handle representing an asynchronously forked subagent task running in the background.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.TelemetryFeature.html">TelemetryFeature</a></dt>
+      <dd><p>Feature that adds <a class="xref" href="MyAgents.Agents.TelemetryMiddleware.html">TelemetryMiddleware</a> to the agent pipeline.
+Compose alongside <a class="xref" href="MyAgents.Agents.LoggingFeature.html">LoggingFeature</a> — order determines span nesting.
+Typically added after <a class="xref" href="MyAgents.Agents.LoggingFeature.html">LoggingFeature</a> so the OTel span is the outermost wrapper.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.TelemetryMiddleware.html">TelemetryMiddleware</a></dt>
+      <dd><p>Middleware that wraps each agent turn in an OpenTelemetry Activity span.
+Tags emitted (MyAgents convention):
+agent.session_id       — from AgentTurnContext.SessionId
+agent.turn.tool_calls  — from AgentTurnResult.Telemetry.ToolCalls
+agent.turn.duration_ms — from AgentTurnResult.Telemetry.TurnDuration
+Tags emitted (GenAI convention):
+gen_ai.operation.name        — &quot;chat.completion&quot;
+gen_ai.request.model         — from AgentTurnResult.Telemetry.ModelId
+gen_ai.response.model        — from AgentTurnResult.Telemetry.ModelId
+gen_ai.usage.input_tokens    — from AgentTurnResult.Telemetry.PromptTokens
+gen_ai.usage.output_tokens   — from AgentTurnResult.Telemetry.CompletionTokens
+gen_ai.usage.total_tokens    — PromptTokens + CompletionTokens
+On exception, the span status is set to Error with the exception message.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.TokenBudgetQuotaException.html">TokenBudgetQuotaException</a></dt>
+      <dd><p>Exception thrown when a turn or session token volume or dollar cost quota is breached.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ToolObserverFeature.html">ToolObserverFeature</a></dt>
+      <dd><p>Feature that registers one or more <a class="xref" href="MyAgents.Core.Tools.IToolCallObserver.html">IToolCallObserver</a> instances
+into the agent assembly so the adapter fires them around every tool invocation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ToolsFeature.html">ToolsFeature</a></dt>
+      <dd><p>Feature that registers one or more <a class="xref" href="MyAgents.Core.Tools.ITool.html">ITool</a> instances or delegates on an agent definition.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ISubagentDispatcher.html">ISubagentDispatcher</a></dt>
+      <dd><p>Dispatcher contract for delegating, forking, and managing hierarchical subagent executions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ITokenCostTelemetrySink.html">ITokenCostTelemetrySink</a></dt>
+      <dd><p>Sink for recording model routing and token cost telemetry records.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.ModelTier.html">ModelTier</a></dt>
+      <dd><p>Operational tier and cost class for a language model candidate.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.SubagentExecutionState.html">SubagentExecutionState</a></dt>
+      <dd><p>Lifecycle status of a subagent execution task.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

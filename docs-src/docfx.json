@@ -1,10 +1,41 @@
 {
   "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "..",
+          "files": [
+            "MyAgents.Core/MyAgents.Core.csproj",
+            "MyAgents.Agents/MyAgents.Agents.csproj",
+            "MyAgents.Runtime.Chat/MyAgents.Runtime.Chat.csproj",
+            "MyAgents.Runtime.Workers/MyAgents.Runtime.Workers.csproj",
+            "MyAgents.Runtime.Workers.Sqlite/MyAgents.Runtime.Workers.Sqlite.csproj",
+            "MyAgents.Memory/MyAgents.Memory.csproj",
+            "MyAgents.Mcp/MyAgents.Mcp.csproj",
+            "MyAgents.Testing/MyAgents.Testing.csproj",
+            "MyAgents.Generators/MyAgents.Generators.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false
+    }
+  ],
   "build": {
     "content": [
       {
         "files": [
-          "**/*.{md,yml}"
+          "api/**.yml",
+          "api/index.md"
+        ]
+      },
+      {
+        "files": [
+          "docs/**/*.{md,yml}",
+          "toc.yml",
+          "*.md"
         ]
       }
     ],

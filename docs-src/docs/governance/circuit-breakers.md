@@ -1,34 +1,39 @@
-# Circuit Breakers & Observability
+# Circuit Breakers, Tool Observers & OpenTelemetry
 
-To protect downstream services from runaway loops, sudden model hallucinations, and cascading failures, MyAgents Community provides built-in circuit breakers, execution observers, and OpenTelemetry metrics.
+To protect downstream dependencies from cascading failures and give operators full visibility into agent behavior, MyAgents Community provides circuit breaker middleware, tool call observers, and first-class OpenTelemetry tracing and metrics.
 
-## 1. Tool Circuit Breaker
+## 1. Circuit Breaker Middleware (`CircuitBreakerMiddleware`)
 
-When an external tool dependency fails repeatedly (e.g. database timeout or third-party API outage), the `CircuitBreakerMiddleware` trips open, immediately rejecting further tool calls before they hit the failing service:
+When an LLM provider or downstream dependency experiences transient failures (such as HTTP 429/503 errors or timeouts), `CircuitBreakerMiddleware` tracks consecutive transient failures via `ITransientErrorClassifier` and trips open (`CircuitState.Open`), fast-failing with `CircuitBreakerOpenException` until `OpenDuration` elapses:
 
 ```csharp
-using MyAgents.Core.Middleware;
+using MyAgents.Core;
 
-var circuitBreaker = new CircuitBreakerMiddleware(new CircuitBreakerOptions
-{
-    FailureThreshold = 3,                       // Trip after 3 consecutive failures
-    BreakDuration = TimeSpan.FromSeconds(30),   // Stay open for 30 seconds
-    HandledExceptions = [typeof(HttpRequestException), typeof(TimeoutException)]
-});
+var circuitBreaker = new CircuitBreakerMiddleware(
+    failureThreshold: 3,
+    openDuration: TimeSpan.FromSeconds(30),
+    classifier: new DefaultTransientErrorClassifier());
+
+// Inspect state (Closed, Open, HalfOpen) or manually reset
+Console.WriteLine($"Circuit state: {circuitBreaker.State}");
+circuitBreaker.Reset();
 ```
 
-When tripped, the circuit breaker returns a structured error to the model so the agent can adapt or inform the user rather than hanging.
+Register `CircuitBreakerMiddleware` in an agent's pipeline using a custom feature or `assembly.Pipeline.Use(circuitBreaker)`.
 
 ---
 
-## 2. Tool Observers
+## 2. Tool Call Observers (`IToolCallObserver`)
 
-Tool observers allow you to audit, log, or measure tool execution without altering the tool's business logic:
+`IToolCallObserver` lets you log, audit, or time every tool execution without modifying the tool implementation itself:
 
 ```csharp
+using Microsoft.Extensions.Logging;
+using MyAgents.Agents;
+using MyAgents.Core;
 using MyAgents.Core.Tools;
 
-public sealed class SecurityAuditToolObserver : IToolObserver
+public sealed class SecurityAuditToolObserver : IToolCallObserver
 {
     private readonly ILogger _logger;
 
@@ -37,48 +42,79 @@ public sealed class SecurityAuditToolObserver : IToolObserver
         _logger = logger;
     }
 
-    public void OnToolInvoking(ToolInvokingContext context)
+    public ValueTask OnToolCallingAsync(
+        ToolCallObservation call,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Tool {ToolName} invoking with args: {Args}", context.ToolName, context.ArgumentsJson);
+        _logger.LogInformation(
+            "Session {SessionId} invoking tool {ToolName} (CallId: {CallId}) with args: {Args}",
+            call.SessionId, call.ToolName, call.CallId, call.Arguments);
+        return ValueTask.CompletedTask;
     }
 
-    public void OnToolInvoked(ToolInvokedContext context)
+    public ValueTask OnToolCalledAsync(
+        ToolResultObservation result,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Tool {ToolName} completed in {ElapsedMs}ms. Success: {IsSuccess}",
-            context.ToolName, context.Duration.TotalMilliseconds, context.Result.IsSuccess);
+        _logger.LogInformation(
+            "Tool {ToolName} finished in {ElapsedMs:F1}ms (Failed: {HasError})",
+            result.Call.ToolName,
+            result.Duration.TotalMilliseconds,
+            result.Exception is not null);
+        return ValueTask.CompletedTask;
     }
 }
 ```
 
-Register observers using `ToolObserverFeature`:
+Attach one or more observers to an `AgentDefinition` via `ToolObserverFeature`:
 
 ```csharp
 var definition = new AgentDefinition("audited-agent", [
-    new ToolObserverFeature(new SecurityAuditToolObserver(logger))
+    new ToolObserverFeature(new SecurityAuditToolObserver(logger)),
+    new ToolsFeature(myTool)
 ]);
 ```
 
 ---
 
-## 3. OpenTelemetry Metrics & Tracing
+## 3. OpenTelemetry Tracing & Metrics (`MyAgentsOtelExtensions`)
 
-`MyAgents.Agents` integrates natively with `System.Diagnostics.DiagnosticSource` and OpenTelemetry:
+`MyAgents.Core` (`MyAgentsTelemetry`) and `MyAgents.Agents` (`TelemetryFeature`, `MyAgentsOtelExtensions`) integrate directly with `System.Diagnostics.ActivitySource`, `System.Diagnostics.Metrics.Meter`, and `.NET Aspire`:
+
+### Enabling Telemetry on an Agent
+
+Add `TelemetryFeature` (and optionally `LoggingFeature`) to your `AgentDefinition`:
 
 ```csharp
-services.AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing.AddSource("MyAgents.Community");
-        tracing.AddOtlpExporter();
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics.AddMeter("MyAgents.Community");
-        metrics.AddOtlpExporter();
-    });
+using MyAgents.Agents;
+using MyAgents.Core;
+
+var definition = new AgentDefinition("observable-agent", [
+    new TelemetryFeature(),
+    new LoggingFeature(),
+    new ToolsFeature(myTool)
+]);
 ```
 
-Exported metrics include:
-- `agent.turn.duration_ms`: Duration of conversational turns.
-- `agent.tool.invocations_total`: Counter of tool calls tagged by tool name and status.
-- `agent.tokens.cost_usd`: Real-time token usage and cost metrics per model tier.
+### Registering OpenTelemetry in `Program.cs`
+
+Use the `AddMyAgentsTracing()` and `AddMyAgentsMetrics()` extension methods on `OpenTelemetryBuilder`:
+
+```csharp
+using MyAgents.Agents;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
+builder.Services.AddOpenTelemetry()
+    .AddMyAgentsTracing()   // Subscribes to "MyAgents" and "Microsoft.Extensions.AI" ActivitySources
+    .AddMyAgentsMetrics()   // Subscribes to the "MyAgents" Meter
+    .WithTracing(tracing => tracing.AddOtlpExporter())
+    .WithMetrics(metrics => metrics.AddOtlpExporter());
+```
+
+Exported instrumentation includes:
+- **Activity Source (`MyAgents` & `Microsoft.Extensions.AI`)**: End-to-end distributed spans across agent turns, middleware, LLM provider calls, and tool executions.
+- **Metrics (`MyAgents`)**:
+  - `agent.turn.duration_ms`: Histogram of conversational turn durations.
+  - `agent.turn.tokens`: Token usage counters (`prompt`, `completion`, `total`).
+  - `agent.turn.errors`: Counter of turn exceptions and failures.

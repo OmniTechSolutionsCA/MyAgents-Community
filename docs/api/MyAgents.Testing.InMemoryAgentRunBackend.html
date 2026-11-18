@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class InMemoryAgentRunBackend | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class InMemoryAgentRunBackend | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Single-process implementation of  for deterministic tests and local development. It does not survive process exit or coordinate separate processes.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Testing_InMemoryAgentRunBackend.md&amp;value=---%0Auid%3A%20MyAgents.Testing.InMemoryAgentRunBackend%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Testing.InMemoryAgentRunBackend">
+
+
+
+  <h1 id="MyAgents_Testing_InMemoryAgentRunBackend" data-uid="MyAgents.Testing.InMemoryAgentRunBackend" class="text-break">
+Class InMemoryAgentRunBackend  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L9"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Testing.html">Testing</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Testing.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Single-process implementation of <a class="xref" href="MyAgents.Core.Execution.IAgentRunBackend.html">IAgentRunBackend</a> for deterministic tests
+and local development. It does not survive process exit or coordinate separate processes.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class InMemoryAgentRunBackend : IAgentRunBackend, IAgentRunBatchCatalog, IAgentRunBatchController</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">InMemoryAgentRunBackend</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="MyAgents.Core.Execution.IAgentRunBackend.html">IAgentRunBackend</a></div>
+      <div><a class="xref" href="MyAgents.Core.Execution.IAgentRunBatchCatalog.html">IAgentRunBatchCatalog</a></div>
+      <div><a class="xref" href="MyAgents.Core.Execution.IAgentRunBatchController.html">IAgentRunBatchController</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend__ctor_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.#ctor*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend__ctor_System_TimeProvider_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.#ctor(System.TimeProvider)">
+  InMemoryAgentRunBackend(TimeProvider?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L18"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates an in-memory backend using the system clock unless a test clock is supplied.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InMemoryAgentRunBackend(TimeProvider? timeProvider = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>timeProvider</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timeprovider">TimeProvider</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend__ctor_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.#ctor*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend__ctor_System_TimeProvider_MyAgents_Core_Execution_AgentRunBackendOptions_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.#ctor(System.TimeProvider,MyAgents.Core.Execution.AgentRunBackendOptions)">
+  InMemoryAgentRunBackend(TimeProvider?, AgentRunBackendOptions?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L24"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates an in-memory backend with optional per-scope limits.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InMemoryAgentRunBackend(TimeProvider? timeProvider, AgentRunBackendOptions? options)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>timeProvider</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timeprovider">TimeProvider</a></dt>
+    <dd></dd>
+    <dt><code>options</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunBackendOptions.html">AgentRunBackendOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_CancelAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CancelAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_CancelAsync_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CancelAsync(System.String,System.Threading.CancellationToken)">
+  CancelAsync(string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L425"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Cancels an unleased run or requests cancellation from its current worker.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; CancelAsync(string runId, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>runId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_CancelBatchAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CancelBatchAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_CancelBatchAsync_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CancelBatchAsync(System.String,System.Threading.CancellationToken)">
+  CancelBatchAsync(string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L92"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Cancels nonterminal runs in a batch and returns the number affected. Leased runs receive a
+cancellation request that their workers observe through lease renewal.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;int&gt; CancelBatchAsync(string batchId, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>batchId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_ClaimAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.ClaimAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_ClaimAsync_System_String_System_TimeSpan_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.ClaimAsync(System.String,System.TimeSpan,System.Threading.CancellationToken)">
+  ClaimAsync(string, TimeSpan, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L141"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Atomically claims the next eligible run for a worker.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;AgentRunLease?&gt; ClaimAsync(string workerId, TimeSpan leaseDuration, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>workerId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>leaseDuration</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_CompleteAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CompleteAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_CompleteAsync_MyAgents_Core_Execution_AgentRunLease_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.CompleteAsync(MyAgents.Core.Execution.AgentRunLease,System.String,System.Threading.CancellationToken)">
+  CompleteAsync(AgentRunLease, string?, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L252"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Completes the run under the current lease.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; CompleteAsync(AgentRunLease lease, string? outputJson = null, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>outputJson</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_FailAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.FailAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_FailAsync_MyAgents_Core_Execution_AgentRunLease_MyAgents_Core_Execution_AgentRunFailure_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.FailAsync(MyAgents.Core.Execution.AgentRunLease,MyAgents.Core.Execution.AgentRunFailure,System.Threading.CancellationToken)">
+  FailAsync(AgentRunLease, AgentRunFailure, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L394"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Marks a current run as failed, cancelled, or deadline-exceeded as applicable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; FailAsync(AgentRunLease lease, AgentRunFailure failure, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>failure</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunFailure.html">AgentRunFailure</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_GetAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.GetAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_GetAsync_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.GetAsync(System.String,System.Threading.CancellationToken)">
+  GetAsync(string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L126"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets the latest durable state of a run, or null when the ID is unknown.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;AgentRunRecord?&gt; GetAsync(string runId, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>runId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.Execution.AgentRunRecord.html">AgentRunRecord</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_GetBatchRunsAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.GetBatchRunsAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_GetBatchRunsAsync_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.GetBatchRunsAsync(System.String,System.Threading.CancellationToken)">
+  GetBatchRunsAsync(string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L72"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns runs for a batch ordered by creation time and run identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;IReadOnlyList&lt;AgentRunRecord&gt;&gt; GetBatchRunsAsync(string batchId, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>batchId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.Execution.AgentRunRecord.html">AgentRunRecord</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_RenewLeaseAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.RenewLeaseAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_RenewLeaseAsync_MyAgents_Core_Execution_AgentRunLease_System_TimeSpan_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.RenewLeaseAsync(MyAgents.Core.Execution.AgentRunLease,System.TimeSpan,System.Threading.CancellationToken)">
+  RenewLeaseAsync(AgentRunLease, TimeSpan, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L196"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Renews a current lease or reports that it expired, was replaced, or was cancelled.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;AgentRunLeaseRenewal&gt; RenewLeaseAsync(AgentRunLease lease, TimeSpan leaseDuration, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>leaseDuration</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.Execution.AgentRunLeaseRenewal.html">AgentRunLeaseRenewal</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_ResumeAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.ResumeAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_ResumeAsync_System_String_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.ResumeAsync(System.String,System.String,System.Threading.CancellationToken)">
+  ResumeAsync(string, string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L319"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Resumes a run that is waiting for input and makes it eligible for claiming.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; ResumeAsync(string runId, string resumeInputJson, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>runId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>resumeInputJson</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_RetryAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.RetryAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_RetryAsync_MyAgents_Core_Execution_AgentRunLease_MyAgents_Core_Execution_AgentRunFailure_System_TimeSpan_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.RetryAsync(MyAgents.Core.Execution.AgentRunLease,MyAgents.Core.Execution.AgentRunFailure,System.TimeSpan,System.Threading.CancellationToken)">
+  RetryAsync(AgentRunLease, AgentRunFailure, TimeSpan, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L349"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Schedules a retry or makes the run terminal when retry policy is exhausted.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; RetryAsync(AgentRunLease lease, AgentRunFailure failure, TimeSpan retryDelay, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>failure</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunFailure.html">AgentRunFailure</a></dt>
+    <dd></dd>
+    <dt><code>retryDelay</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_SaveCheckpointAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.SaveCheckpointAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_SaveCheckpointAsync_MyAgents_Core_Execution_AgentRunLease_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.SaveCheckpointAsync(MyAgents.Core.Execution.AgentRunLease,System.String,System.Threading.CancellationToken)">
+  SaveCheckpointAsync(AgentRunLease, string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L227"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Saves handler state only when the supplied lease is still current.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; SaveCheckpointAsync(AgentRunLease lease, string checkpointJson, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>checkpointJson</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_SubmitAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.SubmitAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_SubmitAsync_MyAgents_Core_Execution_AgentRunRequest_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.SubmitAsync(MyAgents.Core.Execution.AgentRunRequest,System.Threading.CancellationToken)">
+  SubmitAsync(AgentRunRequest, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L32"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Submits a run. Matching scoped idempotency keys return the existing run.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;AgentRunSubmission&gt; SubmitAsync(AgentRunRequest request, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>request</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunRequest.html">AgentRunRequest</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.Execution.AgentRunSubmission.html">AgentRunSubmission</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Testing_InMemoryAgentRunBackend_WaitForInputAsync_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.WaitForInputAsync*"></a>
+
+  <h3 id="MyAgents_Testing_InMemoryAgentRunBackend_WaitForInputAsync_MyAgents_Core_Execution_AgentRunLease_System_String_System_String_System_Threading_CancellationToken_" data-uid="MyAgents.Testing.InMemoryAgentRunBackend.WaitForInputAsync(MyAgents.Core.Execution.AgentRunLease,System.String,System.String,System.Threading.CancellationToken)">
+  WaitForInputAsync(AgentRunLease, string, string, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L283"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Pauses the run until application input or an approval arrives.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValueTask&lt;bool&gt; WaitForInputAsync(AgentRunLease lease, string checkpointJson, string pendingInputDescription, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lease</code> <a class="xref" href="MyAgents.Core.Execution.AgentRunLease.html">AgentRunLease</a></dt>
+    <dd></dd>
+    <dt><code>checkpointJson</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>pendingInputDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Testing/InMemoryAgentRunBackend.cs/#L9" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

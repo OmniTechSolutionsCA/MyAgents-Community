@@ -87,42 +87,43 @@
         <article data-uid="">
 <h1 id="model-context-protocol-mcp-integration">Model Context Protocol (MCP) Integration</h1>
 
-<p>The <code>MyAgents.Mcp</code> package provides first-class integration with the <a href="https://modelcontextprotocol.io">Model Context Protocol (MCP)</a>, allowing your agents to interact with external tools and resources running over standard I/O (stdio) or HTTP/Server-Sent Events (SSE).</p>
+<p>The <code>MyAgents.Mcp</code> package provides first-class integration with the <a href="https://modelcontextprotocol.io">Model Context Protocol (MCP)</a>, allowing your agents to discover and invoke external tools, import server prompts, read external resources, hot-reload MCP connections at runtime, and discover local skill packs.</p>
 <h2 id="installation">Installation</h2>
 <pre><code class="lang-bash">dotnet add package MyAgents.Mcp
 </code></pre>
 <h2 id="how-mcp-works-with-myagents">How MCP Works with MyAgents</h2>
-<p>When you register an <code>McpFeature</code> on an <code>AgentDefinition</code>, the runtime connects to the target MCP server, queries its tool catalog, and translates them into <code>ITool</code> implementations:</p>
+<p>When you register <code>McpFeature</code> or <code>McpMultiServerFeature</code> on an <code>AgentDefinition</code>, the feature connects to the configured MCP transport(s) during <code>CreateSessionAsync</code>, imports tools as <code>ITool</code> adapters, and optionally registers MCP prompts and resource-reading tools:</p>
 <pre><code class="lang-mermaid">flowchart LR
-    Agent[Agent Session] --&gt; McpFeature[MyAgents.Mcp.McpFeature]
-    McpFeature --&gt; Client[McpClient]
-    Client --&gt;|Stdio or HTTP Transport| McpServer[External MCP Server]
-    McpServer --&gt; Tools[External Tools &amp; Resources]
+    Session[&quot;IAgentSession&quot;] --&gt; Feature[&quot;McpFeature / McpMultiServerFeature&quot;]
+    Feature --&gt; Context[&quot;IMcpSessionContext&quot;]
+    Feature --&gt; HotReload[&quot;McpServerHotReloadManager &amp; DynamicToolCatalog&quot;]
+    Context --&gt;|Stdio or HTTP/SSE| Server[&quot;External MCP Server(s)&quot;]
+    Server --&gt; Tools[&quot;MCP Tools, Prompts &amp; Resources&quot;]
 </code></pre>
 <hr>
-<h2 id="1-local-process-mcp-server-stdio">1. Local Process MCP Server (Stdio)</h2>
-<p>To connect to a local MCP server running as a sub-process (e.g. SQLite, GitHub, or Filesystem MCP servers):</p>
+<h2 id="1-single-mcp-server-mcpfeature">1. Single MCP Server (<code>McpFeature</code>)</h2>
+<h3 id="local-process-mcp-server-stdio">Local Process MCP Server (Stdio)</h3>
 <pre><code class="lang-csharp">using ModelContextProtocol.Client;
 using MyAgents.Core;
 using MyAgents.Mcp;
 
-// Configure stdio transport to launch a local server process
 var transport = new StdioClientTransport(new StdioClientTransportOptions
 {
     Command = &quot;npx&quot;,
     Arguments = [&quot;-y&quot;, &quot;@modelcontextprotocol/server-sqlite&quot;, &quot;--db-path&quot;, &quot;analytics.db&quot;]
 });
 
-var mcpFeature = new McpFeature(transport, new McpFeatureOptions
-{
-    ImportPrompts = true,
-    ExposeResourceTools = true
-});
+var mcpFeature = new McpFeature(
+    transport,
+    new McpFeatureOptions(ImportPrompts: true, ExposeResourceTools: true));
 
 var definition = new AgentDefinition(&quot;data-agent&quot;, [mcpFeature]);
+
+// Use CreateSessionAsync when features perform async I/O during assembly
+var factory = (DefaultAgentSessionFactory)serviceProvider.GetRequiredService&lt;IAgentSessionFactory&gt;();
+await using var session = await factory.CreateSessionAsync(&quot;mcp-session-1&quot;, definition, cancellationToken);
 </code></pre>
-<h2 id="2-remote-mcp-server-http--sse">2. Remote MCP Server (HTTP / SSE)</h2>
-<p>To connect to a remote or containerized MCP server over HTTP / SSE:</p>
+<h3 id="remote-mcp-server-http--sse">Remote MCP Server (HTTP / SSE)</h3>
 <pre><code class="lang-csharp">using ModelContextProtocol.Client;
 using MyAgents.Mcp;
 
@@ -132,31 +133,88 @@ var httpTransport = new HttpClientTransport(new HttpClientTransportOptions
 });
 
 var mcpFeature = new McpFeature(httpTransport);
-var definition = new AgentDefinition(&quot;cloud-agent&quot;, [mcpFeature]);
 </code></pre>
 <hr>
-<h2 id="multi-server-aggregation">Multi-Server Aggregation</h2>
-<p>If your agent requires tools from multiple different MCP servers simultaneously (e.g., both a GitHub MCP server and a Database MCP server), use <code>McpMultiServerFeature</code>:</p>
-<pre><code class="lang-csharp">using MyAgents.Mcp;
+<h2 id="2-multi-server-aggregation-mcpmultiserverfeature">2. Multi-Server Aggregation (<code>McpMultiServerFeature</code>)</h2>
+<p>When an agent needs tools from multiple MCP servers simultaneously, use <code>McpMultiServerFeature</code> with <code>McpMultiServerFeature.ServerConfig</code>:</p>
+<pre><code class="lang-csharp">using ModelContextProtocol.Client;
+using MyAgents.Core;
+using MyAgents.Mcp;
 
-var multiServer = new McpMultiServerFeature();
-
-multiServer.AddServer(&quot;db&quot;, new StdioClientTransport(new StdioClientTransportOptions
+var servers = new[]
 {
-    Command = &quot;npx&quot;,
-    Arguments = [&quot;-y&quot;, &quot;@modelcontextprotocol/server-sqlite&quot;, &quot;app.db&quot;]
-}));
+    new McpMultiServerFeature.ServerConfig(
+        Name: &quot;db&quot;,
+        Transport: new StdioClientTransport(new StdioClientTransportOptions
+        {
+            Command = &quot;npx&quot;,
+            Arguments = [&quot;-y&quot;, &quot;@modelcontextprotocol/server-sqlite&quot;, &quot;app.db&quot;]
+        }),
+        EnableDynamicRefresh: true),
 
-multiServer.AddServer(&quot;filesystem&quot;, new StdioClientTransport(new StdioClientTransportOptions
+    new McpMultiServerFeature.ServerConfig(
+        Name: &quot;filesystem&quot;,
+        Transport: new StdioClientTransport(new StdioClientTransportOptions
+        {
+            Command = &quot;npx&quot;,
+            Arguments = [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;, &quot;/workspace&quot;]
+        }),
+        EnableDynamicRefresh: true)
+};
+
+var options = new McpMultiServerFeatureOptions(
+    ImportPrompts: true,
+    ExposeResourceTools: true,
+    AllowedToolNames: null); // Or pass a HashSet&lt;string&gt; to allowlist specific tools
+
+var multiServerFeature = new McpMultiServerFeature(
+    servers: servers,
+    options: options,
+    refreshInterval: TimeSpan.FromMinutes(5));
+
+multiServerFeature.ToolListChanged += (_, args) =&gt;
 {
-    Command = &quot;npx&quot;,
-    Arguments = [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;, &quot;/allowed/workspace&quot;]
-}));
+    Console.WriteLine($&quot;MCP server '{args.ServerName}' updated its tool list ({args.Tools.Count} tools).&quot;);
+};
 
-var definition = new AgentDefinition(&quot;poly-agent&quot;, [multiServer]);
+var definition = new AgentDefinition(&quot;poly-agent&quot;, [multiServerFeature]);
 </code></pre>
-<h2 id="lifecycle--session-ownership">Lifecycle &amp; Session Ownership</h2>
-<p>The underlying MCP connection and child process resources are owned by the active <code>IAgentSession</code>. When <code>await session.DisposeAsync()</code> is called at the end of a conversation, all child processes and connections are gracefully terminated.</p>
+<hr>
+<h2 id="3-dynamic-hot-reload--skill-discovery-mcphotreloadfeature">3. Dynamic Hot-Reload &amp; Skill Discovery (<code>McpHotReloadFeature</code>)</h2>
+<p>For long-running sessions where MCP servers are added, removed, or reloaded on the fly, use <code>DynamicToolCatalog</code>, <code>McpServerHotReloadManager</code>, and <code>McpHotReloadFeature</code>:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Mcp;
+
+var catalog = new DynamicToolCatalog();
+await using var hotReloadManager = new McpServerHotReloadManager(catalog);
+var skillDiscovery = new McpSkillDiscoveryService();
+
+// Register an MCP server dynamically at runtime
+await hotReloadManager.RegisterServerAsync(&quot;github&quot;, githubTransport, cancellationToken);
+
+// Trigger a hot-reload of a specific server or all servers
+McpServerReloadResult reloadResult = await hotReloadManager.ReloadServerAsync(&quot;github&quot;, cancellationToken);
+Console.WriteLine($&quot;Reloaded {reloadResult.ServerName}: {reloadResult.NewToolCount} tools active.&quot;);
+
+// Equip the agent with hot-reload and skill discovery tools:
+// - list_active_mcp_servers
+// - reload_mcp_servers
+// - discover_skills
+var definition = new AgentDefinition(&quot;dynamic-agent&quot;, [
+    new McpHotReloadFeature(hotReloadManager, catalog, skillDiscovery)
+]);
+</code></pre>
+<h3 id="discovering-local-skill-manifests-iskilldiscoveryservice">Discovering Local Skill Manifests (<code>ISkillDiscoveryService</code>)</h3>
+<p><code>McpSkillDiscoveryService</code> scans a directory for skill manifests (<code>SKILL.md</code> or JSON skill definitions) and returns structured <code>DiscoveredSkill</code> metadata (<code>Name</code>, <code>Description</code>, <code>SourcePath</code>, <code>Tags</code>):</p>
+<pre><code class="lang-csharp">IReadOnlyList&lt;DiscoveredSkill&gt; skills = await skillDiscovery.DiscoverSkillsAsync(
+    directoryPath: &quot;.agents/skills&quot;,
+    cancellationToken: cancellationToken);
+
+foreach (var skill in skills)
+{
+    Console.WriteLine($&quot;Skill: {skill.Name} - {skill.Description} ({string.Join(&quot;, &quot;, skill.Tags)})&quot;);
+}
+</code></pre>
 
 </article>
 

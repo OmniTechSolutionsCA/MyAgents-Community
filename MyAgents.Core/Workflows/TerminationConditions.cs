@@ -103,7 +103,7 @@ public sealed class TokenBudgetTermination : ITerminationCondition
 
     /// <summary>
     /// Resets the cumulative token counter.
-    /// Called automatically by <see cref="AgentLoop"/> before each run so this instance
+    /// Called automatically by <c>AgentLoop</c> before each run so this instance
     /// can be safely reused. Call manually if you share the instance outside of AgentLoop.
     /// </summary>
     public void Reset() => _consumedTokens = 0;

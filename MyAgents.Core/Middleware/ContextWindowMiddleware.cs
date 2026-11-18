@@ -29,7 +29,7 @@ public interface IContextWindowTrimmer
 
 /// <summary>
 /// Trims the message history by removing the oldest <em>non-system</em> messages
-/// until the list contains at most <see cref="MaxMessages"/> entries.
+/// until the list contains at most <c>maxMessages</c> entries.
 /// System messages (role == "system") are always retained at their original position.
 /// </summary>
 /// <remarks>

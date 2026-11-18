@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Document Ingestion &amp; Chunking | MyAgents Community Documentation </title>
+      <title>Document Ingestion, Chunking &amp; Knowledge Base Tools | MyAgents Community Documentation </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Document Ingestion &amp; Chunking | MyAgents Community Documentation ">
+      <meta name="title" content="Document Ingestion, Chunking &amp; Knowledge Base Tools | MyAgents Community Documentation ">
       
       
       <link rel="icon" href="../../favicon.ico">
@@ -85,73 +85,102 @@
         </div>
 
         <article data-uid="">
-<h1 id="document-ingestion--chunking">Document Ingestion &amp; Chunking</h1>
+<h1 id="document-ingestion-chunking--knowledge-base-tools">Document Ingestion, Chunking &amp; Knowledge Base Tools</h1>
 
-<p>The <code>MyAgents.Memory</code> package includes built-in document readers and chunkers that ingest structured and unstructured files with <strong>zero external parsing dependencies</strong>.</p>
-<h2 id="supported-document-formats">Supported Document Formats</h2>
+<p>The <code>MyAgents.Memory</code> package includes a complete document ingestion pipeline with <strong>zero third-party parsing dependencies</strong>, boundary-aware chunkers, atomic source replacement, and agentic knowledge base tools.</p>
+<h2 id="supported-document-formats-idocumentreader">Supported Document Formats (<code>IDocumentReader</code>)</h2>
+<p><code>CompositeDocumentReader</code> and <code>HtmlDocumentReader</code> extract clean text and document titles directly from streams or files:</p>
 <ul>
-<li><strong>Markdown (<code>.md</code>)</strong>: Preserves heading hierarchy (<code>#</code>, <code>##</code>, <code>###</code>), list items, and code blocks.</li>
-<li><strong>HTML (<code>.html</code>, <code>.htm</code>)</strong>: Extracts title tags, removes navigation/script boilerplates, and strips tags while preserving structure.</li>
-<li><strong>Plain Text (<code>.txt</code>)</strong>: Splits text with sentence-boundary and paragraph awareness.</li>
-<li><strong>JSON (<code>.json</code>)</strong>: Splits JSON objects or array elements into discrete searchable records.</li>
+<li><strong>Markdown (<code>.md</code>, <code>text/markdown</code>)</strong>: Extracts YAML front-matter <code>title:</code> or the first <code># H1</code> heading and preserves heading hierarchy and fenced code blocks.</li>
+<li><strong>HTML (<code>.html</code>, <code>.htm</code>, <code>text/html</code>)</strong>: Extracts <code>&lt;title&gt;</code> or <code>&lt;h1&gt;</code>, strips <code>&lt;script&gt;</code> / <code>&lt;style&gt;</code> / <code>&lt;nav&gt;</code> boilerplate, converts headings/lists/code/links into structured Markdown, and decodes HTML entities.</li>
+<li><strong>Plain Text (<code>.txt</code>, <code>text/plain</code>)</strong>: Reads UTF-8 text with paragraph and sentence-boundary chunking.</li>
+<li><strong>JSON (<code>.json</code>, <code>application/json</code>)</strong>: Formats and extracts structured JSON content.</li>
 </ul>
 <hr>
-<h2 id="1-registering-document-ingestion">1. Registering Document Ingestion</h2>
+<h2 id="1-configuring-document-ingestion-in-di">1. Configuring Document Ingestion in DI</h2>
+<p>Use <code>AddDocumentIngestion</code> to register <code>IDocumentIngestor</code>, <code>IDocumentReader</code>, <code>ITextChunker</code>, <code>ITokenCounter</code>, and <code>KnowledgeBaseFeature</code>:</p>
 <pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
-using MyAgents.Memory.Ingestion;
+using MyAgents.Memory;
 
 var services = new ServiceCollection();
+services.AddSqliteMemoryStore(&quot;knowledge.db&quot;);
 
 services.AddDocumentIngestion(builder =&gt;
 {
-    // Configure default chunk size and overlap in tokens/characters
+    // Configure chunk size, overlap, and optional token budget per chunk
     builder.WithChunkingOptions(new TextChunkingOptions(
         ChunkSize: 1000,
-        ChunkOverlap: 100,
-        PreserveHeadings: true));
+        ChunkOverlap: 150,
+        MaxTokens: 256));
 
-    // Register format-specific chunkers
-    builder.UseMarkdownChunker();
-    builder.UseHtmlChunker();
-    builder.UsePlainTextChunker();
+    // Use heading-aware Markdown chunker (prepends &quot;# H1 &gt; ## H2&quot; breadcrumbs to chunks)
+    builder.UseMarkdownChunker(includeHeadingBreadcrumbs: true);
+
+    // Use zero-allocation approximate token counter (or register a custom ITokenCounter)
+    builder.UseTokenCounter(ApproximateTokenCounter.Instance);
 });
 
-var provider = services.BuildServiceProvider();
+await using var provider = services.BuildServiceProvider();
 var ingestor = provider.GetRequiredService&lt;IDocumentIngestor&gt;();
 </code></pre>
 <hr>
-<h2 id="2-ingesting-files-and-streams">2. Ingesting Files and Streams</h2>
-<h3 id="ingest-a-local-file">Ingest a Local File</h3>
-<pre><code class="lang-csharp">var result = await ingestor.IngestFileAsync(
+<h2 id="2-ingesting-files-streams-and-batches">2. Ingesting Files, Streams, and Batches</h2>
+<h3 id="ingest-a-local-file-ingestfileasync">Ingest a Local File (<code>IngestFileAsync</code>)</h3>
+<pre><code class="lang-csharp">DocumentIngestionResult fileResult = await ingestor.IngestFileAsync(
+    ns: &quot;project-docs&quot;,
     filePath: &quot;docs/architecture.md&quot;,
-    targetNamespace: &quot;project-knowledge&quot;,
+    source: &quot;docs/architecture.md&quot;,
     metadata: new Dictionary&lt;string, string&gt;
     {
-        [&quot;author&quot;] = &quot;Platform Team&quot;,
-        [&quot;version&quot;] = &quot;1.0.0&quot;
+        [&quot;version&quot;] = &quot;1.0.0&quot;,
+        [&quot;team&quot;] = &quot;platform&quot;
     },
     cancellationToken: cancellationToken);
 
-Console.WriteLine($&quot;Ingested {result.DocumentId} into {result.ChunkCount} chunks.&quot;);
+Console.WriteLine($&quot;Ingested '{fileResult.Source}' into {fileResult.Chunks.Count} chunks (replaced {fileResult.ReplacedChunkCount} prior chunks).&quot;);
 </code></pre>
-<h3 id="ingest-an-in-memory-stream">Ingest an In-Memory Stream</h3>
-<pre><code class="lang-csharp">using var stream = File.OpenRead(&quot;webpage.html&quot;);
+<h3 id="ingest-a-stream-ingeststreamasync">Ingest a Stream (<code>IngestStreamAsync</code>)</h3>
+<pre><code class="lang-csharp">await using var htmlStream = File.OpenRead(&quot;release-notes.html&quot;);
 
-var result = await ingestor.IngestStreamAsync(
-    stream: stream,
-    contentType: &quot;text/html&quot;,
-    documentId: &quot;release-notes-v1&quot;,
-    targetNamespace: &quot;project-knowledge&quot;,
+DocumentIngestionResult streamResult = await ingestor.IngestStreamAsync(
+    ns: &quot;project-docs&quot;,
+    content: htmlStream,
+    source: &quot;https://example.com/release-notes&quot;,
+    contentTypeOrExtension: &quot;text/html&quot;,
     cancellationToken: cancellationToken);
 </code></pre>
+<h3 id="batch-ingestion--atomic-source-replacement-ingestbatchasync">Batch Ingestion &amp; Atomic Source Replacement (<code>IngestBatchAsync</code>)</h3>
+<p>Re-ingesting a document with the same <code>Source</code> automatically removes stale chunks, reuses embeddings for unchanged chunks (via SHA-256 content hashes), and updates the <code>BM25Index</code>:</p>
+<pre><code class="lang-csharp">BatchDocumentIngestionResult batchResult = await ingestor.IngestBatchAsync(
+    ns: &quot;project-docs&quot;,
+    documents:
+    [
+        new IngestDocument(Source: &quot;guide-1&quot;, Content: &quot;# Intro\nWelcome to MyAgents.&quot;, Title: &quot;Intro Guide&quot;),
+        new IngestDocument(Source: &quot;guide-2&quot;, Content: &quot;# Security\nAlways configure tool policies.&quot;, Title: &quot;Security Guide&quot;)
+    ],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Total chunks: {batchResult.TotalChunks}, Replaced: {batchResult.TotalReplacedChunks}&quot;);
+
+// Delete all chunks for a document source
+int deletedChunks = await ingestor.DeleteDocumentAsync(&quot;project-docs&quot;, source: &quot;guide-1&quot;, cancellationToken);
+</code></pre>
 <hr>
-<h2 id="3-chunking-strategies">3. Chunking Strategies</h2>
-<p>The chunker automatically guarantees that chunks respect natural content boundaries:</p>
+<h2 id="3-agentic-knowledge-base-tools-knowledgebasefeature">3. Agentic Knowledge Base Tools (<code>KnowledgeBaseFeature</code>)</h2>
+<p>In addition to passive middleware injection (<code>RetrievalAugmentationFeature</code>), you can give an agent active tools to search and ingest documents on demand using <code>KnowledgeBaseFeature</code>:</p>
 <ul>
-<li>Markdown chunking never splits inside a fenced code block (<code>```</code>).</li>
-<li>Heading paths (<code># Guide &gt; ## Architecture</code>) are prepended to each chunk as context metadata to improve semantic search relevance.</li>
-<li>Token counts are calculated accurately without requiring heavyweight native tokenizers.</li>
+<li><code>search_knowledge_base</code>: Executes a hybrid semantic + BM25 search with optional <code>source</code> filtering and returns numbered citations with provenance metadata.</li>
+<li><code>ingest_knowledge_document</code>: Chunks, embeds, and indexes a document into the knowledge base namespace.</li>
 </ul>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Memory;
+
+var kbFeature = provider.GetRequiredService&lt;KnowledgeBaseFeature&gt;();
+
+var definition = new AgentDefinition(&quot;knowledge-curator&quot;, [
+    kbFeature
+]);
+</code></pre>
 
 </article>
 

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Interface IWorkflowSession&lt;TState&gt; | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Interface IWorkflowSession&lt;TState&gt; | MyAgents Community Documentation ">
+      
+      <meta name="description" content="Session context for workflow execution with typed state.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/new/main/apiSpec/new?filename=MyAgents_Core_Workflows_IWorkflowSession_1.md&amp;value=---%0Auid%3A%20MyAgents.Core.Workflows.IWorkflowSession%601%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Core.Workflows.IWorkflowSession`1">
+
+
+
+  <h1 id="MyAgents_Core_Workflows_IWorkflowSession_1" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1" class="text-break">
+Interface IWorkflowSession&lt;TState&gt;  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L7"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><span class="xref">MyAgents</span>.<a class="xref" href="MyAgents.Core.html">Core</a>.<a class="xref" href="MyAgents.Core.Workflows.html">Workflows</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>MyAgents.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Session context for workflow execution with typed state.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IWorkflowSession&lt;TState&gt;</code></pre>
+  </div>
+
+
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TState</code></dt>
+    <dd><p>The workflow state type.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_SessionId_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.SessionId*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_SessionId" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.SessionId">
+  SessionId
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L12"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Unique identifier for this workflow session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string SessionId { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_State_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.State*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_State" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.State">
+  State
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L17"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>The current workflow state. Can be mutated during execution.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">TState State { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><span class="xref">TState</span></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_CallAgentAsync_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CallAgentAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_CallAgentAsync_System_String_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CallAgentAsync(System.String,System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  CallAgentAsync(string, IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L26"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Calls an agent within this workflow session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ValueTask&lt;AgentTurnResult&gt; CallAgentAsync(string agentName, IReadOnlyList&lt;AgentMessage&gt; messages, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the agent to call.</p>
+</dd>
+    <dt><code>messages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Messages to send to the agent.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.valuetask-1">ValueTask</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>The result of the agent invocation.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_CallAgentStreamingAsync_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CallAgentStreamingAsync*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_CallAgentStreamingAsync_System_String_System_Collections_Generic_IReadOnlyList_MyAgents_Core_AgentMessage__System_Threading_CancellationToken_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CallAgentStreamingAsync(System.String,System.Collections.Generic.IReadOnlyList{MyAgents.Core.AgentMessage},System.Threading.CancellationToken)">
+  CallAgentStreamingAsync(string, IReadOnlyList&lt;AgentMessage&gt;, CancellationToken)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L38"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Calls an agent within this workflow session and streams partial results.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IAsyncEnumerable&lt;AgentTurnResult&gt; CallAgentStreamingAsync(string agentName, IReadOnlyList&lt;AgentMessage&gt; messages, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the agent to call.</p>
+</dd>
+    <dt><code>messages</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="MyAgents.Core.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd><p>Messages to send to the agent.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Cancellation token.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.iasyncenumerable-1">IAsyncEnumerable</a>&lt;<a class="xref" href="MyAgents.Core.AgentTurnResult.html">AgentTurnResult</a>&gt;</dt>
+    <dd><p>An async stream of partial results from the agent.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_CreateSnapshot_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CreateSnapshot*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_CreateSnapshot" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.CreateSnapshot">
+  CreateSnapshot()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L53"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a snapshot of the current workflow state for persistence.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">WorkflowSnapshot CreateSnapshot()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.Workflows.WorkflowSnapshot.html">WorkflowSnapshot</a></dt>
+    <dd><p>A versioned, serializable snapshot.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="MyAgents_Core_Workflows_IWorkflowSession_1_GetPendingHumanInput_" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.GetPendingHumanInput*"></a>
+
+  <h3 id="MyAgents_Core_Workflows_IWorkflowSession_1_GetPendingHumanInput" data-uid="MyAgents.Core.Workflows.IWorkflowSession`1.GetPendingHumanInput">
+  GetPendingHumanInput()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L47"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns the pending human-input request (with <a class="xref" href="MyAgents.Core.Workflows.HumanInputRequest.html#MyAgents_Core_Workflows_HumanInputRequest_Reply">Reply</a> populated)
+if this session was resumed via <a class="xref" href="MyAgents.Core.Workflows.WorkflowHost.html#MyAgents_Core_Workflows_WorkflowHost_ResumeWithInputAsync__1_MyAgents_Core_Workflows_IWorkflow___0__MyAgents_Core_Workflows_WorkflowSnapshot_System_String_System_Text_Json_JsonSerializerOptions_System_Threading_CancellationToken_">ResumeWithInputAsync&lt;TState&gt;(IWorkflow&lt;TState&gt;, WorkflowSnapshot, string, JsonSerializerOptions?, CancellationToken)</a>.
+Returns <code>null</code> for normal (non-HITL-resumed) sessions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">HumanInputRequest? GetPendingHumanInput()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="MyAgents.Core.Workflows.HumanInputRequest.html">HumanInputRequest</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Workflows/IWorkflowSession.cs/#L7" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

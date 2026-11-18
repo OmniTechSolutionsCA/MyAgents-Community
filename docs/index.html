@@ -79,7 +79,7 @@
 <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
 <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen" alt="GitHub Workflow"></a></p>
 <hr>
-<p>MyAgents Community is an enterprise-grade agent framework for .NET 10 built on top of <code>Microsoft.Extensions.AI</code>. It provides complete provider neutrality, compile-time NativeAOT tool generation, restart-recoverable durable worker execution, and hybrid RAG memory with zero vendor lock-in.</p>
+<p>MyAgents Community is an enterprise-grade agent framework for .NET 10 built on top of <code>Microsoft.Extensions.AI</code>. It provides complete provider neutrality, compile-time NativeAOT tool generation, stateful workflow graphs, restart-recoverable durable worker execution, and hybrid RAG memory with zero vendor lock-in.</p>
 <div class="row" style="margin-top: 24px; margin-bottom: 24px;">
   <div class="col-md-4" style="margin-bottom: 16px;">
     <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
@@ -90,15 +90,15 @@
   </div>
   <div class="col-md-4" style="margin-bottom: 16px;">
     <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
-      <h3>🛡️ Durable Execution</h3>
-      <p style="color: var(--muted-foreground); font-size: 14px;">Background worker leasing, idempotency deduplication, and automatic crash recovery with SQLite persistence via <code>MyAgents.Runtime.Workers</code>.</p>
+      <h3>🛡️ Durable Execution & Workflows</h3>
+      <p style="color: var(--muted-foreground); font-size: 14px;">Background worker leasing, idempotency deduplication, stateful <code>AgentGraph&lt;TState&gt;</code> pipelines, and SQLite crash recovery via <code>MyAgents.Runtime.Workers</code>.</p>
       <a href="docs/execution/durable-runs.html">Read Durable Runs &rarr;</a>
     </div>
   </div>
   <div class="col-md-4" style="margin-bottom: 16px;">
     <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--card);">
       <h3>🔍 Hybrid RAG Memory</h3>
-      <p style="color: var(--muted-foreground); font-size: 14px;">Fused SIMD dense cosine similarity (<code>TensorPrimitives</code>) and BM25 sparse lexical ranking with zero external vector database dependencies.</p>
+      <p style="color: var(--muted-foreground); font-size: 14px;">Fused SIMD dense cosine similarity (<code>TensorPrimitives.Dot</code>) and BM25 sparse lexical ranking with zero-dependency document ingestion and grounded citations.</p>
       <a href="docs/memory/hybrid-rag.html">Read Hybrid RAG &rarr;</a>
     </div>
   </div>
@@ -107,8 +107,8 @@
 <h2 id="quick-start-c">Quick Start (C#)</h2>
 <pre><code class="lang-csharp">using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Agents;
 using MyAgents.Core;
-using MyAgents.Core.Tools;
 using MyAgents.Runtime.Chat;
 
 // 1. Configure services with your IChatClient and MyAgents runtime
@@ -119,14 +119,13 @@ services.AddMyAgentsChatRuntime();
 await using var provider = services.BuildServiceProvider();
 var sessionFactory = provider.GetRequiredService&lt;IAgentSessionFactory&gt;();
 
-// 2. Define an agent with system prompts and tools
-var definition = new AgentDefinition(&quot;assistant&quot;, [
-    AgentFeature.Create(assembly =&gt;
-    {
-        assembly.Prompts.AddSystem(&quot;You are a helpful assistant.&quot;);
-        assembly.Tools.Add(DelegateTool.Create(&quot;get_time&quot;, () =&gt; DateTimeOffset.UtcNow.ToString(&quot;O&quot;)));
-    })
-]);
+// 2. Define an agent with tools
+var tools = new ToolsFeature()
+    .AddFunction(() =&gt; DateTimeOffset.UtcNow.ToString(&quot;O&quot;),
+        name: &quot;get_time&quot;,
+        description: &quot;Returns the current UTC timestamp in ISO-8601 format.&quot;);
+
+var definition = new AgentDefinition(&quot;assistant&quot;, [tools]);
 
 // 3. Create a session and run turns
 await using var session = sessionFactory.CreateSession(&quot;session-1&quot;, definition);
@@ -150,7 +149,7 @@ foreach (var message in turn.Output)
 <tbody>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Core</code></strong></td>
-<td style="text-align: left;">Core interfaces (<code>IAgent</code>, <code>IAgentSession</code>, <code>ITool</code>, <code>AgentDefinition</code>, messages).</td>
+<td style="text-align: left;">Core interfaces (<code>IAgent</code>, <code>IAgentSession</code>, <code>ITool</code>, <code>AgentDefinition</code>, <code>AgentGraph&lt;TState&gt;</code>, <code>WorkflowHost</code>, approvals, middleware).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Runtime.Chat</code></strong></td>
@@ -162,27 +161,27 @@ foreach (var message in turn.Output)
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers</code></strong></td>
-<td style="text-align: left;">Long-running durable worker host with lease heartbeats and idempotency.</td>
+<td style="text-align: left;">Long-running durable worker host with lease heartbeats, batch execution, and workflow adapters.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Runtime.Workers.Sqlite</code></strong></td>
-<td style="text-align: left;">SQLite backend for persistent durable runs.</td>
+<td style="text-align: left;">Transactional SQLite backend for persistent durable runs.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Memory</code></strong></td>
-<td style="text-align: left;">SIMD vector store, BM25 inverted index, Reciprocal Rank Fusion, document readers.</td>
+<td style="text-align: left;">SIMD vector store, SQLite/VectorData stores, BM25 inverted index, Reciprocal Rank Fusion, and document ingestion.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Mcp</code></strong></td>
-<td style="text-align: left;">Model Context Protocol (MCP) tool integration over stdio and HTTP/SSE.</td>
+<td style="text-align: left;">Model Context Protocol (MCP) tool, prompt, resource, hot-reload, and skill discovery adapters.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Agents</code></strong></td>
-<td style="text-align: left;">Subagent dispatching, group chats, token cost accounting, and model tier routing.</td>
+<td style="text-align: left;">Subagent dispatching, group chats, guardrails, structured outputs, OpenTelemetry, and model tier routing.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>MyAgents.Testing</code></strong></td>
-<td style="text-align: left;">Deterministic in-memory test agents and session runtimes.</td>
+<td style="text-align: left;">Deterministic in-memory test agents, fake sessions, and run backends.</td>
 </tr>
 </tbody>
 </table>
@@ -191,13 +190,20 @@ foreach (var message in turn.Output)
 <ul>
 <li><a href="docs/getting-started/quickstart.html">Getting Started Guide</a></li>
 <li><a href="docs/core/architecture.html">Architecture &amp; Execution Lifecycle</a></li>
+<li><a href="docs/core/structured-output-and-multimodal.html">Structured Output &amp; Multi-Modal</a></li>
+<li><a href="docs/core/prompt-registry.html">Prompt Registry &amp; Versioning</a></li>
 <li><a href="docs/tools/nativeaot-tools.html">Zero-Reflection NativeAOT Tools</a></li>
-<li><a href="docs/tools/mcp.html">Model Context Protocol (MCP)</a></li>
-<li><a href="docs/execution/durable-runs.html">Durable Background Execution</a></li>
-<li><a href="docs/memory/hybrid-rag.html">Hybrid RAG &amp; Ingestion</a></li>
+<li><a href="docs/tools/mcp.html">Model Context Protocol (MCP) &amp; Hot-Reload</a></li>
+<li><a href="docs/workflows/agent-graphs.html">State Graphs (<code>AgentGraph&lt;TState&gt;</code>)</a></li>
+<li><a href="docs/workflows/checkpointed-workflows.html">Checkpointed Workflows &amp; Human-in-the-Loop</a></li>
+<li><a href="docs/workflows/orchestration-patterns.html">Orchestration Patterns (Loops, Reflection, Consensus)</a></li>
+<li><a href="docs/execution/durable-runs.html">Durable Background Execution &amp; Batches</a></li>
+<li><a href="docs/memory/hybrid-rag.html">Hybrid RAG &amp; Vector Stores</a></li>
 <li><a href="docs/governance/tool-approval.html">Tool Approval &amp; Governance</a></li>
+<li><a href="docs/governance/guardrails-and-resilience.html">Guardrails, Fallbacks &amp; Dead-Letter Queues</a></li>
 <li><a href="docs/agents/multi-agent-and-subagents.html">Subagents &amp; Multi-Agent Teams</a></li>
 <li><a href="docs/testing/testing-agents.html">Unit Testing Agents</a></li>
+<li><a href="api/index.html">C# API Reference</a></li>
 </ul>
 
 </article>

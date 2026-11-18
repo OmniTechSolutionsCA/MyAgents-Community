@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Circuit Breakers &amp; Observability | MyAgents Community Documentation </title>
+      <title>Circuit Breakers, Tool Observers &amp; OpenTelemetry | MyAgents Community Documentation </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Circuit Breakers &amp; Observability | MyAgents Community Documentation ">
+      <meta name="title" content="Circuit Breakers, Tool Observers &amp; OpenTelemetry | MyAgents Community Documentation ">
       
       
       <link rel="icon" href="../../favicon.ico">
@@ -85,27 +85,32 @@
         </div>
 
         <article data-uid="">
-<h1 id="circuit-breakers--observability">Circuit Breakers &amp; Observability</h1>
+<h1 id="circuit-breakers-tool-observers--opentelemetry">Circuit Breakers, Tool Observers &amp; OpenTelemetry</h1>
 
-<p>To protect downstream services from runaway loops, sudden model hallucinations, and cascading failures, MyAgents Community provides built-in circuit breakers, execution observers, and OpenTelemetry metrics.</p>
-<h2 id="1-tool-circuit-breaker">1. Tool Circuit Breaker</h2>
-<p>When an external tool dependency fails repeatedly (e.g. database timeout or third-party API outage), the <code>CircuitBreakerMiddleware</code> trips open, immediately rejecting further tool calls before they hit the failing service:</p>
-<pre><code class="lang-csharp">using MyAgents.Core.Middleware;
+<p>To protect downstream dependencies from cascading failures and give operators full visibility into agent behavior, MyAgents Community provides circuit breaker middleware, tool call observers, and first-class OpenTelemetry tracing and metrics.</p>
+<h2 id="1-circuit-breaker-middleware-circuitbreakermiddleware">1. Circuit Breaker Middleware (<code>CircuitBreakerMiddleware</code>)</h2>
+<p>When an LLM provider or downstream dependency experiences transient failures (such as HTTP 429/503 errors or timeouts), <code>CircuitBreakerMiddleware</code> tracks consecutive transient failures via <code>ITransientErrorClassifier</code> and trips open (<code>CircuitState.Open</code>), fast-failing with <code>CircuitBreakerOpenException</code> until <code>OpenDuration</code> elapses:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
 
-var circuitBreaker = new CircuitBreakerMiddleware(new CircuitBreakerOptions
-{
-    FailureThreshold = 3,                       // Trip after 3 consecutive failures
-    BreakDuration = TimeSpan.FromSeconds(30),   // Stay open for 30 seconds
-    HandledExceptions = [typeof(HttpRequestException), typeof(TimeoutException)]
-});
+var circuitBreaker = new CircuitBreakerMiddleware(
+    failureThreshold: 3,
+    openDuration: TimeSpan.FromSeconds(30),
+    classifier: new DefaultTransientErrorClassifier());
+
+// Inspect state (Closed, Open, HalfOpen) or manually reset
+Console.WriteLine($&quot;Circuit state: {circuitBreaker.State}&quot;);
+circuitBreaker.Reset();
 </code></pre>
-<p>When tripped, the circuit breaker returns a structured error to the model so the agent can adapt or inform the user rather than hanging.</p>
+<p>Register <code>CircuitBreakerMiddleware</code> in an agent's pipeline using a custom feature or <code>assembly.Pipeline.Use(circuitBreaker)</code>.</p>
 <hr>
-<h2 id="2-tool-observers">2. Tool Observers</h2>
-<p>Tool observers allow you to audit, log, or measure tool execution without altering the tool's business logic:</p>
-<pre><code class="lang-csharp">using MyAgents.Core.Tools;
+<h2 id="2-tool-call-observers-itoolcallobserver">2. Tool Call Observers (<code>IToolCallObserver</code>)</h2>
+<p><code>IToolCallObserver</code> lets you log, audit, or time every tool execution without modifying the tool implementation itself:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.Logging;
+using MyAgents.Agents;
+using MyAgents.Core;
+using MyAgents.Core.Tools;
 
-public sealed class SecurityAuditToolObserver : IToolObserver
+public sealed class SecurityAuditToolObserver : IToolCallObserver
 {
     private readonly ILogger _logger;
 
@@ -114,43 +119,71 @@ public sealed class SecurityAuditToolObserver : IToolObserver
         _logger = logger;
     }
 
-    public void OnToolInvoking(ToolInvokingContext context)
+    public ValueTask OnToolCallingAsync(
+        ToolCallObservation call,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation(&quot;Tool {ToolName} invoking with args: {Args}&quot;, context.ToolName, context.ArgumentsJson);
+        _logger.LogInformation(
+            &quot;Session {SessionId} invoking tool {ToolName} (CallId: {CallId}) with args: {Args}&quot;,
+            call.SessionId, call.ToolName, call.CallId, call.Arguments);
+        return ValueTask.CompletedTask;
     }
 
-    public void OnToolInvoked(ToolInvokedContext context)
+    public ValueTask OnToolCalledAsync(
+        ToolResultObservation result,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation(&quot;Tool {ToolName} completed in {ElapsedMs}ms. Success: {IsSuccess}&quot;,
-            context.ToolName, context.Duration.TotalMilliseconds, context.Result.IsSuccess);
+        _logger.LogInformation(
+            &quot;Tool {ToolName} finished in {ElapsedMs:F1}ms (Failed: {HasError})&quot;,
+            result.Call.ToolName,
+            result.Duration.TotalMilliseconds,
+            result.Exception is not null);
+        return ValueTask.CompletedTask;
     }
 }
 </code></pre>
-<p>Register observers using <code>ToolObserverFeature</code>:</p>
+<p>Attach one or more observers to an <code>AgentDefinition</code> via <code>ToolObserverFeature</code>:</p>
 <pre><code class="lang-csharp">var definition = new AgentDefinition(&quot;audited-agent&quot;, [
-    new ToolObserverFeature(new SecurityAuditToolObserver(logger))
+    new ToolObserverFeature(new SecurityAuditToolObserver(logger)),
+    new ToolsFeature(myTool)
 ]);
 </code></pre>
 <hr>
-<h2 id="3-opentelemetry-metrics--tracing">3. OpenTelemetry Metrics &amp; Tracing</h2>
-<p><code>MyAgents.Agents</code> integrates natively with <code>System.Diagnostics.DiagnosticSource</code> and OpenTelemetry:</p>
-<pre><code class="lang-csharp">services.AddOpenTelemetry()
-    .WithTracing(tracing =&gt;
-    {
-        tracing.AddSource(&quot;MyAgents.Community&quot;);
-        tracing.AddOtlpExporter();
-    })
-    .WithMetrics(metrics =&gt;
-    {
-        metrics.AddMeter(&quot;MyAgents.Community&quot;);
-        metrics.AddOtlpExporter();
-    });
+<h2 id="3-opentelemetry-tracing--metrics-myagentsotelextensions">3. OpenTelemetry Tracing &amp; Metrics (<code>MyAgentsOtelExtensions</code>)</h2>
+<p><code>MyAgents.Core</code> (<code>MyAgentsTelemetry</code>) and <code>MyAgents.Agents</code> (<code>TelemetryFeature</code>, <code>MyAgentsOtelExtensions</code>) integrate directly with <code>System.Diagnostics.ActivitySource</code>, <code>System.Diagnostics.Metrics.Meter</code>, and <code>.NET Aspire</code>:</p>
+<h3 id="enabling-telemetry-on-an-agent">Enabling Telemetry on an Agent</h3>
+<p>Add <code>TelemetryFeature</code> (and optionally <code>LoggingFeature</code>) to your <code>AgentDefinition</code>:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var definition = new AgentDefinition(&quot;observable-agent&quot;, [
+    new TelemetryFeature(),
+    new LoggingFeature(),
+    new ToolsFeature(myTool)
+]);
 </code></pre>
-<p>Exported metrics include:</p>
+<h3 id="registering-opentelemetry-in-programcs">Registering OpenTelemetry in <code>Program.cs</code></h3>
+<p>Use the <code>AddMyAgentsTracing()</code> and <code>AddMyAgentsMetrics()</code> extension methods on <code>OpenTelemetryBuilder</code>:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
+builder.Services.AddOpenTelemetry()
+    .AddMyAgentsTracing()   // Subscribes to &quot;MyAgents&quot; and &quot;Microsoft.Extensions.AI&quot; ActivitySources
+    .AddMyAgentsMetrics()   // Subscribes to the &quot;MyAgents&quot; Meter
+    .WithTracing(tracing =&gt; tracing.AddOtlpExporter())
+    .WithMetrics(metrics =&gt; metrics.AddOtlpExporter());
+</code></pre>
+<p>Exported instrumentation includes:</p>
 <ul>
-<li><code>agent.turn.duration_ms</code>: Duration of conversational turns.</li>
-<li><code>agent.tool.invocations_total</code>: Counter of tool calls tagged by tool name and status.</li>
-<li><code>agent.tokens.cost_usd</code>: Real-time token usage and cost metrics per model tier.</li>
+<li><strong>Activity Source (<code>MyAgents</code> &amp; <code>Microsoft.Extensions.AI</code>)</strong>: End-to-end distributed spans across agent turns, middleware, LLM provider calls, and tool executions.</li>
+<li><strong>Metrics (<code>MyAgents</code>)</strong>:
+<ul>
+<li><code>agent.turn.duration_ms</code>: Histogram of conversational turn durations.</li>
+<li><code>agent.turn.tokens</code>: Token usage counters (<code>prompt</code>, <code>completion</code>, <code>total</code>).</li>
+<li><code>agent.turn.errors</code>: Counter of turn exceptions and failures.</li>
+</ul>
+</li>
 </ul>
 
 </article>

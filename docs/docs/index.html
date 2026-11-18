@@ -99,37 +99,47 @@
 <ul>
 <li><strong><a href="core/architecture.html">Architecture &amp; Execution Lifecycle</a></strong>: Understand how session factories, feature pipelines, and turn loops interact with <code>IChatClient</code>.</li>
 <li><strong><a href="core/sessions-and-turns.html">Sessions &amp; Turns</a></strong>: Manage isolated conversation state, streaming responses, and context windows.</li>
+<li><strong><a href="core/structured-output-and-multimodal.html">Structured Output &amp; Multi-Modal</a></strong>: Enforce JSON schemas with automatic self-correction retries and send image, audio, video, or document inputs.</li>
+<li><strong><a href="core/prompt-registry.html">Prompt Registry &amp; Templates</a></strong>: Manage versioned system prompt templates with variable interpolation.</li>
 </ul>
 <hr>
 <h2 id="-tools--extensibility">⚡ Tools &amp; Extensibility</h2>
 <ul>
 <li><strong><a href="tools/nativeaot-tools.html">NativeAOT Tools</a></strong>: Generate zero-reflection, compile-time tools using <code>MyAgents.Generators</code>.</li>
-<li><strong><a href="tools/delegate-tools.html">Delegate &amp; Custom Tools</a></strong>: Create tools from in-process C# lambdas or custom <code>ITool</code> classes.</li>
-<li><strong><a href="tools/mcp.html">Model Context Protocol (MCP)</a></strong>: Connect your agent to external tools and data sources via stdio or HTTP/SSE transports.</li>
+<li><strong><a href="tools/delegate-tools.html">Delegate &amp; Custom Tools</a></strong>: Create tools from in-process C# lambdas, <code>ToolsFeature</code>, <code>WebSearchFeature</code>, or custom <code>ITool</code> classes.</li>
+<li><strong><a href="tools/mcp.html">Model Context Protocol (MCP)</a></strong>: Connect your agent to external tools, prompts, and resources over stdio or HTTP/SSE with dynamic hot-reload and skill discovery.</li>
+</ul>
+<hr>
+<h2 id="-workflows--state-graphs">🔀 Workflows &amp; State Graphs</h2>
+<ul>
+<li><strong><a href="workflows/agent-graphs.html">Agent State Graphs</a></strong>: Build cyclic or DAG workflows with <code>AgentGraph&lt;TState&gt;</code>, conditional routing, parallel fan-out, <code>SendPacket&lt;TState&gt;</code> map-reduce, and snapshot time-travel.</li>
+<li><strong><a href="workflows/checkpointed-workflows.html">Checkpointed Workflows &amp; HITL</a></strong>: Pause and resume stateful <code>IWorkflow&lt;TState&gt;</code> pipelines across process restarts for human input or tool approvals.</li>
+<li><strong><a href="workflows/orchestration-patterns.html">Orchestration Patterns</a></strong>: Execute iterative <code>AgentLoop</code> reductions, planner-worker-synthesizer plans (<code>OrchestratorSteps</code>), generator-critic loops (<code>ReflectionSteps</code>), majority-vote <code>ConsensusSteps</code>, and adaptive goal prioritization.</li>
 </ul>
 <hr>
 <h2 id="-durable-execution--resilience">🛡️ Durable Execution &amp; Resilience</h2>
 <ul>
-<li><strong><a href="execution/durable-runs.html">Durable Agent Runs</a></strong>: Host crash-resilient, restart-recoverable workloads using SQLite leases and background worker services.</li>
+<li><strong><a href="execution/durable-runs.html">Durable Agent Runs &amp; Batches</a></strong>: Host crash-resilient, restart-recoverable workloads using SQLite leases, admission throttling, batch controllers, and background worker services.</li>
 </ul>
 <hr>
 <h2 id="-memory--retrieval-augmented-generation-rag">🔍 Memory &amp; Retrieval-Augmented Generation (RAG)</h2>
 <ul>
-<li><strong><a href="memory/hybrid-rag.html">Hybrid RAG</a></strong>: Fuse dense SIMD cosine similarity (<code>TensorPrimitives</code>) with BM25 sparse lexical ranking.</li>
-<li><strong><a href="memory/episodic-memory.html">Episodic Memory</a></strong>: Enable cross-session recall and automated milestone consolidation.</li>
-<li><strong><a href="memory/document-ingestion.html">Document Ingestion</a></strong>: Ingest and chunk Markdown, HTML, Plain Text, and JSON with zero third-party dependencies.</li>
+<li><strong><a href="memory/hybrid-rag.html">Hybrid RAG &amp; Vector Stores</a></strong>: Fuse dense SIMD cosine similarity (<code>TensorPrimitives.Dot</code>) with BM25 sparse lexical ranking across in-memory, SQLite, and <code>Microsoft.Extensions.VectorData</code> stores.</li>
+<li><strong><a href="memory/document-ingestion.html">Document Ingestion &amp; Chunking</a></strong>: Ingest and chunk Markdown, HTML, Plain Text, and JSON with zero third-party dependencies, content-hash deduplication, and agentic knowledge base tools.</li>
+<li><strong><a href="memory/episodic-memory.html">Episodic Memory</a></strong>: Enable cross-session recall, automated episode consolidation, and retention policies.</li>
 </ul>
 <hr>
-<h2 id="-governance--safety">🔒 Governance &amp; Safety</h2>
+<h2 id="-governance-guardrails--observability">🔒 Governance, Guardrails &amp; Observability</h2>
 <ul>
-<li><strong><a href="governance/tool-approval.html">Tool Approval &amp; Allowlisting</a></strong>: Enforce rule-based permission policies and human-in-the-loop approval gates.</li>
-<li><strong><a href="governance/circuit-breakers.html">Circuit Breakers &amp; Observability</a></strong>: Protect against cascade failures, monitor tool telemetry, and emit OpenTelemetry metrics.</li>
+<li><strong><a href="governance/tool-approval.html">Tool Approval &amp; Allowlisting</a></strong>: Enforce rule-based permission policies, session approval memory, audit sinks, and human-in-the-loop approval gates.</li>
+<li><strong><a href="governance/guardrails-and-resilience.html">Guardrails, Fallbacks &amp; Resilience</a></strong>: Protect agent outputs with <code>GuardrailsFeature</code>, retry transient provider errors with <code>ResilienceMiddleware</code>, and capture failures with <code>FallbackFeature</code> and dead-letter queues.</li>
+<li><strong><a href="governance/circuit-breakers.html">Circuit Breakers &amp; Observability</a></strong>: Protect against cascade failures, monitor tool invocations with <code>IToolCallObserver</code>, and emit OpenTelemetry traces and metrics (<code>AddMyAgentsTracing</code>, <code>AddMyAgentsMetrics</code>).</li>
 </ul>
 <hr>
 <h2 id="-multi-agent-systems--testing">👥 Multi-Agent Systems &amp; Testing</h2>
 <ul>
-<li><strong><a href="agents/multi-agent-and-subagents.html">Subagents &amp; Teams</a></strong>: Orchestrate hierarchical subagent dispatching, group chats, and multi-model cost routing.</li>
-<li><strong><a href="testing/testing-agents.html">Unit Testing Agents</a></strong>: Write fast, deterministic unit tests using <code>MyAgents.Testing</code> and in-memory agents.</li>
+<li><strong><a href="agents/multi-agent-and-subagents.html">Subagents, Group Chats &amp; Routing</a></strong>: Orchestrate hierarchical subagent dispatching, <code>GroupChat</code> / <code>SelectorGroupChat</code>, <code>CapabilityRouter</code>, and multi-model token cost routing.</li>
+<li><strong><a href="testing/testing-agents.html">Unit Testing Agents</a></strong>: Write fast, deterministic unit tests using <code>MyAgents.Testing</code> (<code>InMemoryAgent</code>, <code>FakeAgentSession</code>, <code>InMemoryAgentRuntime</code>, <code>InMemoryAgentRunBackend</code>).</li>
 </ul>
 
 </article>

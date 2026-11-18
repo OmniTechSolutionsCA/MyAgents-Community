@@ -65,3 +65,6 @@ studio-data/
 # Documentation site output
 _site/
 docs-src/_site/
+docs-src/api/*.yml
+docs-src/api/.manifest
+

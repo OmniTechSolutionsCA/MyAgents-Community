@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Episodic Memory &amp; Long-Term Recall | MyAgents Community Documentation </title>
+      <title>Episodic Memory &amp; Retention Policies | MyAgents Community Documentation </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Episodic Memory &amp; Long-Term Recall | MyAgents Community Documentation ">
+      <meta name="title" content="Episodic Memory &amp; Retention Policies | MyAgents Community Documentation ">
       
       
       <link rel="icon" href="../../favicon.ico">
@@ -85,63 +85,94 @@
         </div>
 
         <article data-uid="">
-<h1 id="episodic-memory--long-term-recall">Episodic Memory &amp; Long-Term Recall</h1>
+<h1 id="episodic-memory--retention-policies">Episodic Memory &amp; Retention Policies</h1>
 
-<p>While standard session state is ephemeral, real-world agents require <strong>long-term episodic memory</strong> to remember user preferences, previous decisions, and domain facts across different sessions and days.</p>
+<p>While standard session state is tied to a single conversation, real-world agents require <strong>long-term episodic memory</strong> to remember user preferences, architectural decisions, and domain milestones across separate sessions and days.</p>
 <h2 id="what-is-episodic-memory">What is Episodic Memory?</h2>
-<p><code>MyAgents.Memory</code> provides <code>IEpisodicMemoryStore</code>, a high-level memory layer built on top of hybrid retrieval:</p>
+<p><code>MyAgents.Memory</code> provides <code>IEpisodicMemoryStore</code> (<code>EpisodicMemoryStore</code>), a structured long-term memory layer built on top of <code>IMemoryStore</code> and <code>IHybridMemoryRetriever</code>:</p>
 <ol>
-<li><strong>Semantic Persistence</strong>: Automatically indexes conversational facts into a persistent store.</li>
-<li><strong>Cross-Session Recall</strong>: Queries relevant memories based on conversational context.</li>
-<li><strong>Automated Milestone Consolidation</strong>: Summarizes multiple related memories into concise milestone entries.</li>
-<li><strong>Retention Policies</strong>: Trims expired or low-importance memories to respect token budgets.</li>
+<li><strong>Structured Episodes (<code>EpisodicMemoryEntry</code>)</strong>: Stores <code>EpisodeId</code>, <code>SessionId</code>, <code>Summary</code>, <code>KeyFacts</code>, <code>Entities</code>, <code>Timestamp</code>, and <code>Salience</code> (0.0 to 1.0).</li>
+<li><strong>Cross-Session Hybrid Recall (<code>RecallEpisodesAsync</code>)</strong>: Searches past episodes using hybrid semantic + BM25 retrieval with optional session, age, and minimum salience filters.</li>
+<li><strong>Episode Consolidation (<code>ConsolidateEpisodesAsync</code>)</strong>: Merges older, lower-salience episodes for a session into consolidated milestone entries.</li>
+<li><strong>Retention &amp; Summarization (<code>MemoryRetentionService</code>)</strong>: Enforces entry count and age limits while optionally summarizing trimmed entries and updating the BM25 lexical index.</li>
 </ol>
 <hr>
 <h2 id="1-setting-up-episodic-memory">1. Setting up Episodic Memory</h2>
 <pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core.Memory;
 using MyAgents.Memory;
 
 var services = new ServiceCollection();
+services.AddSingleton&lt;IMemoryStore, InMemoryMemoryStore&gt;();
 
-// Registers IEpisodicMemoryStore and EpisodicMemoryFeature
+// Registers IEpisodicMemoryStore, HybridMemoryRetriever, and EpisodicMemoryFeature
 services.AddEpisodicMemory(ns: &quot;user-longterm-memory&quot;);
 
-var provider = services.BuildServiceProvider();
+await using var provider = services.BuildServiceProvider();
 var episodicStore = provider.GetRequiredService&lt;IEpisodicMemoryStore&gt;();
 </code></pre>
 <hr>
-<h2 id="2-using-the-episodic-memory-feature-in-an-agent">2. Using the Episodic Memory Feature in an Agent</h2>
-<p>Register <code>EpisodicMemoryFeature</code> in your agent definition to give the model tools to remember and recall information autonomously:</p>
+<h2 id="2-saving-recalling--consolidating-episodes-programmatically">2. Saving, Recalling &amp; Consolidating Episodes Programmatically</h2>
+<pre><code class="lang-csharp">// 1. Save an episode
+var episode = new EpisodicMemoryEntry(
+    EpisodeId: &quot;ep-001&quot;,
+    SessionId: &quot;session-42&quot;,
+    Summary: &quot;User prefers NativeAOT deployments on Linux containers with SQLite WAL persistence.&quot;,
+    KeyFacts: [&quot;Target runtime: .NET 10 NativeAOT&quot;, &quot;Database: SQLite WAL mode&quot;],
+    Entities: [&quot;NativeAOT&quot;, &quot;SQLite&quot;],
+    Timestamp: DateTimeOffset.UtcNow,
+    Salience: 0.95);
+
+await episodicStore.SaveEpisodeAsync(episode, cancellationToken);
+
+// 2. Recall episodes across sessions
+var query = new EpisodicRecallQuery(
+    Query: &quot;deployment database preference&quot;,
+    SessionIdFilter: null,
+    MaxEpisodes: 5,
+    MinSalience: 0.5,
+    MaxAge: TimeSpan.FromDays(90));
+
+IReadOnlyList&lt;EpisodicMemoryEntry&gt; recalled = await episodicStore.RecallEpisodesAsync(query, cancellationToken);
+
+// 3. Consolidate older episodes for a session into a single milestone
+await episodicStore.ConsolidateEpisodesAsync(
+    sessionId: &quot;session-42&quot;,
+    olderThan: TimeSpan.FromDays(7),
+    cancellationToken: cancellationToken);
+</code></pre>
+<hr>
+<h2 id="3-equipping-an-agent-with-episodic-memory-tools-episodicmemoryfeature">3. Equipping an Agent with Episodic Memory Tools (<code>EpisodicMemoryFeature</code>)</h2>
+<p>Register <code>EpisodicMemoryFeature</code> on an <code>AgentDefinition</code> to give the model autonomous tools to record and search episodic memories:</p>
 <pre><code class="lang-csharp">var episodicFeature = provider.GetRequiredService&lt;EpisodicMemoryFeature&gt;();
 
-var definition = new AgentDefinition(&quot;personal-assistant&quot;, [
+var definition = new AgentDefinition(&quot;personal-architect&quot;, [
     episodicFeature
 ]);
 </code></pre>
-<p>The feature automatically injects two tools into the model:</p>
+<p><code>EpisodicMemoryFeature</code> registers two tools:</p>
 <ul>
-<li><code>remember(key, content, importance)</code>: Stores an episodic observation.</li>
-<li><code>recall(query, maxResults)</code>: Searches episodic memory for relevant facts.</li>
+<li><code>save_episodic_fact</code>: Persists an important user fact, preference, or milestone summary (<code>session_id</code>, <code>summary</code>, <code>key_facts</code>, <code>entities</code>, <code>salience</code>).</li>
+<li><code>recall_past_episodes</code>: Searches long-term episodic memory for relevant past conversations (<code>query</code>, <code>session_id</code>, <code>max_episodes</code>).</li>
 </ul>
 <hr>
-<h2 id="3-retention-policies--summarization">3. Retention Policies &amp; Summarization</h2>
-<p>Over months of usage, memories accumulate. Use <code>MemoryRetentionService</code> to prune older memories while preserving summaries:</p>
+<h2 id="4-memory-retention-policies-memoryretentionservice">4. Memory Retention Policies (<code>MemoryRetentionService</code>)</h2>
+<p>Use <code>MemoryRetentionService</code> to prune expired or excess memory entries while optionally generating milestone summaries via <code>IMemorySummaryGenerator</code>:</p>
 <pre><code class="lang-csharp">var retentionService = provider.GetRequiredService&lt;MemoryRetentionService&gt;();
 
 var policy = new MemoryRetentionPolicy(
     MaxEntries: 500,
     MaxAge: TimeSpan.FromDays(90),
     SummarizeTrimmedEntries: true,
-    SummarySourceCount: 20,
-    SummaryKeyPrefix: &quot;milestone-summary&quot;
-);
+    SummaryKeyPrefix: &quot;milestone-summary&quot;,
+    SummarySourceCount: 20);
 
 MemoryRetentionResult result = await retentionService.ApplyAsync(
     ns: &quot;user-longterm-memory&quot;,
     policy: policy,
     cancellationToken: cancellationToken);
 
-Console.WriteLine($&quot;Pruned {result.DeletedCount} entries, summarized {result.SummarizedCount} milestones.&quot;);
+Console.WriteLine($&quot;Pruned {result.DeletedCount} entries, summarized {result.SummarizedCount} entries.&quot;);
 </code></pre>
 
 </article>

@@ -7,7 +7,7 @@ namespace MyAgents.Agents;
 /// </summary>
 /// <remarks>
 /// Place this at the outermost position in the features list so the fallback
-/// wraps the entire pipeline (including <see cref="ResilienceFeature"/> when present):
+/// wraps the entire pipeline (including <see cref="ResilienceMiddleware"/> when present):
 /// <code>
 /// var agent = new AgentDefinition(
 ///     Name: "ResilientAgent",
