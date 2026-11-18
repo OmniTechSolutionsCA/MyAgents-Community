@@ -48,29 +48,21 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
         // can configure instructions and tools without rebuilding them.
         var agent = _runtime.CreateAgent(definition, assembly);
 
-        // If session-scoped services were contributed, wrap the root provider in a thin overlay
-        // that satisfies those resolutions while falling back to root for everything else.
-        IServiceProvider sessionProvider;
-        if (assembly.Memory is not null ||
-            assembly.PromptRegistry is not null ||
-            assembly.Channel is not null ||
-            assembly.ToolObservers.Count > 0 ||
-            toolCatalog is not null ||
-            assembly.SessionServices.Count > 0)
-        {
-            sessionProvider = new SessionOverlayServiceProvider(
-                _rootProvider,
-                assembly.Memory,
-                assembly.PromptRegistry,
-                assembly.Channel,
-                toolCatalog,
-                assembly.ToolObservers.AsReadOnly(),
-                assembly.SessionServices);
-        }
-        else
-        {
-            sessionProvider = _rootProvider;
-        }
+        // The overlay is unconditional. ToolCatalog is always built above (an empty catalog is still a
+        // catalog), and FunctionCallingMiddleware resolves it from the turn services and silently
+        // disables the tool loop when it is null — so every session must expose one. A previous
+        // condition here tested `toolCatalog is not null`, which is always true and made the
+        // no-overlay branch unreachable; deleting the clause instead of the branch would have
+        // reintroduced the silent tool-loop disablement. See SessionCreationTests:
+        // A_session_with_no_tools_or_services_still_resolves_a_ToolCatalog.
+        var sessionProvider = new SessionOverlayServiceProvider(
+            _rootProvider,
+            assembly.Memory,
+            assembly.PromptRegistry,
+            assembly.Channel,
+            toolCatalog,
+            assembly.ToolObservers.AsReadOnly(),
+            assembly.SessionServices);
 
         var composedCapabilities = MergeCapabilities(definition.Capabilities, assembly.Capabilities);
 

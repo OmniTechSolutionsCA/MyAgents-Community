@@ -51,6 +51,47 @@ public sealed class SessionCreationTests
     }
 
     /// <summary>
+    /// Pins an invariant <c>FunctionCallingMiddleware</c> depends on: it resolves
+    /// <see cref="ToolCatalog"/> from the turn services and silently disables function calling when
+    /// that resolves to null. Every session must therefore expose a catalog — including one built
+    /// from an agent that registered no tools and contributed no session services at all.
+    /// </summary>
+    [Test]
+    public async Task A_session_with_no_tools_or_services_still_resolves_a_ToolCatalog()
+    {
+        var capture = new ToolCatalogCaptureFeature();
+        var factory = new TrackingSessionFactory();
+
+        var session = await factory.CreateSessionAsync("s1", new AgentDefinition("a1", [capture]));
+        await session.InvokeAsync([AgentMessage.FromText("user", "hi")]);
+
+        Assert.That(capture.Catalog, Is.Not.Null,
+            "A null ToolCatalog silently disables the function-calling loop; the session provider " +
+            "must always overlay one.");
+    }
+
+    /// <summary>Captures the <see cref="ToolCatalog"/> a turn can resolve from its services.</summary>
+    private sealed class ToolCatalogCaptureFeature : IAgentFeature
+    {
+        public ToolCatalog? Catalog { get; private set; }
+
+        public void Contribute(AgentAssembly assembly)
+            => assembly.Pipeline.Use(new CaptureMiddleware(this));
+
+        private sealed class CaptureMiddleware(ToolCatalogCaptureFeature owner) : IAgentMiddleware
+        {
+            public async ValueTask<AgentTurnResult> InvokeAsync(
+                AgentTurnContext context,
+                Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> next,
+                CancellationToken cancellationToken = default)
+            {
+                owner.Catalog = context.Services.GetService<ToolCatalog>();
+                return await next(context, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    /// <summary>
     /// Feature that records the token it was handed and cancels itself when it is already
     /// cancelled, so the test observes propagation without needing a live provider.
     /// </summary>
