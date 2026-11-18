@@ -126,7 +126,13 @@ public sealed class CanaryDefenseFeature : IAgentFeature
         var scanner = _scanner ?? new DefaultEgressScanner(_options.BeaconHostAllowList);
         var handler = _handler ?? new QuarantineSessionViolationHandler(vault);
 
-        assembly.Pipeline.Use(new CanaryEgressMiddleware(vault, scanner, handler, _options));
+        // The window is scanned together with the current turn, so it must stay well inside the scan
+        // cap -- otherwise a long conversation would push the combined payload over MaxScanBytes and
+        // every turn would fail closed as oversized. Half the cap leaves room for the turn itself.
+        var window = new CanaryTurnWindow(
+            maxBytes: Math.Max(1, Math.Min(CanaryTurnWindow.DefaultBytes, _options.MaxScanBytes / 2)));
+
+        assembly.Pipeline.Use(new CanaryEgressMiddleware(vault, scanner, handler, _options, window));
         assembly.ToolObservers.Add(new CanaryToolEgressObserver(vault, scanner, handler, _options));
     }
 }

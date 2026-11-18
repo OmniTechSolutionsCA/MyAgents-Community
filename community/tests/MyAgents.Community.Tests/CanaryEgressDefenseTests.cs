@@ -103,6 +103,106 @@ public sealed partial class CanaryEgressDefenseTests
         Assert.That(result.Output.Single().Content, Is.EqualTo(Refusal));
     }
 
+    // ── Cross-turn smuggling (T5) ──────────────────────────────────────────────
+
+    [Test]
+    public async Task A_canary_split_across_two_turns_is_detected_on_the_second()
+    {
+        const int splitAt = 16;
+        var client = new DelegateChatClient(canary => $"part one: {canary[..splitAt]}");
+        var session = await CreateSessionAsync(client, new CanaryDefenseFeature());
+
+        var first = await session.InvokeAsync([AgentMessage.FromText("user", "start")]);
+
+        client.Transform = canary => $"part two: {canary[splitAt..]}";
+        var second = await session.InvokeAsync([AgentMessage.FromText("user", "continue")]);
+
+        Assert.Multiple(() =>
+        {
+            // Neither half contains the canary, so the first turn must reach the caller intact --
+            // without this, a middleware that refused everything would satisfy the assertion below.
+            Assert.That(first.Output.Single().Content, Does.StartWith("part one:"),
+                "The first turn holds only a fragment and must not be refused.");
+
+            Assert.That(second.Output.Single().Content, Is.EqualTo(Refusal),
+                "The completing fragment must be caught against the recent-turn window.");
+        });
+    }
+
+    [Test]
+    public async Task A_canary_split_across_three_turns_is_detected_on_the_third()
+    {
+        const int step = 11; // the 33-character token divides into three equal fragments
+        var client = new DelegateChatClient(canary => $"a: {canary[..step]}");
+        var session = await CreateSessionAsync(client, new CanaryDefenseFeature());
+
+        var first = await session.InvokeAsync([AgentMessage.FromText("user", "one")]);
+        client.Transform = canary => $"b: {canary[step..(step * 2)]}";
+        var second = await session.InvokeAsync([AgentMessage.FromText("user", "two")]);
+        client.Transform = canary => $"c: {canary[(step * 2)..]}";
+        var third = await session.InvokeAsync([AgentMessage.FromText("user", "three")]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(first.Output.Single().Content, Does.StartWith("a:"));
+            Assert.That(second.Output.Single().Content, Does.StartWith("b:"),
+                "Two fragments are not yet a token, so the second turn must reach the caller.");
+            Assert.That(third.Output.Single().Content, Is.EqualTo(Refusal),
+                "The third fragment completes the token across the window.");
+        });
+    }
+
+    [Test]
+    public async Task Ten_clean_turns_are_never_refused()
+    {
+        const string clean = "a clean and entirely ordinary reply";
+        var client = new DelegateChatClient(_ => clean);
+        var session = await CreateSessionAsync(client, new CanaryDefenseFeature());
+
+        for (var turn = 0; turn < 10; turn++)
+        {
+            var result = await session.InvokeAsync([AgentMessage.FromText("user", $"turn {turn}")]);
+            Assert.That(result.Output.Single().Content, Is.EqualTo(clean),
+                $"turn {turn} must not be refused; a growing window must not manufacture a match.");
+        }
+    }
+
+    [Test]
+    public async Task The_window_bound_decides_whether_a_split_is_caught()
+    {
+        // Both directions in one test: a short separation must be caught and a long one must not.
+        // Asserting only the long case would pass just as happily with no window at all.
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SplitAcrossTurnsAsync(gap: 2).GetAwaiter().GetResult(), Is.EqualTo(Refusal),
+                "two clean turns later the first fragment is still inside the 8-turn window");
+            Assert.That(SplitAcrossTurnsAsync(gap: 9).GetAwaiter().GetResult(),
+                Does.Not.EqualTo(Refusal),
+                "nine clean turns evict the first fragment, so the completing one must not match");
+        });
+    }
+
+    /// <summary>Emits the two canary halves with <paramref name="gap"/> clean turns between them.</summary>
+    private async Task<string> SplitAcrossTurnsAsync(int gap)
+    {
+        var client = new DelegateChatClient(canary => $"part one: {canary[..16]}");
+        var session = await CreateSessionAsync(client, new CanaryDefenseFeature());
+
+        await session.InvokeAsync([AgentMessage.FromText("user", "start")]);
+
+        client.Transform = _ => "clean reply";
+        for (var turn = 0; turn < gap; turn++)
+            await session.InvokeAsync([AgentMessage.FromText("user", $"clean {turn}")]);
+
+        client.Transform = canary => $"part two: {canary[16..]}";
+        var final = await session.InvokeAsync([AgentMessage.FromText("user", "finish")]);
+        return final.Output.Single().Content;
+    }
+
+    private static string ExtractCanaryFromLastPrompt(DelegateChatClient client)
+        => ExtractCanary(client.Requests[^1]);
+
     // ── Quarantine is monotonic ─────────────────────────────────────────────────
 
     [Test]

@@ -53,6 +53,15 @@ internal static class EgressGuard
                 Severity: EgressSeverity.Confirmed,
                 Reason: $"Session canary found on the {channel} channel."));
         }
+        else if (CanaryMatcher.MatchFragments(canaries, payload) is not null)
+        {
+            // The token is present but was not contiguous: it arrived in pieces with other text
+            // between them, which is what a cross-turn split looks like.
+            (findings ??= []).Add(new EgressFinding(
+                DetectorName: "session-canary-fragment",
+                Severity: EgressSeverity.Confirmed,
+                Reason: $"Session canary found in fragments on the {channel} channel."));
+        }
 
         if (scanner is not null)
         {

@@ -37,6 +37,66 @@ internal static class CanaryMatcher
         return null;
     }
 
+    /// <summary>
+    /// Matches a canary whose fragments are separated by other text, as happens when it is split
+    /// across turns.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Plain concatenation is not enough: each turn carries its own prose, so the fragments of the
+    /// token are never adjacent in the combined payload. This pass removes every character that
+    /// cannot belong to a canary and then matches the token exactly, which reassembles fragments
+    /// regardless of how much text sits between them or how many turns the split spans.
+    /// </para>
+    /// <para>
+    /// The alphabet is derived from the configured canaries rather than hard-coded, so a change to the
+    /// token format does not silently disable this pass. A false positive needs 130 bits of entropy to
+    /// line up in order, so the tolerance for surrounding text costs essentially nothing.
+    /// </para>
+    /// </remarks>
+    public static string? MatchFragments(IReadOnlyList<string> canaries, string payload)
+    {
+        if (canaries.Count == 0 || string.IsNullOrEmpty(payload))
+            return null;
+
+        var alphabet = BuildAlphabet(canaries);
+        if (alphabet.Count == 0)
+            return null;
+
+        var builder = new StringBuilder(payload.Length);
+        for (var index = 0; index < payload.Length; index++)
+        {
+            var character = payload[index];
+            if (alphabet.Contains(character))
+                builder.Append(character);
+        }
+
+        if (builder.Length == 0)
+            return null;
+
+        var filtered = builder.ToString();
+        for (var index = 0; index < canaries.Count; index++)
+        {
+            var canary = canaries[index];
+            if (filtered.Contains(canary, StringComparison.Ordinal))
+                return canary;
+        }
+
+        return null;
+    }
+
+    private static HashSet<char> BuildAlphabet(IReadOnlyList<string> canaries)
+    {
+        var alphabet = new HashSet<char>();
+        for (var index = 0; index < canaries.Count; index++)
+        {
+            foreach (var character in canaries[index])
+                alphabet.Add(character);
+        }
+
+        return alphabet;
+    }
+
     private static IEnumerable<string> Candidates(string payload)
     {
         yield return payload;

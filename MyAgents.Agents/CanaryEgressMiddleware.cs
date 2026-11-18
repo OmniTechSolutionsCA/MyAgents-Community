@@ -33,17 +33,20 @@ internal sealed class CanaryEgressMiddleware : IAgentMiddleware
     private readonly IEgressScanner? _scanner;
     private readonly ICanaryViolationHandler _handler;
     private readonly CanaryDefenseOptions _options;
+    private readonly CanaryTurnWindow? _window;
 
     public CanaryEgressMiddleware(
         ICanaryVault vault,
         IEgressScanner? scanner,
         ICanaryViolationHandler handler,
-        CanaryDefenseOptions options)
+        CanaryDefenseOptions options,
+        CanaryTurnWindow? window = null)
     {
         _vault = vault;
         _scanner = scanner;
         _handler = handler;
         _options = options;
+        _window = window;
     }
 
     public async ValueTask<AgentTurnResult> InvokeAsync(
@@ -94,19 +97,28 @@ internal sealed class CanaryEgressMiddleware : IAgentMiddleware
     {
         var payload = BuildPayload(result.Output);
 
+        // Scan the recent-turn window together with this turn. Scanning the turn alone is what lets
+        // an attacker emit one canary fragment per turn and never present a whole token.
+        var scanned = _window is null ? payload : string.Concat(_window.Snapshot(), payload);
+
         var scan = await EgressGuard
             .ScanAsync(
                 _vault.Canaries,
                 _scanner,
                 EgressChannel.TurnOutput,
-                payload,
+                scanned,
                 _options.MaxScanBytes,
                 _options.FailOpenOnScannerError,
                 cancellationToken)
             .ConfigureAwait(false);
 
         if (scan.Severity == EgressSeverity.Informational)
+        {
+            // Only clean turns enter the window: retaining a violating turn would keep feeding the
+            // detector text it has already rejected.
+            _window?.Append(payload);
             return result;
+        }
 
         var disposition = await _handler
             .HandleAsync(new CanaryViolationContext(EgressChannel.TurnOutput, scan, context.SessionId), cancellationToken)
