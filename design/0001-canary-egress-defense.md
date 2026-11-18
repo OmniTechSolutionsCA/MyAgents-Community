@@ -1,7 +1,7 @@
 # RFC 0001 — Canary & Egress Defense against Malicious-Model Data Exfiltration
 
-- **Status:** Implemented — Phase 1 shipped on `feat/canary-egress-defense`; see §10 for what
-  actually landed and where it differs from §5
+- **Status:** Implemented — Phase 1 shipped on `feat/canary-egress-defense` (§10), threat **T5**
+  closed on `feat/canary-cross-turn-detection` (§11), `design/` tracked in git
 - **Target:** `MyAgents.Core` (contracts) + `MyAgents.Agents` (feature wiring)
 - **Branch:** `feat/canary-egress-defense`
 - **Location:** `design/` — tracked in git. It sits outside `docs-src/docfx.json`'s content globs, so
@@ -477,3 +477,62 @@ are purely additive.
   it regenerates the whole committed `/docs` site (~326 files) and should be its own commit.
 - `MemoryWrite` channel (R2/Phase 2) not implemented; `MemoryFeature` write path still unread.
 - Thresholds still untuned: `MaxScanBytes` = 1 MiB, entropy ≥ 4.0 bits/char over ≥ 20 chars.
+
+---
+
+## 11. Threat T5 — cross-turn smuggling (implemented)
+
+Phase 1 scanned each turn in isolation, so the cheapest evasion worked: emit one fragment per turn
+and the token never appears whole in any single payload.
+
+### 11.1 Two changes, because the obvious one is not enough
+
+**`CanaryTurnWindow`** — a bounded per-session ring of recent turn output, scanned together with the
+current turn. Bounds are **both** enforced, oldest evicted first:
+
+| Bound | Default | Why |
+|---|---|---|
+| `DefaultTurns` | 8 | A split spanning more turns than this is beyond what a window can catch; unbounded retention would grow scan cost without limit. |
+| `DefaultBytes` | 8 KiB UTF-8 | Clamped to half of `MaxScanBytes` at wiring time, so the combined payload (window + turn) cannot trip the oversize guard and fail every turn closed. |
+
+Eviction is a **correctness** property, not an optimisation: without it the window keeps matching
+fragments the session moved past long ago, and the scanned payload grows until every turn is
+rejected as oversized.
+
+**`CanaryMatcher.MatchFragments`** — plain concatenation is insufficient. Each turn carries its own
+prose, so the fragments are never adjacent in the combined payload; the first implementation failed
+exactly this way (the completing fragment was matched against nothing and leaked). This pass strips
+every character that cannot belong to a canary, then matches the token exactly — which reassembles
+fragments regardless of how much text sits between them, or how many turns the split spans. The
+alphabet is derived from the configured canaries rather than hard-coded, so a token-format change
+cannot silently disable the pass.
+
+### 11.2 Defect found and fixed during implementation
+
+Truncating an oversized turn to `maxBytes` **characters** is not a byte bound: a character can cost
+up to four bytes, so a 40-character string can occupy 80 bytes. Caught by a UTF-8 accounting test
+before the feature was committed. Truncation now walks back by byte cost and keeps surrogate pairs
+whole.
+
+### 11.3 Verification
+
+Full suite **247/247** (236 before). Every new behavioural test was seen red first, or proven
+breakable by breaking the code:
+
+| Break | Red | Green |
+|---|---|---|
+| Window unplugged from the feature | the 3 split tests, including the "near" direction of the bound test | the other 15 |
+| Eviction removed from `Append` | the 2 bounds unit tests and the "far" direction of the bound test | the matching path |
+
+The "near/far" test asserts **both** directions in one test deliberately: asserting only the far case
+would pass just as happily with no window at all.
+
+`InternalsVisibleTo` for the test project is a visibility change only — no public API change, no
+baseline regeneration.
+
+### 11.4 What T5 coverage still does not reach
+
+- A split spanning **more than 8 turns**, or whose fragments exceed the byte budget, is not caught.
+  Both are configured constants, not tunables, because exposing them would be public API.
+- Fragment matching is order-preserving over filtered text, so an attacker who interleaves
+  *canary-alphabet characters* between fragments defeats it. Cost is raised, not eliminated.
