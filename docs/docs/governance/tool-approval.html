@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Tool Approval, Gates &amp; Audit Trails | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Tool Approval, Gates &amp; Audit Trails | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/tool-approval.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="tool-approval-gates--audit-trails">Tool Approval, Gates &amp; Audit Trails</h1>
+
+<p>When AI agents execute tools that mutate production state, run shell commands, or call external APIs, granular governance is essential. MyAgents Community provides a multi-stage tool approval pipeline built into <code>MyAgents.Core</code>.</p>
+<h2 id="the-tool-approval-pipeline">The Tool Approval Pipeline</h2>
+<p>Every tool call requested by a model is evaluated by <code>ToolApprovalEvaluator</code> before the tool handler runs:</p>
+<pre><code class="lang-mermaid">flowchart LR
+    Model[&quot;Model Requests Tool Call&quot;] --&gt; Memory[&quot;1. ISessionApprovalMemory&quot;]
+    Memory --&gt;|No Cached Grant| Policy[&quot;2. IToolApprovalPolicy&quot;]
+    Policy --&gt;|Approved| Audit[&quot;4. IToolApprovalAuditSink&quot;]
+    Policy --&gt;|Pending| Gate[&quot;3. IToolApprovalGate&quot;]
+    Policy --&gt;|Rejected| Reject[&quot;Return Rejection to Model&quot;]
+    Gate --&gt;|Approved / Rejected| Store[&quot;IToolApprovalStore &amp; Session Memory&quot;]
+    Store --&gt; Audit
+    Audit --&gt; Exec[&quot;Execute ITool.InvokeAsync&quot;]
+</code></pre>
+<hr>
+<h2 id="1-rule-based-approval-policies-rulebasedtoolapprovalpolicy">1. Rule-Based Approval Policies (<code>RuleBasedToolApprovalPolicy</code>)</h2>
+<p>Configure allowlists, denylists, regex argument rules, and human-approval requirements using <code>RuleBasedToolApprovalPolicy</code>:</p>
+<pre><code class="lang-csharp">using System.Text.RegularExpressions;
+using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
+
+var policy = new RuleBasedToolApprovalPolicy()
+    // 1. Safe read-only tools execute automatically
+    .AllowTool(&quot;get_current_utc_time&quot;, reason: &quot;Read-only clock tool&quot;)
+    .AllowTool(&quot;search_knowledge_base&quot;, reason: &quot;Read-only RAG search&quot;)
+
+    // 2. Block dangerous arguments using regex inspection
+    .AddArgumentPatternRule(
+        toolPattern: &quot;execute_sql&quot;,
+        argumentRegex: new Regex(@&quot;\b(DROP|DELETE|TRUNCATE|ALTER)\b&quot;, RegexOptions.IgnoreCase),
+        decision: ToolApprovalDecision.Reject(decidedBy: &quot;security-policy&quot;, reason: &quot;Destructive SQL is prohibited.&quot;))
+
+    // 3. Sensitive tools pause for interactive gate approval (returns ToolApprovalStatus.Pending)
+    .RequireApprovalForTool(&quot;deploy_production&quot;, reason: &quot;Production deployment requires operator sign-off&quot;)
+
+    // 4. Custom predicate rule
+    .AddRule(request =&gt; request.ToolName.StartsWith(&quot;internal_&quot;, StringComparison.Ordinal)
+        ? ToolApprovalDecision.Reject(&quot;policy&quot;, &quot;Internal tools are disabled.&quot;)
+        : null)
+
+    // 5. Reject any other unknown tool by default
+    .SetDefaultDecision(ToolApprovalDecision.Reject(
+        decidedBy: &quot;default-policy&quot;,
+        reason: &quot;Tool is not in the approved allowlist.&quot;));
+
+services.AddSingleton&lt;IToolApprovalPolicy&gt;(policy);
+</code></pre>
+<p>Other built-in policies include:</p>
+<ul>
+<li><code>AllowAllToolApprovalPolicy</code>: Approves all tool calls (default when no policy is registered).</li>
+<li><code>RequireApprovalPolicy</code>: Marks every tool call as <code>Pending</code> so an <code>IToolApprovalGate</code> is always consulted.</li>
+</ul>
+<hr>
+<h2 id="2-human-in-the-loop-approval-gates-itoolapprovalgate">2. Human-in-the-Loop Approval Gates (<code>IToolApprovalGate</code>)</h2>
+<p>When a policy returns <code>ToolApprovalStatus.Pending</code>, <code>ToolApprovalEvaluator</code> invokes the registered <code>IToolApprovalGate</code> (<code>EvaluateOrPromptAsync</code>):</p>
+<h3 id="built-in-gates">Built-in Gates</h3>
+<ol>
+<li><strong><code>ConsolePromptApprovalGate</code></strong>: Interactive CLI prompt for console applications.
+<pre><code class="lang-csharp">services.AddSingleton&lt;IToolApprovalGate&gt;(
+    new ConsolePromptApprovalGate(Console.In, Console.Out, autoApproveNonInteractive: false));
+</code></pre>
+</li>
+<li><strong><code>CallbackToolApprovalGate</code></strong>: Delegate-based gate for custom webhooks or UI dialogs.
+<pre><code class="lang-csharp">var gate = new CallbackToolApprovalGate(async (request, pendingDecision, ct) =&gt;
+{
+    bool approved = await mySlackNotifier.AskSupervisorAsync(request.ToolName, request.ArgumentsJson, ct);
+    return approved
+        ? ToolApprovalDecision.Approve(
+            decidedBy: &quot;supervisor@acme.com&quot;,
+            reason: &quot;Approved via Slack&quot;,
+            scope: ApprovalScope.SessionTool)
+        : ToolApprovalDecision.Reject(
+            decidedBy: &quot;supervisor@acme.com&quot;,
+            reason: &quot;Denied via Slack&quot;);
+});
+services.AddSingleton&lt;IToolApprovalGate&gt;(gate);
+</code></pre>
+</li>
+<li><strong><code>AsyncSignalApprovalGate</code></strong>: Asynchronous signal queue where external HTTP endpoints can inspect <code>gate.PendingRequests</code> and complete decisions via <code>gate.TrySubmitDecision(approvalId, decision)</code>.</li>
+</ol>
+<hr>
+<h2 id="3-session-approval-scopes--audit-sinks">3. Session Approval Scopes &amp; Audit Sinks</h2>
+<p>When approving a tool call, you can specify an <code>ApprovalScope</code> so the human operator is not prompted repeatedly during the same session:</p>
+<ul>
+<li><code>ApprovalScope.Once</code>: Valid only for this single tool invocation.</li>
+<li><code>ApprovalScope.SessionCall</code>: Remembers approval for the same tool <strong>and identical JSON arguments</strong> within the session.</li>
+<li><code>ApprovalScope.SessionTool</code>: Remembers approval for all future calls to the same tool within the session.</li>
+<li><code>ApprovalScope.SessionAlways</code>: Approves all subsequent tool calls in the session.</li>
+</ul>
+<p>Register <code>ISessionApprovalMemory</code>, <code>IToolApprovalStore</code>, and <code>IToolApprovalAuditSink</code> in DI to persist and inspect decisions:</p>
+<pre><code class="lang-csharp">var sessionMemory = new InMemorySessionApprovalMemory();
+var approvalStore = new InMemoryToolApprovalStore();
+var auditSink = new InMemoryToolApprovalAuditSink();
+
+services.AddSingleton&lt;ISessionApprovalMemory&gt;(sessionMemory);
+services.AddSingleton&lt;IToolApprovalStore&gt;(approvalStore);
+services.AddSingleton&lt;IToolApprovalAuditSink&gt;(auditSink);
+
+// After running turns, inspect the immutable audit log:
+IReadOnlyList&lt;ToolApprovalAuditRecord&gt; auditRecords = await auditSink.ListAllAsync();
+foreach (var record in auditRecords)
+{
+    Console.WriteLine($&quot;{record.Timestamp:O} | {record.ToolName} | {record.Decision.Status} by {record.Decision.DecidedBy} ({record.GateType})&quot;);
+}
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/tool-approval.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

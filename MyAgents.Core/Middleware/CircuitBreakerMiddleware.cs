@@ -60,9 +60,9 @@ public sealed class CircuitBreakerOpenException : Exception
 /// <para>
 /// State transitions:
 /// <list type="bullet">
-///   <item><description><b>Closed → Open</b>: <see cref="failureThreshold"/> consecutive
+///   <item><description><b>Closed → Open</b>: <c>failureThreshold</c> consecutive
 ///     transient failures (as classified by the <see cref="ITransientErrorClassifier"/>).</description></item>
-///   <item><description><b>Open → HalfOpen</b>: <paramref name="openDuration"/> has elapsed.</description></item>
+///   <item><description><b>Open → HalfOpen</b>: <c>openDuration</c> has elapsed.</description></item>
 ///   <item><description><b>HalfOpen → Closed</b>: the probe call succeeds.</description></item>
 ///   <item><description><b>HalfOpen → Open</b>: the probe call fails.</description></item>
 /// </list>

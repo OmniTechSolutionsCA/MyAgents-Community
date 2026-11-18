@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Guardrails, Retries, Fallbacks &amp; Dead-Letter Queues | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Guardrails, Retries, Fallbacks &amp; Dead-Letter Queues | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/guardrails-and-resilience.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="guardrails-retries-fallbacks--dead-letter-queues">Guardrails, Retries, Fallbacks &amp; Dead-Letter Queues</h1>
+
+<p>Production AI systems must validate model outputs before they reach users and recover gracefully from transient provider outages or unhandled exceptions. MyAgents Community provides a layered defense pipeline via <code>GuardrailsFeature</code>, <code>ResilienceMiddleware</code>, and <code>FallbackFeature</code>.</p>
+<h2 id="defense-in-depth-pipeline-ordering">Defense-in-Depth Pipeline Ordering</h2>
+<p>When composing resilience and safety features on an <code>AgentDefinition</code>, order them from outermost to innermost:</p>
+<pre><code class="lang-mermaid">flowchart LR
+    Caller[&quot;Caller&quot;] --&gt; Fallback[&quot;1. FallbackFeature (Outermost)&quot;]
+    Fallback --&gt; Resilience[&quot;2. ResilienceMiddleware (Retries)&quot;]
+    Resilience --&gt; Circuit[&quot;3. CircuitBreakerMiddleware&quot;]
+    Circuit --&gt; Guardrails[&quot;4. GuardrailsFeature (Output Validation)&quot;]
+    Guardrails --&gt; Runtime[&quot;ChatClientRuntime (IChatClient)&quot;]
+</code></pre>
+<hr>
+<h2 id="1-content-safety-output-guardrails-guardrailsfeature">1. Content-Safety Output Guardrails (<code>GuardrailsFeature</code>)</h2>
+<p><code>GuardrailsFeature</code> attaches <code>GuardrailMiddleware</code> to evaluate every turn's output against an ordered list of <code>IGuardrailPolicy</code> implementations. If any policy returns a <code>GuardrailViolation</code>, the violating output is replaced outright with <code>violation.ReplacementMessage</code> (never leaking partial violating content, even on streaming calls).</p>
+<h3 id="built-in-guardrail-policies">Built-in Guardrail Policies</h3>
+<ul>
+<li><strong><code>EmptyResponseGuardrailPolicy</code></strong>: Flags turns whose output is empty or whitespace-only (enabled by default in <code>new GuardrailsFeature()</code>).</li>
+<li><strong><code>MaxLengthGuardrailPolicy(maxLength)</code></strong>: Flags turns whose total character length exceeds <code>maxLength</code>.</li>
+<li><strong><code>BlocklistGuardrailPolicy(blockedPhrases)</code></strong>: Case-insensitive substring check against prohibited phrases, secrets, or competitor names.</li>
+</ul>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var definition = new AgentDefinition(&quot;customer-facing-agent&quot;, [
+    new GuardrailsFeature(
+        new EmptyResponseGuardrailPolicy(),
+        new MaxLengthGuardrailPolicy(maxLength: 4000),
+        new BlocklistGuardrailPolicy([&quot;INTERNAL_ONLY&quot;, &quot;CONFIDENTIAL_PROJECT_X&quot;]))
+]);
+</code></pre>
+<h3 id="custom-iguardrailpolicy">Custom <code>IGuardrailPolicy</code></h3>
+<p>Implement <code>IGuardrailPolicy</code> for custom PII redaction, regex validation, or moderation checks:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+
+public sealed class NoCreditCardGuardrailPolicy : IGuardrailPolicy
+{
+    public ValueTask&lt;GuardrailViolation?&gt; EvaluateAsync(
+        IReadOnlyList&lt;AgentMessage&gt; output,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var message in output)
+        {
+            if (message.Content is not null &amp;&amp; message.Content.Contains(&quot;4111-&quot;, StringComparison.Ordinal))
+            {
+                return ValueTask.FromResult&lt;GuardrailViolation?&gt;(new GuardrailViolation(
+                    PolicyName: nameof(NoCreditCardGuardrailPolicy),
+                    Reason: &quot;Output contained a masked or raw payment card pattern.&quot;,
+                    ReplacementMessage: &quot;I cannot display payment card numbers.&quot;));
+            }
+        }
+
+        return ValueTask.FromResult&lt;GuardrailViolation?&gt;(null);
+    }
+}
+</code></pre>
+<hr>
+<h2 id="2-transient-retry-middleware-resiliencemiddleware">2. Transient Retry Middleware (<code>ResilienceMiddleware</code>)</h2>
+<p><code>ResilienceMiddleware</code> uses <code>ITransientErrorClassifier</code> (<code>DefaultTransientErrorClassifier</code>) to retry transient network or HTTP rate-limit failures with exponential backoff:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+
+var resilience = new ResilienceMiddleware(
+    classifier: new DefaultTransientErrorClassifier(),
+    maxRetries: 3,
+    baseDelay: TimeSpan.FromMilliseconds(500));
+</code></pre>
+<hr>
+<h2 id="3-graceful-fallbacks--dead-letter-queues-fallbackfeature">3. Graceful Fallbacks &amp; Dead-Letter Queues (<code>FallbackFeature</code>)</h2>
+<p>When all retries are exhausted or an unrecoverable exception occurs, <code>FallbackFeature</code> (<code>FallbackMiddleware</code>) catches the exception and invokes an <code>IFallbackPolicy</code> so the caller receives a controlled response while failed turns are captured for inspection:</p>
+<h3 id="static-fallback-staticfallbackpolicy">Static Fallback (<code>StaticFallbackPolicy</code>)</h3>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var fallback = new FallbackFeature(
+    new StaticFallbackPolicy(&quot;The assistant is temporarily unavailable. Please try again shortly.&quot;));
+</code></pre>
+<h3 id="dead-letter-queue-capture-deadletterfallbackpolicy">Dead-Letter Queue Capture (<code>DeadLetterFallbackPolicy</code>)</h3>
+<p>Use <code>DeadLetterFallbackPolicy</code> with <code>IDeadLetterQueue</code> (<code>InMemoryDeadLetterQueue</code> or your own persistent queue) to record failed turn messages, session IDs, timestamps, and exceptions for alerting or replay:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var deadLetterQueue = new InMemoryDeadLetterQueue();
+
+var definition = new AgentDefinition(&quot;resilient-support-agent&quot;, [
+    new FallbackFeature(new DeadLetterFallbackPolicy(
+        queue: deadLetterQueue,
+        fallbackMessage: &quot;We recorded your request and an engineer will follow up.&quot;)),
+    new GuardrailsFeature()
+]);
+
+// Inspect captured dead letters for alerting or replay
+foreach (DeadLetter item in deadLetterQueue.Items)
+{
+    Console.WriteLine($&quot;Failed session {item.SessionId} at {item.FailedAt:O}: {item.Exception.Message}&quot;);
+}
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/guardrails-and-resilience.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -14,7 +14,7 @@
 [![NuGet](https://img.shields.io/nuget/v/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
 [![Status: General Availability](https://img.shields.io/badge/status-GA%201.0.0-brightgreen)](#project-status)
 
-**Explore:** [Quick start](#getting-started) · [Capabilities](#capabilities) ·
+**Explore:** [Documentation Site](https://omnitechsolutionsca.github.io/MyAgents-Community/) · [Quick start](#getting-started) · [Capabilities](#capabilities) ·
 [Architecture](#architecture) · [Packages](#packages) · [Examples & Samples](#examples) ·
 [Real-world deployment](#real-world-deployment-example) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
@@ -28,8 +28,8 @@ invocations with NativeAOT safety, durable restart recovery, and hybrid memory r
 ```csharp
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Agents;
 using MyAgents.Core;
-using MyAgents.Core.Tools;
 using MyAgents.Runtime.Chat;
 
 // 1. Configure services with your IChatClient and MyAgents runtime
@@ -40,14 +40,13 @@ services.AddMyAgentsChatRuntime();
 await using var provider = services.BuildServiceProvider();
 var sessionFactory = provider.GetRequiredService<IAgentSessionFactory>();
 
-// 2. Define an agent with prompts and tools
-var definition = new AgentDefinition("assistant", [
-    AgentFeature.Create(assembly =>
-    {
-        assembly.Prompts.AddSystem("You are a helpful assistant.");
-        assembly.Tools.Add(DelegateTool.Create("get_time", () => DateTimeOffset.UtcNow.ToString("O")));
-    })
-]);
+// 2. Define an agent with reusable tool and prompt features
+var tools = new ToolsFeature()
+    .AddFunction(() => DateTimeOffset.UtcNow.ToString("O"),
+        name: "get_time",
+        description: "Returns the current UTC timestamp in ISO-8601 format.");
+
+var definition = new AgentDefinition("assistant", [tools]);
 
 // 3. Create a session and run turns
 await using var session = sessionFactory.CreateSession("session-1", definition);

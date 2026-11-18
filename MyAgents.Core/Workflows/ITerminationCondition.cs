@@ -28,7 +28,7 @@ public interface ITerminationCondition
 
     /// <summary>
     /// Resets any internal state accumulated across turns (e.g. cumulative token counts).
-    /// Called automatically by <see cref="AgentLoop"/> before each run so that the same
+    /// Called automatically by <c>AgentLoop</c> before each run so that the same
     /// condition instance can be safely reused across multiple loop invocations.
     /// The default implementation is a no-op.
     /// </summary>

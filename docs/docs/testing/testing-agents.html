@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Unit Testing Agents, Sessions &amp; Durable Runs | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Unit Testing Agents, Sessions &amp; Durable Runs | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/testing/testing-agents.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="unit-testing-agents-sessions--durable-runs">Unit Testing Agents, Sessions &amp; Durable Runs</h1>
+
+<p>Testing conversational AI applications against live LLM endpoints is slow, nondeterministic, and expensive. The <code>MyAgents.Testing</code> package provides deterministic, in-memory test doubles for agents, sessions, middleware pipelines, and durable run backends.</p>
+<h2 id="installation">Installation</h2>
+<pre><code class="lang-bash">dotnet add package MyAgents.Testing
+</code></pre>
+<hr>
+<h2 id="1-testing-agents-with-inmemoryagent">1. Testing Agents with <code>InMemoryAgent</code></h2>
+<p><code>InMemoryAgent</code> implements <code>IAgent</code> with a FIFO queue of scripted responses and records every <code>AgentTurnContext</code> it receives:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[TestFixture]
+public sealed class AgentTests
+{
+    [Test]
+    public async Task InMemoryAgent_Returns_Queued_Responses_In_Order()
+    {
+        // 1. Arrange a deterministic agent with queued responses and token counts
+        using var agent = new InMemoryAgent(&quot;MockReviewer&quot;)
+            .EnqueueResponse(&quot;Step 1: Static analysis passed.&quot;, promptTokens: 40, completionTokens: 12)
+            .EnqueueResponse(&quot;Step 2: Ready to merge.&quot;, promptTokens: 55, completionTokens: 8)
+            .WithFallbackResponse(&quot;Default fallback response&quot;);
+
+        var services = new AgentTurnServices(new ServiceCollection().BuildServiceProvider());
+        var context1 = new AgentTurnContext(&quot;session-1&quot;, [AgentMessage.FromText(&quot;user&quot;, &quot;Check PR #42&quot;)], services);
+        var context2 = new AgentTurnContext(&quot;session-1&quot;, [AgentMessage.FromText(&quot;user&quot;, &quot;Approve?&quot;)], services);
+
+        // 2. Act
+        var result1 = await agent.InvokeAsync(context1);
+        var result2 = await agent.InvokeAsync(context2);
+
+        // 3. Assert
+        Assert.That(result1.Output[0].Content, Is.EqualTo(&quot;Step 1: Static analysis passed.&quot;));
+        Assert.That(result1.Telemetry.TotalTokens, Is.EqualTo(52));
+        Assert.That(result2.Output[0].Content, Is.EqualTo(&quot;Step 2: Ready to merge.&quot;));
+        Assert.That(agent.InvocationCount, Is.EqualTo(2));
+        Assert.That(agent.ReceivedContexts, Has.Count.EqualTo(2));
+    }
+}
+</code></pre>
+<hr>
+<h2 id="2-testing-middleware-pipelines-with-fakeagentsession">2. Testing Middleware Pipelines with <code>FakeAgentSession</code></h2>
+<p><code>FakeAgentSession</code> wraps an <code>InMemoryAgent</code> inside an <code>IAgentSession</code> so you can unit-test middleware (<code>CircuitBreakerMiddleware</code>, <code>ContextWindowMiddleware</code>, <code>GuardrailMiddleware</code>, etc.) in isolation:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[Test]
+public async Task FakeAgentSession_Executes_Middleware_Pipeline()
+{
+    var guardrail = new GuardrailMiddleware([new BlocklistGuardrailPolicy([&quot;secret-token&quot;])]);
+
+    await using var session = FakeAgentSession.CreateWithMiddleware(&quot;test-session&quot;, guardrail)
+        .EnqueueResponse(&quot;Here is the leaked secret-token value.&quot;);
+
+    var turn = await session.InvokeAsync([AgentMessage.FromText(&quot;user&quot;, &quot;Show config&quot;)]);
+
+    // GuardrailMiddleware intercepts the response and substitutes the safe fallback message
+    Assert.That(turn.Output[0].Content, Does.Not.Contain(&quot;secret-token&quot;));
+    Assert.That(session.InvocationCount, Is.EqualTo(1));
+}
+</code></pre>
+<hr>
+<h2 id="3-testing-full-agent-definitions-with-inmemoryagentruntime">3. Testing Full Agent Definitions with <code>InMemoryAgentRuntime</code></h2>
+<p>Use <code>InMemoryAgentRuntime</code> alongside <code>DefaultAgentSessionFactory</code> (or <code>services.AddMyAgents(runtime)</code>) to test complete <code>AgentDefinition</code> compositions, multi-agent <code>GroupChat</code>, or <code>AgentGraph&lt;TState&gt;</code> workflows:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Core;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[Test]
+public async Task InMemoryAgentRuntime_Creates_And_Configures_Named_Agents()
+{
+    var runtime = new InMemoryAgentRuntime()
+        .ForAgent(&quot;researcher&quot;, agent =&gt; agent.WithFallbackResponse(&quot;Research findings complete.&quot;))
+        .ForAgent(&quot;writer&quot;, agent =&gt; agent.WithFallbackResponse(&quot;Final article draft.&quot;));
+
+    var services = new ServiceCollection()
+        .AddMyAgents(runtime)
+        .BuildServiceProvider();
+
+    var factory = services.GetRequiredService&lt;IAgentSessionFactory&gt;();
+
+    await using var session = factory.CreateSession(
+        &quot;session-1&quot;,
+        new AgentDefinition(&quot;researcher&quot;, []));
+
+    var turn = await session.InvokeAsync([AgentMessage.FromText(&quot;user&quot;, &quot;Start research&quot;)]);
+
+    Assert.That(turn.Output[0].Content, Is.EqualTo(&quot;Research findings complete.&quot;));
+    Assert.That(runtime.GetAgent(&quot;researcher&quot;).InvocationCount, Is.EqualTo(1));
+}
+</code></pre>
+<hr>
+<h2 id="4-testing-durable-runs-with-inmemoryagentrunbackend">4. Testing Durable Runs with <code>InMemoryAgentRunBackend</code></h2>
+<p><code>InMemoryAgentRunBackend</code> implements <code>IAgentRunBackend</code>, <code>IAgentRunBatchCatalog</code>, and <code>IAgentRunBatchController</code> in memory and accepts a custom <code>TimeProvider</code> (such as <code>FakeTimeProvider</code>) for deterministic lease expiration and retry testing:</p>
+<pre><code class="lang-csharp">using MyAgents.Core.Execution;
+using MyAgents.Testing;
+using NUnit.Framework;
+
+[Test]
+public async Task InMemoryAgentRunBackend_Deduplicates_IdempotencyKeys()
+{
+    var backend = new InMemoryAgentRunBackend(TimeProvider.System);
+
+    var request = new AgentRunRequest(
+        HandlerId: &quot;report-generator&quot;,
+        InputJson: &quot;&quot;&quot;{&quot;quarter&quot;:&quot;Q3&quot;}&quot;&quot;&quot;,
+        IdempotencyKey: &quot;q3-report-2026&quot;,
+        ScopeKey: &quot;tenant-1&quot;);
+
+    var first = await backend.SubmitAsync(request);
+    var second = await backend.SubmitAsync(request);
+
+    Assert.Multiple(() =&gt;
+    {
+        Assert.That(first.WasDeduplicated, Is.False);
+        Assert.That(second.WasDeduplicated, Is.True);
+        Assert.That(second.RunId, Is.EqualTo(first.RunId));
+    });
+}
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/testing/testing-agents.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

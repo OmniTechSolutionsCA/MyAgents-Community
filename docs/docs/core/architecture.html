@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Architecture &amp; Execution Lifecycle | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Architecture &amp; Execution Lifecycle | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/core/architecture.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="architecture--execution-lifecycle">Architecture &amp; Execution Lifecycle</h1>
+
+<p>MyAgents Community is designed with a strict separation of concerns between <strong>agent definitions</strong>, <strong>feature assembly</strong>, <strong>middleware pipelines</strong>, <strong>runtime execution loops</strong>, <strong>tool invocation policies</strong>, and <strong>state persistence</strong>.</p>
+<h2 id="architecture-overview">Architecture Overview</h2>
+<pre><code class="lang-mermaid">flowchart TD
+    subgraph Client Application
+        App[&quot;Host Application / Web API&quot;]
+        Factory[&quot;IAgentSessionFactory&quot;]
+    end
+
+    subgraph Assembly &amp; Definition
+        Definition[&quot;AgentDefinition&quot;]
+        Features[&quot;IAgentFeature Pipeline&quot;]
+        Assembly[&quot;AgentAssembly: Prompts, Tools, Middleware, Capabilities&quot;]
+    end
+
+    subgraph Turn Execution Loop
+        Session[&quot;IAgentSession&quot;]
+        Middleware[&quot;AgentPipeline (Middleware Chain)&quot;]
+        Runtime[&quot;MyAgents.Runtime.Chat (ChatClientRuntime)&quot;]
+        ChatClient[&quot;Microsoft.Extensions.AI IChatClient&quot;]
+        LLM[&quot;Model Provider: OpenAI, Ollama, Azure, etc.&quot;]
+    end
+
+    subgraph Governance &amp; Tools
+        Approval[&quot;ToolApprovalEvaluator &amp; IToolApprovalPolicy&quot;]
+        Gate[&quot;IToolApprovalGate &amp; ISessionApprovalMemory&quot;]
+        ToolRegistry[&quot;ToolCatalog (ITool)&quot;]
+        Observers[&quot;IToolCallObserver&quot;]
+    end
+
+    App --&gt; Factory
+    Factory --&gt;|Creates| Session
+    Definition --&gt;|Configures| Assembly
+    Features --&gt;|Contributes| Assembly
+    Assembly --&gt; Session
+    Session --&gt; Middleware
+    Middleware --&gt; Runtime
+    Runtime &lt;--&gt; ChatClient
+    ChatClient &lt;--&gt; LLM
+    Runtime --&gt; Approval
+    Approval &lt;--&gt; Gate
+    Approval --&gt;|Approved| ToolRegistry
+    Runtime --&gt; Observers
+</code></pre>
+<hr>
+<h2 id="core-abstractions">Core Abstractions</h2>
+<h3 id="1-agentdefinition">1. <code>AgentDefinition</code></h3>
+<p>An immutable description of an agent's identity, description, features, and capabilities:</p>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+using MyAgents.Memory;
+
+var definition = new AgentDefinition(
+    Name: &quot;financial-analyst&quot;,
+    Features:
+    [
+        new PromptRegistryFeature(promptRegistry, &quot;system.analyst&quot;),
+        new ToolsFeature(marketDataTool),
+        new RetrievalAugmentationFeature(new RetrievalAugmentationOptions(&quot;sec-filings&quot;)),
+        new GuardrailsFeature(),
+        new TelemetryFeature()
+    ],
+    Description: &quot;Analyzes quarterly financial filings with grounded citations.&quot;);
+</code></pre>
+<h3 id="2-iagentfeature--agentassembly">2. <code>IAgentFeature</code> &amp; <code>AgentAssembly</code></h3>
+<p>Features are the primary unit of composition (<code>Features are composed, not inherited</code>). When an agent session is created, every feature's <code>Contribute(AgentAssembly)</code> or <code>ContributeAsync(AgentAssembly, CancellationToken)</code> method populates an <code>AgentAssembly</code>:</p>
+<ul>
+<li><strong><code>assembly.Prompts</code></strong> (<code>PromptBuilder</code>): Appends system instructions injected before model invocation.</li>
+<li><strong><code>assembly.Tools</code></strong> (<code>ToolCatalogBuilder</code>): Registers <code>ITool</code> implementations or delegate functions.</li>
+<li><strong><code>assembly.Pipeline</code></strong> (<code>PipelineBuilder</code>): Adds <code>IAgentMiddleware</code> interceptors around each turn (RAG context augmentation, context window trimming, retries, circuit breakers, structured output validation, guardrails, telemetry).</li>
+<li><strong><code>assembly.ToolObservers</code></strong>: Attaches <code>IToolCallObserver</code> listeners for pre/post tool call auditing.</li>
+<li><strong><code>assembly.Capabilities</code></strong>: Advertises <code>AgentCapabilities</code> (<code>Tools</code>, <code>Streaming</code>, <code>StructuredOutput</code>, <code>Memory</code>, <code>MultiModal</code>, <code>Telemetry</code>, <code>Channel</code>, <code>Workflow</code>) or <code>AgentModelCapability</code>.</li>
+<li><strong><code>assembly.RegisterSessionService&lt;T&gt;(service)</code></strong>: Registers session-scoped services accessible via <code>context.Services</code>.</li>
+</ul>
+<h3 id="3-iagentsessionfactory--iagentsession">3. <code>IAgentSessionFactory</code> &amp; <code>IAgentSession</code></h3>
+<p><code>IAgentSessionFactory</code> (implemented by <code>DefaultAgentSessionFactory</code>) is registered in Dependency Injection via <code>services.AddMyAgentsChatRuntime()</code> or <code>services.AddMyAgents(...)</code>.</p>
+<ul>
+<li>Calling <code>factory.CreateSession(sessionId, definition)</code> or <code>await factory.CreateSessionAsync(sessionId, definition, ct)</code> runs the feature assembly phase and builds the middleware pipeline.</li>
+<li>Each <code>IAgentSession</code> manages isolated conversation state and implements <code>IAsyncDisposable</code> to clean up session-owned resources (such as MCP connections) when disposed.</li>
+</ul>
+<hr>
+<h2 id="the-turn-execution-lifecycle">The Turn Execution Lifecycle</h2>
+<p>When <code>session.InvokeAsync(messages)</code> or <code>session.InvokeStreamingAsync(messages)</code> is called:</p>
+<pre><code class="lang-mermaid">sequenceDiagram
+    autonumber
+    actor User
+    participant Session as IAgentSession
+    participant Pipeline as AgentPipeline (Middleware)
+    participant Runtime as ChatClientRuntime
+    participant LLM as IChatClient
+    participant Eval as ToolApprovalEvaluator
+    participant Tool as ITool
+
+    User-&gt;&gt;Session: InvokeAsync(messages)
+    Session-&gt;&gt;Pipeline: InvokeAsync(AgentTurnContext)
+    Pipeline-&gt;&gt;Runtime: InvokeAsync(augmentedContext)
+    
+    loop Model &amp; Tool Loop (up to MaxToolRoundTrips)
+        Runtime-&gt;&gt;LLM: GetResponseAsync(history, ChatOptions)
+        LLM--&gt;&gt;Runtime: ChatResponse
+        alt Contains FunctionCallContent
+            Runtime-&gt;&gt;Eval: EvaluateAsync(ToolApprovalRequest)
+            alt Approved
+                Eval--&gt;&gt;Runtime: ToolApprovalDecision (Approved)
+                Runtime-&gt;&gt;Tool: InvokeAsync(argumentsJson)
+                Tool--&gt;&gt;Runtime: string result
+                Runtime-&gt;&gt;Runtime: Notify IToolCallObserver &amp; append FunctionResultContent
+            else Rejected or Pending without Gate Approval
+                Eval--&gt;&gt;Runtime: Rejected / Throw ToolApprovalRequiredException
+            end
+        else Final Assistant Response
+            Runtime--&gt;&gt;Pipeline: AgentTurnResult (Output + AgentTurnTelemetry)
+        end
+    end
+
+    Pipeline--&gt;&gt;Session: Validated AgentTurnResult
+    Session--&gt;&gt;User: AgentTurnResult
+</code></pre>
+<ol>
+<li><strong>Middleware Pipeline Pre-Processing</strong>: Registered <code>IAgentMiddleware</code> components execute in order—trimming the context window (<code>ContextWindowMiddleware</code>), injecting hybrid RAG citations (<code>RetrievalAugmentationMiddleware</code>), setting structured output schemas (<code>StructuredOutputMiddleware&lt;T&gt;</code>), and starting OpenTelemetry activities (<code>TelemetryMiddleware</code>).</li>
+<li><strong>Model Request</strong>: <code>ChatClientRuntime</code> converts <code>AgentMessage</code> records (including multi-modal <code>ContentParts</code>) and <code>ITool</code> declarations into <code>Microsoft.Extensions.AI</code> primitives and invokes <code>IChatClient</code>.</li>
+<li><strong>Tool Call Detection &amp; Parallel Execution</strong>: If the model requests one or more tool calls, the runtime evaluates them (supporting concurrent tool calls up to <code>ChatClientRuntimeOptions.MaxParallelToolCalls</code>).</li>
+<li><strong>Approval &amp; Observation</strong>: <code>ToolApprovalEvaluator</code> checks <code>ISessionApprovalMemory</code>, <code>IToolApprovalPolicy</code>, and <code>IToolApprovalGate</code>, recording an audit trail to <code>IToolApprovalAuditSink</code>. Approved calls notify <code>IToolCallObserver.OnToolCallingAsync</code>, execute <code>ITool.InvokeAsync</code>, and notify <code>OnToolCalledAsync</code>.</li>
+<li><strong>Post-Turn Validation</strong>: Output flows back through the middleware pipeline—verifying citation grounding (<code>CitationGrounder</code>), validating JSON schemas (<code>StructuredOutputMiddleware&lt;T&gt;</code>), and checking safety policies (<code>GuardrailMiddleware</code>)—before returning the final <code>AgentTurnResult</code>.</li>
+</ol>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/core/architecture.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

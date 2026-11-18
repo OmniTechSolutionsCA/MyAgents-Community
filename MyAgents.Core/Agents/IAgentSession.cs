@@ -9,7 +9,7 @@ namespace MyAgents.Core;
 /// <see cref="IDisposable.Dispose"/> is retained for backward compatibility and
 /// for use in <see langword="using"/> blocks that cannot <see langword="await"/>.
 /// Prefer <c>await using</c> over <c>using</c> for sessions created via
-/// <see cref="IAgentSessionFactory.CreateSessionAsync"/> so that MCP and other async
+/// <see cref="DefaultAgentSessionFactory.CreateSessionAsync"/> so that MCP and other async
 /// resources are torn down cleanly.
 /// </remarks>
 public interface IAgentSession : IDisposable, IAsyncDisposable

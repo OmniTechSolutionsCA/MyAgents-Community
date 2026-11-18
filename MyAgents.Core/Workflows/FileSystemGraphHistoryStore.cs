@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace MyAgents.Core.Workflows;
 
 /// <summary>
-/// <see cref=""IGraphHistoryStore""/> implementation that persists <see cref=""GraphSnapshot""/> records
+/// <see cref="IGraphHistoryStore"/> implementation that persists <see cref="GraphSnapshot"/> records
 /// as JSON files on the local file system.
 /// </summary>
 public sealed class FileSystemGraphHistoryStore : IGraphHistoryStore, IGraphHistoryCatalog
@@ -16,7 +16,7 @@ public sealed class FileSystemGraphHistoryStore : IGraphHistoryStore, IGraphHist
     private readonly ConcurrentDictionary<string, string> _snapshotToSessionIndex = new(StringComparer.Ordinal);
 
     /// <summary>
-    /// Creates a new <see cref=""FileSystemGraphHistoryStore""/> using <paramref name=""directory""/>.
+    /// Creates a new <see cref="FileSystemGraphHistoryStore"/> using <paramref name="directory"/>.
     /// </summary>
     public FileSystemGraphHistoryStore(string directory)
     {

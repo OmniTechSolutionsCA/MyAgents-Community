@@ -5,7 +5,7 @@ using MyAgents.Core;
 namespace MyAgents.Agents;
 
 /// <summary>
-/// Configuration for <see cref=\"SelectorGroupChat\"/>.
+/// Configuration for <see cref="SelectorGroupChat"/>.
 /// </summary>
 public sealed record SelectorGroupChatOptions(
     /// <summary>
@@ -40,7 +40,7 @@ public sealed record SelectorGroupChatOptions(
 /// the conversation context. This is the AutoGen <c>SelectorGroupChat</c> pattern.
 /// </summary>
 /// <remarks>
-/// Unlike <see cref=\"GroupChat\"/> (round-robin), this pattern uses an LLM to dynamically
+/// Unlike <see cref="GroupChat"/> (round-robin), this pattern uses an LLM to dynamically
 /// determine the best agent for each turn based on the conversation so far.
 /// </remarks>
 public sealed class SelectorGroupChat
@@ -63,8 +63,8 @@ public sealed class SelectorGroupChat
     /// <summary>
     /// Runs the selector group chat until termination condition is met or max turns reached.
     /// </summary>
-    /// <param name=\"initialMessages\">Initial messages to start the conversation.</param>
-    /// <param name=\"cancellationToken\">Cancellation token.</param>
+    /// <param name="initialMessages">Initial messages to start the conversation.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The final conversation history, the last agent to speak, and selection reasoning.</returns>
     public async ValueTask<SelectorGroupChatResult> RunAsync(
         IReadOnlyList<AgentMessage> initialMessages,
@@ -176,7 +176,7 @@ public sealed class SelectorGroupChat
 }
 
 /// <summary>
-/// Result of a <see cref=\"SelectorGroupChat\"/> run.
+/// Result of a <see cref="SelectorGroupChat"/> run.
 /// </summary>
 public sealed record SelectorGroupChatResult(
     IReadOnlyList<AgentMessage> Conversation,

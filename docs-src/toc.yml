@@ -1,4 +1,10 @@
 - name: Docs
   href: docs/
+- name: API Reference
+  href: api/
+- name: Quick Start
+  href: docs/getting-started/quickstart.md
+- name: NuGet Packages
+  href: https://www.nuget.org/packages?q=MyAgents
 - name: GitHub
   href: https://github.com/OmniTechSolutionsCA/MyAgents-Community

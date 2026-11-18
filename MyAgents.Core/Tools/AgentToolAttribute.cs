@@ -27,7 +27,7 @@ public sealed class AgentToolAttribute : Attribute
     /// types. Every non-primitive argument and result type must be declared in the context via
     /// <see cref="System.Text.Json.Serialization.JsonSerializableAttribute"/>; the generator reports a
     /// compile-time error otherwise. When set, the generated tool binds arguments and serializes results
-    /// through <see cref="System.Text.Json.JsonTypeInfo"/> without reflection, making the tool
+    /// through <see cref="System.Text.Json.Serialization.Metadata.JsonTypeInfo"/> without reflection, making the tool
     /// NativeAOT- and trimming-safe.
     /// </summary>
     public Type? JsonContext { get; set; }

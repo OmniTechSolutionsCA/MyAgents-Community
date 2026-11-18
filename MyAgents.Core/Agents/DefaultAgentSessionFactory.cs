@@ -25,7 +25,7 @@ public sealed class DefaultAgentSessionFactory : IAgentSessionFactory
 
     /// <summary>
     /// Creates a new session asynchronously. Preferred over <see cref="CreateSession"/> when
-    /// any feature may perform async I/O during contribution (e.g. <see cref="McpFeature"/>).
+    /// any feature may perform async I/O during contribution (e.g. <c>McpFeature</c>).
     /// </summary>
     public async ValueTask<IAgentSession> CreateSessionAsync(
         string sessionId,

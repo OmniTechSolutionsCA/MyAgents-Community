@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Hybrid RAG &amp; Vector Memory Stores | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Hybrid RAG &amp; Vector Memory Stores | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/memory/hybrid-rag.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="hybrid-rag--vector-memory-stores">Hybrid RAG &amp; Vector Memory Stores</h1>
+
+<p><code>MyAgents.Memory</code> delivers an enterprise-grade retrieval-augmented generation (RAG) and memory system with <strong>zero mandatory external database dependencies</strong>, while also supporting persistent SQLite storage and <code>Microsoft.Extensions.VectorData</code> providers.</p>
+<h2 id="why-hybrid-retrieval">Why Hybrid Retrieval?</h2>
+<p>Pure vector search (dense embeddings) excels at semantic similarity and conceptual queries, but can miss exact product SKUs, error codes, C# type names, or rare identifiers. Pure keyword search (BM25) excels at exact token matching but lacks semantic understanding.</p>
+<p>MyAgents Community combines both using <strong>Reciprocal Rank Fusion (RRF)</strong> or <strong>Weighted Linear Combination</strong>:</p>
+<pre><code class="lang-mermaid">flowchart TD
+    Query[&quot;User Query: 'NativeAOT source generator MYAG001'&quot;] --&gt; Dense[&quot;Dense Vector Search (IVectorMemoryStore)&quot;]
+    Query --&gt; Sparse[&quot;BM25 Lexical Search (BM25Index)&quot;]
+
+    Dense --&gt;|&quot;Pre-normalized TensorPrimitives.Dot SIMD&quot;| DenseRanks[&quot;Dense Ranked List&quot;]
+    Sparse --&gt;|&quot;Zero-Regex Span Tokenization + TF-IDF&quot;| SparseRanks[&quot;Sparse Ranked List&quot;]
+
+    DenseRanks --&gt; RRF[&quot;Reciprocal Rank Fusion / Linear Combination&quot;]
+    SparseRanks --&gt; RRF
+
+    RRF --&gt; FusedResults[&quot;Fused Grounded Context &amp; Citations&quot;]
+</code></pre>
+<hr>
+<h2 id="1-choosing-a-memory-store">1. Choosing a Memory Store</h2>
+<p><code>MyAgents.Memory</code> ships with three <code>IVectorMemoryStore</code> implementations that all support <code>IMemoryStoreChangeNotifier</code> (automatically keeping the <code>BM25Index</code> synchronized on writes and deletes) and SHA-256 content-hash deduplication:</p>
+<h3 id="option-a-durable-sqlite-vector-store-sqlitememorystore">Option A: Durable SQLite Vector Store (<code>SqliteMemoryStore</code>)</h3>
+<p>Persists entries, JSON metadata, and binary float embeddings in WAL-mode SQLite while executing SIMD <code>TensorPrimitives.Dot</code> similarity in memory:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Memory;
+
+var services = new ServiceCollection();
+services.AddSingleton&lt;IEmbeddingGenerator&lt;string, Embedding&lt;float&gt;&gt;&gt;(embeddingGenerator);
+
+// Registers SqliteMemoryStore as IMemoryStore + IVectorMemoryStore and adds HybridMemoryRetriever
+services.AddSqliteMemoryStore(&quot;knowledge.db&quot;);
+</code></pre>
+<h3 id="option-b-in-memory-simd-vector-store-with-snapshots-vectormemorystore">Option B: In-Memory SIMD Vector Store with Snapshots (<code>VectorMemoryStore</code>)</h3>
+<p>High-speed in-memory vector store with binary stream/file snapshot persistence:</p>
+<pre><code class="lang-csharp">var vectorStore = new VectorMemoryStore(embeddingGenerator);
+
+// Save and restore binary snapshots for fast warm starts
+await vectorStore.SaveToFileAsync(&quot;vectors.snapshot&quot;, cancellationToken);
+int loadedCount = await vectorStore.LoadFromFileAsync(&quot;vectors.snapshot&quot;, cancellationToken);
+</code></pre>
+<h3 id="option-c-microsoftextensionsvectordata-bridge-vectordatamemorystore">Option C: <code>Microsoft.Extensions.VectorData</code> Bridge (<code>VectorDataMemoryStore</code>)</h3>
+<p>Bridges any <code>VectorStoreCollection&lt;string, VectorDataMemoryRecord&gt;</code> from the <code>Microsoft.Extensions.VectorData</code> ecosystem:</p>
+<pre><code class="lang-csharp">services.AddVectorDataMemoryStore(vectorStoreCollection);
+</code></pre>
+<h3 id="content-hash-embedding-caching-cachingembeddinggenerator">Content-Hash Embedding Caching (<code>CachingEmbeddingGenerator</code>)</h3>
+<p>Wrap any <code>IEmbeddingGenerator&lt;string, Embedding&lt;float&gt;&gt;</code> in <code>CachingEmbeddingGenerator</code> to avoid re-computing embeddings for repeated queries or unchanged chunks:</p>
+<pre><code class="lang-csharp">var cachedEmbedder = new CachingEmbeddingGenerator(innerEmbeddingGenerator, maxCacheEntries: 4096);
+Console.WriteLine($&quot;Cache Hits: {cachedEmbedder.CacheHits}, Misses: {cachedEmbedder.CacheMisses}&quot;);
+</code></pre>
+<hr>
+<h2 id="2-executing-a-hybrid-search-query">2. Executing a Hybrid Search Query</h2>
+<pre><code class="lang-csharp">var retriever = provider.GetRequiredService&lt;IHybridMemoryRetriever&gt;();
+
+var query = new HybridMemoryQuery(
+    QueryText: &quot;NativeAOT source generator&quot;,
+    MaxResults: 5,
+    DenseWeight: 0.5,
+    SparseWeight: 0.5,
+    RrfK: 60,
+    RankingMode: HybridRankingMode.ReciprocalRankFusion,
+    MinScore: 0.0,
+    MetadataFilters: new Dictionary&lt;string, string&gt; { [&quot;category&quot;] = &quot;tools&quot; });
+
+IReadOnlyList&lt;HybridMemorySearchResult&gt; results = await retriever.SearchHybridAsync(
+    ns: &quot;technical-docs&quot;,
+    query: query,
+    cancellationToken: cancellationToken);
+
+foreach (var hit in results)
+{
+    Console.WriteLine($&quot;[Fused: {hit.FusedScore:F4} | DenseRank: {hit.DenseRank} | SparseRank: {hit.SparseRank}] {hit.Entry.Key}&quot;);
+}
+</code></pre>
+<hr>
+<h2 id="3-automatic-context-injection--grounded-citations-retrievalaugmentationfeature">3. Automatic Context Injection &amp; Grounded Citations (<code>RetrievalAugmentationFeature</code>)</h2>
+<p>Register <code>RetrievalAugmentationFeature</code> on an agent to automatically retrieve relevant chunks before each turn, expand adjacent neighbor chunks, enforce token budgets, and verify citation grounding (<code>[1]</code>, <code>[2]</code>) on the assistant's response:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Memory;
+
+var ragOptions = new RetrievalAugmentationOptions(
+    Namespace: &quot;technical-docs&quot;,
+    MaxResults: 5,
+    MinScore: 0.1,
+    MaxContextTokens: 2000,
+    DeduplicateAcrossTurns: true,
+    AdjacentChunkWindow: 1,
+    AppendCitationReferences: true,
+    OnCitationsEvaluated: grounding =&gt;
+    {
+        Console.WriteLine($&quot;Grounded: {grounding.IsGrounded}, Cited sources: {grounding.CitedSources.Count}&quot;);
+    });
+
+var definition = new AgentDefinition(&quot;grounded-assistant&quot;, [
+    new RetrievalAugmentationFeature(ragOptions)
+]);
+</code></pre>
+<p>When <code>AppendCitationReferences: true</code> is enabled and the model cites <code>[1]</code> in its answer, <code>RetrievalAugmentationFeature</code> automatically appends a formatted <code>References:</code> footer with the document title and source provenance.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/memory/hybrid-rag.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -29,7 +29,7 @@ public sealed class EmptyResponseGuardrailPolicy : IGuardrailPolicy
 }
 
 /// <summary>
-/// Flags turns whose combined output text exceeds <see cref="MaxLength"/> characters.
+/// Flags turns whose combined output text exceeds <c>maxLength</c> characters.
 /// </summary>
 public sealed class MaxLengthGuardrailPolicy : IGuardrailPolicy
 {

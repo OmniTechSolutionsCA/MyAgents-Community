@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Multi-Agent Teams, Subagents &amp; Cost Routing | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Multi-Agent Teams, Subagents &amp; Cost Routing | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/agents/multi-agent-and-subagents.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="multi-agent-teams-subagents--cost-routing">Multi-Agent Teams, Subagents &amp; Cost Routing</h1>
+
+<p>Complex tasks often benefit from dividing responsibilities across specialized agents. <code>MyAgents.Agents</code> provides hierarchical subagent delegation, multi-agent group chats, capability routing, inter-agent messaging channels, and multi-model cost routing.</p>
+<h2 id="1-hierarchical-subagent-dispatching">1. Hierarchical Subagent Dispatching</h2>
+<p>A parent orchestrator agent can delegate subtasks synchronously (<code>delegate_to_subagent</code>) or fork background tasks (<code>fork_subagent</code> + <code>get_subagent_task_status</code>) using <code>HierarchicalSubagentDispatcher</code> and <code>SubagentDelegationFeature</code>:</p>
+<pre><code class="lang-mermaid">flowchart TD
+    User[&quot;User Request&quot;] --&gt; Parent[&quot;Lead Orchestrator Agent&quot;]
+    Parent --&gt;|delegate_to_subagent / fork_subagent| Sub1[&quot;web-searcher&quot;]
+    Parent --&gt;|delegate_to_subagent / fork_subagent| Sub2[&quot;data-analyst&quot;]
+    Parent --&gt;|delegate_to_subagent / fork_subagent| Sub3[&quot;code-reviewer&quot;]
+    Sub1 --&gt; Parent
+    Sub2 --&gt; Parent
+    Sub3 --&gt; Parent
+</code></pre>
+<h3 id="configuring-subagents-in-dependency-injection">Configuring Subagents in Dependency Injection</h3>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Agents;
+using MyAgents.Core;
+
+var services = new ServiceCollection();
+services.AddMyAgentsChatRuntime();
+
+// Register child subagents and SubagentDelegationFeature
+services.AddHierarchicalSubagents(builder =&gt;
+{
+    builder
+        .AddSubagent(new AgentDefinition(&quot;web-searcher&quot;, [searchTools], &quot;Finds up-to-date documentation&quot;))
+        .AddSubagent(new AgentDefinition(&quot;data-analyst&quot;, [sqlTools], &quot;Analyzes metrics and SQL datasets&quot;))
+        .AddSubagent(new AgentDefinition(&quot;code-reviewer&quot;, [reviewTools], &quot;Reviews C# code for bugs&quot;))
+        .ConfigureOptions(options =&gt;
+        {
+            options.MaxDelegationDepth = 3;
+            options.DefaultTimeout = TimeSpan.FromMinutes(2);
+            options.PrefixSubagentSessionId = true;
+        });
+});
+
+await using var provider = services.BuildServiceProvider();
+
+// Attach SubagentDelegationFeature to the parent orchestrator agent
+var delegationFeature = provider.GetRequiredService&lt;SubagentDelegationFeature&gt;();
+var leadAgent = new AgentDefinition(&quot;lead-orchestrator&quot;, [delegationFeature]);
+</code></pre>
+<p>You can also invoke <code>ISubagentDispatcher</code> directly from C# code:</p>
+<pre><code class="lang-csharp">var dispatcher = provider.GetRequiredService&lt;ISubagentDispatcher&gt;();
+
+// Synchronous delegation
+SubagentResult result = await dispatcher.DelegateAsync(
+    new SubagentTask(
+        TaskId: &quot;task-1&quot;,
+        TargetAgentName: &quot;data-analyst&quot;,
+        Instructions: &quot;Summarize Q3 revenue growth.&quot;),
+    cancellationToken);
+
+// Or background fork
+SubagentTaskHandle handle = await dispatcher.ForkAsync(
+    new SubagentTask(&quot;task-2&quot;, &quot;web-searcher&quot;, &quot;Check .NET 10 release notes.&quot;),
+    cancellationToken);
+</code></pre>
+<hr>
+<h2 id="2-multi-agent-group-chat-groupchat--selectorgroupchat">2. Multi-Agent Group Chat (<code>GroupChat</code> &amp; <code>SelectorGroupChat</code>)</h2>
+<p>When multiple agents need to collaborate in a shared conversation thread, use <code>GroupChat</code> (deterministic C# speaker selection function) or <code>SelectorGroupChat</code> (LLM-driven speaker selection):</p>
+<h3 id="deterministic-groupchat">Deterministic <code>GroupChat</code></h3>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var options = new GroupChatOptions(
+    Agents: [researcherDef, writerDef, reviewerDef],
+    MaxTurns: 6,
+    Termination: new TextMentionTermination(&quot;APPROVED&quot;));
+
+var groupChat = new GroupChat(options, sessionFactory);
+
+GroupChatResult chatResult = await groupChat.RunAsync(
+    initialMessages: [AgentMessage.FromText(&quot;user&quot;, &quot;Draft a migration guide for NativeAOT.&quot;)],
+    selectionFunc: (history, turnIndex) =&gt; options.Agents[turnIndex % options.Agents.Count],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Completed in {chatResult.TotalTurns} turns. Last speaker: {chatResult.LastSpeaker}&quot;);
+</code></pre>
+<h3 id="llm-coordinated-selectorgroupchat">LLM-Coordinated <code>SelectorGroupChat</code></h3>
+<pre><code class="lang-csharp">var selectorOptions = new SelectorGroupChatOptions(
+    Agents: [researcherDef, writerDef, reviewerDef],
+    SelectorClient: coordinatorChatClient,
+    SelectorPrompt: &quot;Select the next agent best suited to advance the conversation.&quot;,
+    MaxTurns: 8,
+    Termination: new TextMentionTermination(&quot;FINAL_SIGN_OFF&quot;));
+
+var selectorChat = new SelectorGroupChat(selectorOptions, sessionFactory);
+SelectorGroupChatResult result = await selectorChat.RunAsync(
+    [AgentMessage.FromText(&quot;user&quot;, &quot;Produce a security audit report.&quot;)],
+    cancellationToken);
+</code></pre>
+<hr>
+<h2 id="3-capability-routing-capabilityrouter">3. Capability Routing (<code>CapabilityRouter</code>)</h2>
+<p>Use <code>CapabilityRouter</code> to classify an incoming task description and route it to the best-matching <code>AgentDefinition</code>:</p>
+<pre><code class="lang-csharp">var router = new CapabilityRouter(
+    chatClient: classifierChatClient,
+    agents: [billingAgentDef, technicalSupportDef, salesAgentDef],
+    fallbackAgentName: &quot;technical-support&quot;);
+
+CapabilityRouterResult route = await router.RouteAsync(
+    &quot;My invoice from October shows a duplicate charge.&quot;,
+    cancellationToken);
+
+Console.WriteLine($&quot;Selected: {route.SelectedAgent.Name} (Reason: {route.Reasoning})&quot;);
+</code></pre>
+<hr>
+<h2 id="4-adaptive-multi-model-cost-routing-multimodelroutingchatclient">4. Adaptive Multi-Model Cost Routing (<code>MultiModelRoutingChatClient</code>)</h2>
+<p>Route turns across model tiers (<code>ModelTier.Economy</code>, <code>ModelTier.Standard</code>, <code>ModelTier.Advanced</code>), enforce per-turn or per-session USD/token budgets (<code>TokenBudgetQuotaException</code>), and automatically cascade to fallback models on transient failures:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Agents;
+
+services.AddMultiModelRouting(builder =&gt;
+{
+    builder
+        .AddCandidate(
+            modelId: &quot;gpt-4o-mini&quot;,
+            client: miniChatClient,
+            tier: ModelTier.Economy,
+            pricing: new ModelPricing(&quot;gpt-4o-mini&quot;, InputCostPerMillionTokens: 0.15m, OutputCostPerMillionTokens: 0.60m),
+            maxInputTokens: 128_000)
+        .AddCandidate(
+            modelId: &quot;gpt-4o&quot;,
+            client: frontierChatClient,
+            tier: ModelTier.Advanced,
+            pricing: new ModelPricing(&quot;gpt-4o&quot;, InputCostPerMillionTokens: 2.50m, OutputCostPerMillionTokens: 10.00m),
+            maxInputTokens: 128_000,
+            isFallback: true)
+        .ConfigureOptions(options =&gt;
+        {
+            options.EnableFallbackCascade = true;
+            options.MaxCostPerTurnUsd = 0.25m;
+            options.MaxCostPerSessionUsd = 5.00m;
+            options.MaxTokensPerSession = 250_000;
+        });
+});
+</code></pre>
+<p>Inspect real-time token and cost metrics via <code>ITokenCostTelemetrySink</code> (<code>InMemoryTokenCostTelemetrySink</code>):</p>
+<pre><code class="lang-csharp">var costSink = (InMemoryTokenCostTelemetrySink)provider.GetRequiredService&lt;ITokenCostTelemetrySink&gt;();
+Console.WriteLine($&quot;Session spend: ${costSink.GetTotalCostUsd(&quot;session-1&quot;):F4} ({costSink.GetTotalTokens(&quot;session-1&quot;)} tokens)&quot;);
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/agents/multi-agent-and-subagents.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

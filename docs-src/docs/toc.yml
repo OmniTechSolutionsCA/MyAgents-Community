@@ -1,12 +1,62 @@
 - name: Overview
   href: index.md
-- name: Architecture
-  href: architecture.md
-- name: NativeAOT Tools
-  href: nativeaot-tools.md
-- name: Durable Agent Runs
-  href: durable-runs.md
-- name: Hybrid RAG & Memory
-  href: hybrid-rag.md
-- name: Tool Approval & Governance
-  href: tool-approval.md
+- name: Getting Started
+  items:
+    - name: Quick Start
+      href: getting-started/quickstart.md
+    - name: Packages Matrix
+      href: getting-started/packages.md
+- name: Core Concepts
+  items:
+    - name: Architecture & Lifecycle
+      href: core/architecture.md
+    - name: Sessions & Turns
+      href: core/sessions-and-turns.md
+    - name: Structured Output & Multi-Modal
+      href: core/structured-output-and-multimodal.md
+    - name: Prompt Registry & Templates
+      href: core/prompt-registry.md
+- name: Tools & Extensibility
+  items:
+    - name: NativeAOT Tools
+      href: tools/nativeaot-tools.md
+    - name: Delegate & Custom Tools
+      href: tools/delegate-tools.md
+    - name: Model Context Protocol (MCP)
+      href: tools/mcp.md
+- name: Workflows & State Graphs
+  items:
+    - name: Agent State Graphs
+      href: workflows/agent-graphs.md
+    - name: Checkpointed Workflows & HITL
+      href: workflows/checkpointed-workflows.md
+    - name: Orchestration Patterns
+      href: workflows/orchestration-patterns.md
+- name: Durable Execution
+  items:
+    - name: Durable Runs & Batch Workers
+      href: execution/durable-runs.md
+- name: Memory & RAG
+  items:
+    - name: Hybrid RAG & Vector Stores
+      href: memory/hybrid-rag.md
+    - name: Document Ingestion & Chunking
+      href: memory/document-ingestion.md
+    - name: Episodic Memory & Retention
+      href: memory/episodic-memory.md
+- name: Safety & Governance
+  items:
+    - name: Tool Approvals & Gates
+      href: governance/tool-approval.md
+    - name: Guardrails, Fallbacks & Resilience
+      href: governance/guardrails-and-resilience.md
+    - name: Circuit Breakers & Observability
+      href: governance/circuit-breakers.md
+- name: Multi-Agent Systems
+  items:
+    - name: Subagents, Group Chat & Routing
+      href: agents/multi-agent-and-subagents.md
+- name: Testing
+  items:
+    - name: Unit Testing Agents & Runs
+      href: testing/testing-agents.md

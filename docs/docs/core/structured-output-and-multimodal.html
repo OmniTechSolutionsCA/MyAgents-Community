@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Structured Outputs &amp; Multi-Modal Inputs | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Structured Outputs &amp; Multi-Modal Inputs | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/core/structured-output-and-multimodal.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="structured-outputs--multi-modal-inputs">Structured Outputs &amp; Multi-Modal Inputs</h1>
+
+<p>MyAgents Community supports schema-constrained JSON structured outputs with automatic self-correction retries, as well as multi-modal turns combining text, images, audio, video, and binary documents.</p>
+<h2 id="1-strongly-typed-structured-outputs">1. Strongly-Typed Structured Outputs</h2>
+<h3 id="using-sessioninvokeasynct">Using <code>session.InvokeAsync&lt;T&gt;</code></h3>
+<p>The <code>AgentSessionStructuredExtensions.InvokeAsync&lt;T&gt;</code> extension method configures the turn's <code>AgentResponseFormat</code> for type <code>T</code>, invokes the session, and deserializes the assistant's response into <code>AgentStructuredTurnResult&lt;T&gt;</code>:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+
+public sealed record CodeReviewReport(
+    string Summary,
+    int SeverityScore,
+    IReadOnlyList&lt;string&gt; Findings,
+    bool ApprovedForMerge);
+
+AgentStructuredTurnResult&lt;CodeReviewReport&gt; review = await session.InvokeAsync&lt;CodeReviewReport&gt;(
+    messages: [AgentMessage.FromText(&quot;user&quot;, &quot;Review the diff in PR #128.&quot;)],
+    strict: true,
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Approved: {review.Value.ApprovedForMerge} (Score: {review.Value.SeverityScore})&quot;);
+foreach (var finding in review.Value.Findings)
+{
+    Console.WriteLine($&quot;- {finding}&quot;);
+}
+</code></pre>
+<h3 id="using-structuredoutputfeaturet-with-self-correction-retries">Using <code>StructuredOutputFeature&lt;T&gt;</code> with Self-Correction Retries</h3>
+<p>When an agent is dedicated to producing a specific schema—or when working with smaller models that occasionally emit markdown code fences (<code>```json</code>) or invalid JSON—register <code>StructuredOutputFeature&lt;T&gt;</code> (from <code>MyAgents.Agents</code>).</p>
+<p><code>StructuredOutputMiddleware&lt;T&gt;</code> automatically:</p>
+<ol>
+<li>Attaches <code>AgentResponseFormat.ForType&lt;T&gt;</code> to every turn's <code>TurnCapabilities</code>.</li>
+<li>Strips surrounding markdown code fences if present.</li>
+<li>Validates that the output deserializes cleanly into <code>T</code>.</li>
+<li>If deserialization fails, appends a correction prompt containing the <code>JsonException</code> details and retries up to <code>maxValidationRetries</code> times.</li>
+</ol>
+<pre><code class="lang-csharp">using MyAgents.Agents;
+using MyAgents.Core;
+
+var definition = new AgentDefinition(&quot;invoice-extractor&quot;, [
+    new StructuredOutputFeature&lt;InvoiceSummary&gt;(
+        maxValidationRetries: 2,
+        schemaName: &quot;invoice_summary&quot;,
+        schemaDescription: &quot;Extracted line items and totals from an invoice.&quot;,
+        strict: true)
+]);
+</code></pre>
+<h3 id="custom-json-schemas-agentresponseformat">Custom JSON Schemas (<code>AgentResponseFormat</code>)</h3>
+<p>You can also specify raw JSON schemas or unconstrained JSON object mode on any turn:</p>
+<pre><code class="lang-csharp">// Unconstrained JSON object mode
+var jsonObjectFormat = AgentResponseFormat.JsonObject;
+
+// Explicit JSON schema string
+var customSchemaFormat = AgentResponseFormat.ForJsonSchema(
+    schemaName: &quot;ticket_classification&quot;,
+    schemaJson: &quot;&quot;&quot;
+    {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;category&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;billing&quot;, &quot;technical&quot;, &quot;sales&quot;] },
+        &quot;urgency&quot;: { &quot;type&quot;: &quot;integer&quot; }
+      },
+      &quot;required&quot;: [&quot;category&quot;, &quot;urgency&quot;],
+      &quot;additionalProperties&quot;: false
+    }
+    &quot;&quot;&quot;,
+    strict: true);
+
+var result = await session.InvokeAsync(
+    [AgentMessage.FromText(&quot;user&quot;, &quot;Classify: My server is down!&quot;)],
+    configureContext: ctx =&gt; ctx.Capabilities.Set(customSchemaFormat),
+    cancellationToken: cancellationToken);
+</code></pre>
+<hr>
+<h2 id="2-multi-modal-messages-agentcontent">2. Multi-Modal Messages (<code>AgentContent</code>)</h2>
+<p><code>AgentMessage.FromParts</code> lets you combine multiple <code>AgentContent</code> items in a single turn. <code>ChatClientRuntime</code> maps these directly to <code>Microsoft.Extensions.AI</code> content types (<code>TextContent</code>, <code>DataContent</code>, <code>UriContent</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Content Type</th>
+<th style="text-align: left;">Purpose</th>
+<th style="text-align: left;">Key Properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>TextAgentContent</code></strong></td>
+<td style="text-align: left;">Natural language text segment</td>
+<td style="text-align: left;"><code>Text</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>ImageAgentContent</code></strong></td>
+<td style="text-align: left;">Inline binary image bytes</td>
+<td style="text-align: left;"><code>Data</code>, <code>MediaType</code> (e.g. <code>&quot;image/png&quot;</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>UriImageAgentContent</code></strong></td>
+<td style="text-align: left;">Remote or local URI image reference</td>
+<td style="text-align: left;"><code>Uri</code>, <code>MediaType</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>AudioAgentContent</code></strong></td>
+<td style="text-align: left;">Audio clip bytes</td>
+<td style="text-align: left;"><code>Data</code>, <code>MediaType</code>, <code>Duration</code>, <code>Language</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>VideoAgentContent</code></strong></td>
+<td style="text-align: left;">Video clip bytes</td>
+<td style="text-align: left;"><code>Data</code>, <code>MediaType</code>, <code>Duration</code>, <code>Width</code>, <code>Height</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>DocumentAgentContent</code></strong></td>
+<td style="text-align: left;">Named document attachment (PDF, CSV, etc.)</td>
+<td style="text-align: left;"><code>Data</code>, <code>MediaType</code>, <code>FileName</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>DataAgentContent</code></strong></td>
+<td style="text-align: left;">Arbitrary binary payload</td>
+<td style="text-align: left;"><code>Data</code>, <code>MediaType</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-sending-text--image--pdf-document">Example: Sending Text + Image + PDF Document</h3>
+<pre><code class="lang-csharp">using MyAgents.Core;
+
+byte[] screenshotBytes = await File.ReadAllBytesAsync(&quot;error-dialog.png&quot;, cancellationToken);
+byte[] logFileBytes = await File.ReadAllBytesAsync(&quot;crash-report.pdf&quot;, cancellationToken);
+
+var multiModalMessage = AgentMessage.FromParts(
+    role: &quot;user&quot;,
+    parts:
+    [
+        new TextAgentContent(&quot;Diagnose the error shown in this screenshot and crash report.&quot;),
+        new ImageAgentContent(screenshotBytes, &quot;image/png&quot;),
+        new DocumentAgentContent(logFileBytes, &quot;application/pdf&quot;, &quot;crash-report.pdf&quot;)
+    ],
+    textSummary: &quot;Diagnose the error shown in this screenshot and crash report.&quot;);
+
+var result = await session.InvokeAsync([multiModalMessage], cancellationToken);
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/core/structured-output-and-multimodal.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

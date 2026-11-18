@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace MyAgents.Memory | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace MyAgents.Memory | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="MyAgents.Memory">
+
+  <h1 id="MyAgents_Memory" data-uid="MyAgents.Memory" class="text-break">Namespace MyAgents.Memory</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.ApproximateTokenCounter.html">ApproximateTokenCounter</a></dt>
+      <dd><p>Zero-dependency, allocation-free subword token estimator implementing <a class="xref" href="MyAgents.Core.ITokenCounter.html">ITokenCounter</a>
+and modeling modern BPE tokenizers (approx. 4 characters per alphanumeric subword token plus punctuation runs).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.BM25Index.html">BM25Index</a></dt>
+      <dd><p>High-performance in-memory BM25 (Best Matching 25) sparse lexical index and ranking engine.
+Computes probabilistic relevance using term frequency saturation and document length normalization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.BatchDocumentIngestionResult.html">BatchDocumentIngestionResult</a></dt>
+      <dd><p>Summary of a completed multi-document batch ingestion operation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.CachingEmbeddingGenerator.html">CachingEmbeddingGenerator</a></dt>
+      <dd><p>Thread-safe, bounded content-hash caching decorator for <span class="xref">Microsoft.Extensions.AI.IEmbeddingGenerator&lt;TInput, TEmbedding&gt;</span>.
+Eliminates redundant embedding generation calls across identical queries and unchanged document chunks.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.CitationGrounder.html">CitationGrounder</a></dt>
+      <dd><p>Extracts and verifies numbered <code>[n]</code> citations in model responses against retrieved memory results.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.CitationGroundingResult.html">CitationGroundingResult</a></dt>
+      <dd><p>Result of evaluating an assistant response's <code>[n]</code> citation markers against the
+retrieved context entries injected during a turn.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.CompositeDocumentReader.html">CompositeDocumentReader</a></dt>
+      <dd><p>Composite <a class="xref" href="MyAgents.Memory.IDocumentReader.html">IDocumentReader</a> that dispatches to registered format readers (HTML, Markdown,
+plain text, JSON, CSV, source code, or custom binary readers) and extracts heading titles when present.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DefaultDocumentIngestor.html">DefaultDocumentIngestor</a></dt>
+      <dd><p>Default implementation of <a class="xref" href="MyAgents.Memory.IDocumentIngestor.html">IDocumentIngestor</a> that chunks documents via <a class="xref" href="MyAgents.Memory.ITextChunker.html">ITextChunker</a>,
+performs single-batch embedding generation, replaces prior chunks for the same source URI, and synchronizes
+the <a class="xref" href="MyAgents.Memory.IHybridMemoryRetriever.html">IHybridMemoryRetriever</a> lexical index.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DefaultMemoryRetriever.html">DefaultMemoryRetriever</a></dt>
+      <dd><p>Default weighted memory retriever over keyword and semantic stores.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DocumentIngestionBuilder.html">DocumentIngestionBuilder</a></dt>
+      <dd><p>Builder for configuring document chunking, token counting, and ingestion services.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DocumentIngestionResult.html">DocumentIngestionResult</a></dt>
+      <dd><p>Summary of a completed document ingestion operation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DocumentIngestorReaderExtensions.html">DocumentIngestorReaderExtensions</a></dt>
+      <dd><p>Convenience extensions on <a class="xref" href="MyAgents.Memory.IDocumentIngestor.html">IDocumentIngestor</a> for ingesting files and streams directly via <a class="xref" href="MyAgents.Memory.IDocumentReader.html">IDocumentReader</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.DocumentMetadataKeys.html">DocumentMetadataKeys</a></dt>
+      <dd><p>Well-known metadata keys attached to ingested document chunks for provenance and citation rendering.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.EpisodicMemoryEntry.html">EpisodicMemoryEntry</a></dt>
+      <dd><p>Long-term episodic memory record capturing a distilled interaction, session summary, or cross-session milestone.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.EpisodicMemoryFeature.html">EpisodicMemoryFeature</a></dt>
+      <dd><p>Feature that registers long-term episodic memory tools (<code>recall_past_episodes</code>, <code>save_episodic_fact</code>)
+into an agent assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.EpisodicMemoryStore.html">EpisodicMemoryStore</a></dt>
+      <dd><p>Hybrid episodic memory store providing long-term semantic persistence, cross-session recall,
+and automated milestone consolidation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.EpisodicRecallQuery.html">EpisodicRecallQuery</a></dt>
+      <dd><p>Query criteria for recalling episodic memories across sessions.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.GroundedCitation.html">GroundedCitation</a></dt>
+      <dd><p>Represents a numbered citation marker (e.g., <code>[1]</code>) referenced in an assistant response
+and resolved back to its retrieved <a class="xref" href="MyAgents.Core.Memory.MemoryEntry.html">MemoryEntry</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.HtmlDocumentReader.html">HtmlDocumentReader</a></dt>
+      <dd><p>Zero-dependency <a class="xref" href="MyAgents.Memory.IDocumentReader.html">IDocumentReader</a> that extracts structured text and titles from HTML documents.
+Strips <code>&lt;script&gt;</code>, <code>&lt;style&gt;</code>, <code>&lt;svg&gt;</code>, and <code>&lt;noscript&gt;</code> blocks,
+converts HTML headings (<code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code>), paragraphs, list items, and line breaks into
+Markdown-compatible text, and decodes HTML entities.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.HybridMemoryQuery.html">HybridMemoryQuery</a></dt>
+      <dd><p>Query parameters for hybrid semantic + BM25 sparse memory retrieval.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.HybridMemoryRetriever.html">HybridMemoryRetriever</a></dt>
+      <dd><p>Hybrid memory retriever combining semantic dense embeddings with BM25 sparse lexical indexing.
+Merges disparate ranking signals using Reciprocal Rank Fusion (RRF) for optimal recall and precision.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.HybridMemorySearchResult.html">HybridMemorySearchResult</a></dt>
+      <dd><p>Hybrid search result containing both dense vector and sparse BM25 rank/score metrics.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IngestDocument.html">IngestDocument</a></dt>
+      <dd><p>Represents a source document to be chunked, embedded, and upserted into a memory namespace.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IngestDocumentTool.html">IngestDocumentTool</a></dt>
+      <dd><p>Tool that allows an agent to ingest or update a document in the knowledge base with provenance metadata.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.KnowledgeBaseFeature.html">KnowledgeBaseFeature</a></dt>
+      <dd><p>Agent feature that registers knowledge base RAG tools (<code>search_knowledge_base</code> and optionally
+<code>ingest_knowledge_document</code>) into an agent assembly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MarkdownTextChunker.html">MarkdownTextChunker</a></dt>
+      <dd><p>Structure-aware Markdown <a class="xref" href="MyAgents.Memory.ITextChunker.html">ITextChunker</a> that splits documents along ATX heading
+boundaries (<code>#</code>–<code>######</code>), keeps fenced code blocks (<code>```</code> / <code>~~~</code>) intact
+whenever they fit within the configured budget, and optionally prepends active parent heading
+breadcrumbs to chunks so subsections retain their document hierarchy context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryQuery.html">MemoryQuery</a></dt>
+      <dd><p>Weighted query used by the memory retriever.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryRetentionPolicy.html">MemoryRetentionPolicy</a></dt>
+      <dd><p>Policy used by memory retention and summarization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryRetentionResult.html">MemoryRetentionResult</a></dt>
+      <dd><p>Outcome of a memory retention/compaction pass.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryRetentionService.html">MemoryRetentionService</a></dt>
+      <dd><p>Applies retention and summarization policies over a memory namespace.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryRetrievalTelemetry.html">MemoryRetrievalTelemetry</a></dt>
+      <dd><p>Structured telemetry emitted for a memory retrieval request.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemorySearchResult.html">MemorySearchResult</a></dt>
+      <dd><p>Ranked memory search result with per-signal scores.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.MemoryServiceExtensions.html">MemoryServiceExtensions</a></dt>
+      <dd><p>DI helpers for ranked retrieval, hybrid BM25/vector search, episodic memory, document ingestion, and retention services.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.RecallEpisodicMemoriesTool.html">RecallEpisodicMemoriesTool</a></dt>
+      <dd><p>Tool that allows an agent to search and recall past long-term episodic memories and interaction history.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.RecursiveCharacterTextChunker.html">RecursiveCharacterTextChunker</a></dt>
+      <dd><p>Default <a class="xref" href="MyAgents.Memory.ITextChunker.html">ITextChunker</a> implementation that splits text along a hierarchy of
+paragraph, line, sentence, clause, and word separators before falling back to hard character limits.
+Supports both character budgets (<a class="xref" href="MyAgents.Memory.TextChunkingOptions.html#MyAgents_Memory_TextChunkingOptions_ChunkSize">ChunkSize</a>) and token budgets
+(<a class="xref" href="MyAgents.Memory.TextChunkingOptions.html#MyAgents_Memory_TextChunkingOptions_MaxTokens">MaxTokens</a>) via <a class="xref" href="MyAgents.Core.ITokenCounter.html">ITokenCounter</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.RetrievalAugmentationFeature.html">RetrievalAugmentationFeature</a></dt>
+      <dd><p>Feature that injects retrieved memory context into the agent turn before model invocation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.RetrievalAugmentationOptions.html">RetrievalAugmentationOptions</a></dt>
+      <dd><p>Options for retrieval augmentation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.SaveEpisodicFactTool.html">SaveEpisodicFactTool</a></dt>
+      <dd><p>Tool that allows an agent to explicitly record a crucial fact, decision, or milestone to long-term episodic memory.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.SearchKnowledgeBaseTool.html">SearchKnowledgeBaseTool</a></dt>
+      <dd><p>Tool that allows an agent to actively search a knowledge base namespace using hybrid semantic + BM25 retrieval
+and receive numbered citations with provenance metadata.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.SqliteMemoryStore.html">SqliteMemoryStore</a></dt>
+      <dd><p>Durable SQLite-backed implementation of <a class="xref" href="MyAgents.Memory.IVectorMemoryStore.html">IVectorMemoryStore</a> and <a class="xref" href="MyAgents.Core.Memory.IMemoryStoreChangeNotifier.html">IMemoryStoreChangeNotifier</a>.
+Persists <a class="xref" href="MyAgents.Core.Memory.MemoryEntry.html">MemoryEntry</a> records, JSON metadata, and pre-normalized float embeddings in a single SQLite database
+while maintaining an in-memory cache for microsecond-latency SIMD <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.readonlyspan-1">Dot(ReadOnlySpan&lt;float&gt;, ReadOnlySpan&lt;float&gt;)</a> vector search.
+Also skips redundant embedding generation when upserting an entry whose content is unchanged.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.TextChunk.html">TextChunk</a></dt>
+      <dd><p>A contiguous slice of a source document produced by an <a class="xref" href="MyAgents.Memory.ITextChunker.html">ITextChunker</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.TextChunkingOptions.html">TextChunkingOptions</a></dt>
+      <dd><p>Options controlling character-budget and optional token-budget text splitting and chunk overlap.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.VectorDataMemoryRecord.html">VectorDataMemoryRecord</a></dt>
+      <dd><p>Canonical record model used when persisting <a class="xref" href="MyAgents.Core.Memory.MemoryEntry.html">MemoryEntry</a> items to a
+<span class="xref">Microsoft.Extensions.VectorData.VectorStore</span> or <span class="xref">Microsoft.Extensions.VectorData.VectorStoreCollection&lt;TKey, TRecord&gt;</span>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.VectorDataMemoryStore.html">VectorDataMemoryStore</a></dt>
+      <dd><p>Adapter that implements <a class="xref" href="MyAgents.Memory.IVectorMemoryStore.html">IVectorMemoryStore</a> and <a class="xref" href="MyAgents.Core.Memory.IMemoryStoreChangeNotifier.html">IMemoryStoreChangeNotifier</a>
+over any <span class="xref">Microsoft.Extensions.VectorData.VectorStore</span> or
+<span class="xref">Microsoft.Extensions.VectorData.VectorStoreCollection&lt;TKey, TRecord&gt;</span> (such as Qdrant, pgvector, Azure AI Search, SQLite-vec, or Redis)
+without coupling <code>MyAgents.Memory</code> to any vendor SDK.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.VectorMemoryFeature.html">VectorMemoryFeature</a></dt>
+      <dd><p>Agent feature that contributes a <a class="xref" href="MyAgents.Memory.VectorMemoryStore.html">VectorMemoryStore</a> as the
+agent's <a class="xref" href="MyAgents.Core.Memory.IMemoryStore.html">IMemoryStore</a> (exposed via <a class="xref" href="MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_Memory">Memory</a>).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.VectorMemoryStore.html">VectorMemoryStore</a></dt>
+      <dd><p>Vector-backed implementation of <a class="xref" href="MyAgents.Memory.IVectorMemoryStore.html">IVectorMemoryStore</a> that stores
+<a class="xref" href="MyAgents.Core.Memory.MemoryEntry.html">MemoryEntry</a> records with their embeddings in memory, supports
+high-performance semantic search powered by SIMD-accelerated <span class="xref">System.Numerics.Tensors.TensorPrimitives</span>,
+and provides durable snapshot serialization to and from disk or streams.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.VectorSearchResult.html">VectorSearchResult</a></dt>
+      <dd><p>A single result from a vector similarity search.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IDocumentIngestor.html">IDocumentIngestor</a></dt>
+      <dd><p>Orchestrates text chunking, single-batch embedding generation, provenance metadata tagging,
+store persistence, and lexical index synchronization for RAG corpora.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IDocumentReader.html">IDocumentReader</a></dt>
+      <dd><p>Abstraction for extracting normalized text, title, and metadata from streams or files
+(such as HTML, Markdown, JSON, source code, or custom binary document formats like PDF/DOCX)
+into an <a class="xref" href="MyAgents.Memory.IngestDocument.html">IngestDocument</a> ready for <a class="xref" href="MyAgents.Memory.IDocumentIngestor.html">IDocumentIngestor</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IEpisodicMemoryStore.html">IEpisodicMemoryStore</a></dt>
+      <dd><p>Store contract for persisting, querying, and consolidating episodic long-term memory.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IHybridMemoryRetriever.html">IHybridMemoryRetriever</a></dt>
+      <dd><p>Specialized contract for hybrid dense + BM25 memory retrieval.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IMemoryRetriever.html">IMemoryRetriever</a></dt>
+      <dd><p>High-level retrieval service that ranks memories using multiple signals.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IMemorySummaryGenerator.html">IMemorySummaryGenerator</a></dt>
+      <dd><p>Summary generator used by retention/compaction workflows.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IMemoryTelemetrySink.html">IMemoryTelemetrySink</a></dt>
+      <dd><p>Sink for memory retrieval telemetry records.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.ITextChunker.html">ITextChunker</a></dt>
+      <dd><p>Splits document text into size-bounded, optionally overlapping chunks.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.IVectorMemoryStore.html">IVectorMemoryStore</a></dt>
+      <dd><p>Extends <a class="xref" href="MyAgents.Core.Memory.IMemoryStore.html">IMemoryStore</a> with semantic vector search.
+Implementations use an embedding model to convert text to vectors and
+find semantically similar entries using cosine similarity or similar metrics.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Memory.HybridRankingMode.html">HybridRankingMode</a></dt>
+      <dd><p>Method used to merge dense vector similarity and sparse BM25 lexical signals.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

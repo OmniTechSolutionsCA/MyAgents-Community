@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Document Ingestion, Chunking &amp; Knowledge Base Tools | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Document Ingestion, Chunking &amp; Knowledge Base Tools | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/memory/document-ingestion.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="document-ingestion-chunking--knowledge-base-tools">Document Ingestion, Chunking &amp; Knowledge Base Tools</h1>
+
+<p>The <code>MyAgents.Memory</code> package includes a complete document ingestion pipeline with <strong>zero third-party parsing dependencies</strong>, boundary-aware chunkers, atomic source replacement, and agentic knowledge base tools.</p>
+<h2 id="supported-document-formats-idocumentreader">Supported Document Formats (<code>IDocumentReader</code>)</h2>
+<p><code>CompositeDocumentReader</code> and <code>HtmlDocumentReader</code> extract clean text and document titles directly from streams or files:</p>
+<ul>
+<li><strong>Markdown (<code>.md</code>, <code>text/markdown</code>)</strong>: Extracts YAML front-matter <code>title:</code> or the first <code># H1</code> heading and preserves heading hierarchy and fenced code blocks.</li>
+<li><strong>HTML (<code>.html</code>, <code>.htm</code>, <code>text/html</code>)</strong>: Extracts <code>&lt;title&gt;</code> or <code>&lt;h1&gt;</code>, strips <code>&lt;script&gt;</code> / <code>&lt;style&gt;</code> / <code>&lt;nav&gt;</code> boilerplate, converts headings/lists/code/links into structured Markdown, and decodes HTML entities.</li>
+<li><strong>Plain Text (<code>.txt</code>, <code>text/plain</code>)</strong>: Reads UTF-8 text with paragraph and sentence-boundary chunking.</li>
+<li><strong>JSON (<code>.json</code>, <code>application/json</code>)</strong>: Formats and extracts structured JSON content.</li>
+</ul>
+<hr>
+<h2 id="1-configuring-document-ingestion-in-di">1. Configuring Document Ingestion in DI</h2>
+<p>Use <code>AddDocumentIngestion</code> to register <code>IDocumentIngestor</code>, <code>IDocumentReader</code>, <code>ITextChunker</code>, <code>ITokenCounter</code>, and <code>KnowledgeBaseFeature</code>:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using MyAgents.Memory;
+
+var services = new ServiceCollection();
+services.AddSqliteMemoryStore(&quot;knowledge.db&quot;);
+
+services.AddDocumentIngestion(builder =&gt;
+{
+    // Configure chunk size, overlap, and optional token budget per chunk
+    builder.WithChunkingOptions(new TextChunkingOptions(
+        ChunkSize: 1000,
+        ChunkOverlap: 150,
+        MaxTokens: 256));
+
+    // Use heading-aware Markdown chunker (prepends &quot;# H1 &gt; ## H2&quot; breadcrumbs to chunks)
+    builder.UseMarkdownChunker(includeHeadingBreadcrumbs: true);
+
+    // Use zero-allocation approximate token counter (or register a custom ITokenCounter)
+    builder.UseTokenCounter(ApproximateTokenCounter.Instance);
+});
+
+await using var provider = services.BuildServiceProvider();
+var ingestor = provider.GetRequiredService&lt;IDocumentIngestor&gt;();
+</code></pre>
+<hr>
+<h2 id="2-ingesting-files-streams-and-batches">2. Ingesting Files, Streams, and Batches</h2>
+<h3 id="ingest-a-local-file-ingestfileasync">Ingest a Local File (<code>IngestFileAsync</code>)</h3>
+<pre><code class="lang-csharp">DocumentIngestionResult fileResult = await ingestor.IngestFileAsync(
+    ns: &quot;project-docs&quot;,
+    filePath: &quot;docs/architecture.md&quot;,
+    source: &quot;docs/architecture.md&quot;,
+    metadata: new Dictionary&lt;string, string&gt;
+    {
+        [&quot;version&quot;] = &quot;1.0.0&quot;,
+        [&quot;team&quot;] = &quot;platform&quot;
+    },
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Ingested '{fileResult.Source}' into {fileResult.Chunks.Count} chunks (replaced {fileResult.ReplacedChunkCount} prior chunks).&quot;);
+</code></pre>
+<h3 id="ingest-a-stream-ingeststreamasync">Ingest a Stream (<code>IngestStreamAsync</code>)</h3>
+<pre><code class="lang-csharp">await using var htmlStream = File.OpenRead(&quot;release-notes.html&quot;);
+
+DocumentIngestionResult streamResult = await ingestor.IngestStreamAsync(
+    ns: &quot;project-docs&quot;,
+    content: htmlStream,
+    source: &quot;https://example.com/release-notes&quot;,
+    contentTypeOrExtension: &quot;text/html&quot;,
+    cancellationToken: cancellationToken);
+</code></pre>
+<h3 id="batch-ingestion--atomic-source-replacement-ingestbatchasync">Batch Ingestion &amp; Atomic Source Replacement (<code>IngestBatchAsync</code>)</h3>
+<p>Re-ingesting a document with the same <code>Source</code> automatically removes stale chunks, reuses embeddings for unchanged chunks (via SHA-256 content hashes), and updates the <code>BM25Index</code>:</p>
+<pre><code class="lang-csharp">BatchDocumentIngestionResult batchResult = await ingestor.IngestBatchAsync(
+    ns: &quot;project-docs&quot;,
+    documents:
+    [
+        new IngestDocument(Source: &quot;guide-1&quot;, Content: &quot;# Intro\nWelcome to MyAgents.&quot;, Title: &quot;Intro Guide&quot;),
+        new IngestDocument(Source: &quot;guide-2&quot;, Content: &quot;# Security\nAlways configure tool policies.&quot;, Title: &quot;Security Guide&quot;)
+    ],
+    cancellationToken: cancellationToken);
+
+Console.WriteLine($&quot;Total chunks: {batchResult.TotalChunks}, Replaced: {batchResult.TotalReplacedChunks}&quot;);
+
+// Delete all chunks for a document source
+int deletedChunks = await ingestor.DeleteDocumentAsync(&quot;project-docs&quot;, source: &quot;guide-1&quot;, cancellationToken);
+</code></pre>
+<hr>
+<h2 id="3-agentic-knowledge-base-tools-knowledgebasefeature">3. Agentic Knowledge Base Tools (<code>KnowledgeBaseFeature</code>)</h2>
+<p>In addition to passive middleware injection (<code>RetrievalAugmentationFeature</code>), you can give an agent active tools to search and ingest documents on demand using <code>KnowledgeBaseFeature</code>:</p>
+<ul>
+<li><code>search_knowledge_base</code>: Executes a hybrid semantic + BM25 search with optional <code>source</code> filtering and returns numbered citations with provenance metadata.</li>
+<li><code>ingest_knowledge_document</code>: Chunks, embeds, and indexes a document into the knowledge base namespace.</li>
+</ul>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Memory;
+
+var kbFeature = provider.GetRequiredService&lt;KnowledgeBaseFeature&gt;();
+
+var definition = new AgentDefinition(&quot;knowledge-curator&quot;, [
+    kbFeature
+]);
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/memory/document-ingestion.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
