@@ -51,7 +51,8 @@ TYPE class MyAgents.Mcp.McpFeature
   METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
 TYPE class MyAgents.Mcp.McpFeatureOptions
-  CTOR McpFeatureOptions(bool ImportPrompts, bool ExposeResourceTools)
+  CTOR McpFeatureOptions(bool ImportPrompts, bool ExposeResourceTools, System.Collections.Generic.IReadOnlySet<string> AllowedToolNames)
+  PROP System.Collections.Generic.IReadOnlySet<string> AllowedToolNames { get; set; }
   PROP bool ExposeResourceTools { get; set; }
   PROP bool ImportPrompts { get; set; }
   METHOD MyAgents.Mcp.McpFeatureOptions <Clone>$()
@@ -59,7 +60,7 @@ TYPE class MyAgents.Mcp.McpFeatureOptions
   METHOD bool Equals(object obj)
   METHOD int GetHashCode()
   METHOD string ToString()
-  METHOD void Deconstruct(bool& ImportPrompts, bool& ExposeResourceTools)
+  METHOD void Deconstruct(bool& ImportPrompts, bool& ExposeResourceTools, System.Collections.Generic.IReadOnlySet<string>& AllowedToolNames)
 TYPE class MyAgents.Mcp.McpHotReloadFeature
   CTOR McpHotReloadFeature(MyAgents.Mcp.IMcpServerHotReloadManager manager, MyAgents.Mcp.DynamicToolCatalog catalog, MyAgents.Mcp.ISkillDiscoveryService discoveryService)
   METHOD System.Threading.Tasks.ValueTask ContributeAsync(MyAgents.Core.AgentAssembly assembly, System.Threading.CancellationToken cancellationToken)

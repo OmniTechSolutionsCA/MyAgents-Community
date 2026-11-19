@@ -1,4 +1,9 @@
+using System.IO.Pipelines;
 using System.Text.Json;
+using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
+using MyAgents.Core;
 using MyAgents.Core.Tools;
 using MyAgents.Mcp;
 using NUnit.Framework;
@@ -99,6 +104,93 @@ public sealed class McpTests
                 Directory.Delete(tempDir, recursive: true);
             }
         }
+    }
+
+    /// <summary>
+    /// A real MCP server running in-process over stream pipes, so <see cref="McpFeature"/> speaks the
+    /// actual wire protocol without any network or external process.
+    /// </summary>
+    private sealed class InProcessMcpServer : IAsyncDisposable
+    {
+        private readonly CancellationTokenSource _stop = new();
+        private readonly Pipe _clientToServer = new();
+        private readonly Pipe _serverToClient = new();
+        private readonly Task _running;
+
+        public InProcessMcpServer(params string[] toolNames)
+        {
+            var tools = new McpServerPrimitiveCollection<McpServerTool>();
+            foreach (var name in toolNames)
+            {
+                tools.Add(McpServerTool.Create(
+                    (string message) => $"{name}: {message}",
+                    new McpServerToolCreateOptions { Name = name }));
+            }
+
+            var options = new McpServerOptions
+            {
+                ServerInfo = new Implementation { Name = "in-process-test-server", Version = "1.0.0" },
+                ToolCollection = tools,
+            };
+
+            _running = RunAsync(options);
+        }
+
+        public IClientTransport ClientTransport => new StreamClientTransport(
+            _clientToServer.Writer.AsStream(),
+            _serverToClient.Reader.AsStream());
+
+        private async Task RunAsync(McpServerOptions options)
+        {
+            await using var server = McpServer.Create(
+                new StreamServerTransport(_clientToServer.Reader.AsStream(), _serverToClient.Writer.AsStream()),
+                options);
+            await server.RunAsync(_stop.Token);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _stop.CancelAsync();
+            _clientToServer.Writer.Complete();
+            _serverToClient.Writer.Complete();
+            try
+            {
+                await _running;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when the server is stopped.
+            }
+            _stop.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task McpFeature_exposes_only_allowed_tools_when_filter_is_set()
+    {
+        await using var server = new InProcessMcpServer("echo", "secret-tool");
+        var feature = new McpFeature(
+            server.ClientTransport,
+            new McpFeatureOptions(AllowedToolNames: new HashSet<string> { "echo" }));
+        var assembly = new AgentAssembly();
+
+        await feature.ContributeAsync(assembly);
+
+        Assert.That(assembly.Tools.Build().Select(t => t.Name).ToArray(), Is.EqualTo(new[] { "echo" }));
+    }
+
+    [Test]
+    public async Task McpFeature_exposes_all_tools_when_no_filter_is_set()
+    {
+        await using var server = new InProcessMcpServer("echo", "secret-tool");
+        var feature = new McpFeature(server.ClientTransport);
+        var assembly = new AgentAssembly();
+
+        await feature.ContributeAsync(assembly);
+
+        Assert.That(
+            assembly.Tools.Build().Select(t => t.Name).ToArray(),
+            Is.EquivalentTo(new[] { "echo", "secret-tool" }));
     }
 
     [Test]
