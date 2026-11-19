@@ -775,6 +775,7 @@ TYPE class MyAgents.Core.Security.EgressAuditRecord
   METHOD string ToString()
   METHOD void Deconstruct(string& AuditId, string& SessionId, MyAgents.Core.Security.EgressChannel& Channel, MyAgents.Core.Security.EgressSeverity& Severity, string& DetectorName, string& Reason, System.DateTimeOffset& Timestamp, string& ToolName)
 TYPE enum MyAgents.Core.Security.EgressChannel
+  FIELD MyAgents.Core.Security.EgressChannel MemoryWrite
   FIELD MyAgents.Core.Security.EgressChannel ToolArguments
   FIELD MyAgents.Core.Security.EgressChannel TurnOutput
 TYPE class MyAgents.Core.Security.EgressFinding

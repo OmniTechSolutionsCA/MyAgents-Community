@@ -23,6 +23,7 @@ TYPE class MyAgents.Agents.CanaryDefenseOptions
   PROP System.Collections.Generic.IReadOnlyCollection<string> BeaconHostAllowList { get; set; }
   PROP bool FailOpenOnScannerError { get; set; }
   PROP int MaxScanBytes { get; set; }
+  PROP bool ScanMemoryWrites { get; set; }
   PROP bool ScanToolArguments { get; set; }
   PROP System.Collections.Generic.IReadOnlyCollection<MyAgents.Core.Security.SecretPattern> SecretPatterns { get; set; }
 TYPE class MyAgents.Agents.CapabilityFeature

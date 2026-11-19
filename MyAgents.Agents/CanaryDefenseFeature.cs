@@ -147,5 +147,8 @@ public sealed class CanaryDefenseFeature : IAgentFeature
 
         assembly.Pipeline.Use(new CanaryEgressMiddleware(vault, scanner, handler, _options, window));
         assembly.ToolObservers.Add(new CanaryToolEgressObserver(vault, scanner, handler, _options));
+        assembly.DecorateMemory(store => store is CanaryGuardedMemoryStore
+            ? store
+            : new CanaryGuardedMemoryStore(store, vault, scanner, handler, _options));
     }
 }

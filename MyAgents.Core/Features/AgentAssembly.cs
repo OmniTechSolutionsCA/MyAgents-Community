@@ -35,12 +35,36 @@ public sealed class AgentAssembly
     /// </summary>
     public PromptBuilder Prompts { get; } = new();
 
+    private IMemoryStore? _memory;
+    private Func<IMemoryStore, IMemoryStore>? _memoryDecorator;
+
     /// <summary>
     /// Optional memory store contributed by <c>MemoryFeature</c>.
     /// When set, the store is made available as <see cref="IMemoryStore"/> via
     /// <see cref="AgentTurnServices"/> during every turn.
     /// </summary>
-    public IMemoryStore? Memory { get; set; }
+    public IMemoryStore? Memory
+    {
+        get => _memory;
+        set => _memory = value is not null && _memoryDecorator is not null
+            ? _memoryDecorator(value)
+            : value;
+    }
+
+    internal void DecorateMemory(Func<IMemoryStore, IMemoryStore> decorator)
+    {
+        ArgumentNullException.ThrowIfNull(decorator);
+
+        var previous = _memoryDecorator;
+        _memoryDecorator = previous is null
+            ? decorator
+            : store => decorator(previous(store));
+
+        if (_memory is not null)
+        {
+            _memory = decorator(_memory);
+        }
+    }
 
     /// <summary>
     /// Optional prompt registry contributed by <c>PromptRegistryFeature</c>.

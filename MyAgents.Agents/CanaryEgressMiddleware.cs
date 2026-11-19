@@ -95,6 +95,9 @@ internal sealed class CanaryEgressMiddleware : IAgentMiddleware
         AgentTurnResult result,
         CancellationToken cancellationToken)
     {
+        if (_vault.IsQuarantined)
+            return Refuse();
+
         var payload = BuildPayload(result.Output);
 
         // Scan the recent-turn window together with this turn. Scanning the turn alone is what lets

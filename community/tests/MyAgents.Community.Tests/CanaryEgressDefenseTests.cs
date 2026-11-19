@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyAgents.Agents;
 using MyAgents.Core;
+using MyAgents.Core.Memory;
 using MyAgents.Core.Security;
 using MyAgents.Core.Tools;
 using MyAgents.Runtime.Chat;
@@ -644,6 +645,267 @@ public sealed partial class CanaryEgressDefenseTests
         });
     }
 
+    // ── Durable memory write channel (EgressChannel.MemoryWrite) ──────────────
+
+    [Test]
+    public async Task Canary_in_memory_write_aborts_before_persisting_and_audits()
+    {
+        var backingStore = new InMemoryMemoryStore();
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(_ => "ok");
+        CanaryViolationException? writeException = null;
+
+        var session = await CreateSessionAsync(
+            client,
+            new MemoryFeature(backingStore),
+            new CanaryDefenseFeature(options => options.AuditSink = sink),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                var vault = context.Services.GetRequiredService<ICanaryVault>();
+                var canary = vault.Canaries[0];
+
+                try
+                {
+                    await store.SetAsync(new MemoryEntry(
+                        Key: "poison-1",
+                        Namespace: "facts",
+                        Content: $"remember {ToBase64(canary)}"));
+                }
+                catch (CanaryViolationException ex)
+                {
+                    writeException = ex;
+                }
+            }));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "hi")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(writeException, Is.Not.Null, "Writing a canary to IMemoryStore must throw CanaryViolationException.");
+            var persisted = await backingStore.GetAsync("facts", "poison-1");
+            Assert.That(persisted, Is.Null, "Violating entry must not be persisted to the backing store.");
+            Assert.That(result.Output.Single().Content, Is.EqualTo(Refusal), "Session is quarantined after a confirmed memory write violation.");
+
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            Assert.That(records[0].Channel, Is.EqualTo(EgressChannel.MemoryWrite));
+            Assert.That(records[0].Severity, Is.EqualTo(EgressSeverity.Confirmed));
+            Assert.That(records[0].DetectorName, Is.EqualTo("session-canary"));
+        });
+    }
+
+    [Test]
+    public async Task Memory_write_is_guarded_regardless_of_feature_registration_order()
+    {
+        var backingStore = new InMemoryMemoryStore();
+        var client = new DelegateChatClient(_ => "ok");
+        CanaryViolationException? writeException = null;
+
+        // Register CanaryDefenseFeature BEFORE MemoryFeature
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(),
+            new MemoryFeature(backingStore),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                var vault = context.Services.GetRequiredService<ICanaryVault>();
+                var canary = vault.Canaries[0];
+
+                try
+                {
+                    await store.SetAsync(new MemoryEntry(
+                        Key: "order-test",
+                        Namespace: "facts",
+                        Content: "clean content",
+                        Metadata: new Dictionary<string, string>
+                        {
+                            ["leak"] = canary,
+                        }));
+                }
+                catch (CanaryViolationException ex)
+                {
+                    writeException = ex;
+                }
+            }));
+
+        await session.InvokeAsync([AgentMessage.FromText("user", "hi")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(writeException, Is.Not.Null,
+                "IMemoryStore must be wrapped even when CanaryDefenseFeature contributes before MemoryFeature.");
+            var persisted = await backingStore.GetAsync("facts", "order-test");
+            Assert.That(persisted, Is.Null, "Violating entry in Metadata must not be persisted.");
+        });
+    }
+
+    [Test]
+    public async Task Quarantined_session_refuses_subsequent_memory_writes()
+    {
+        var backingStore = new InMemoryMemoryStore();
+        var client = new DelegateChatClient(_ => "ok");
+        CanaryViolationException? secondWriteException = null;
+
+        var session = await CreateSessionAsync(
+            client,
+            new MemoryFeature(backingStore),
+            new CanaryDefenseFeature(),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                var vault = context.Services.GetRequiredService<ICanaryVault>();
+                var canary = vault.Canaries[0];
+
+                try
+                {
+                    await store.SetAsync(new MemoryEntry("first", "facts", canary));
+                }
+                catch (CanaryViolationException)
+                {
+                    // Expected: quarantines session
+                }
+
+                try
+                {
+                    await store.SetAsync(new MemoryEntry("second-clean", "facts", "completely harmless fact"));
+                }
+                catch (CanaryViolationException ex)
+                {
+                    secondWriteException = ex;
+                }
+            }));
+
+        await session.InvokeAsync([AgentMessage.FromText("user", "hi")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(secondWriteException, Is.Not.Null, "Quarantined session must refuse subsequent clean memory writes.");
+            var persisted = await backingStore.GetAsync("facts", "second-clean");
+            Assert.That(persisted, Is.Null, "Clean entry written after quarantine must not reach backing store.");
+        });
+    }
+
+    [Test]
+    public async Task Suspicious_memory_write_is_audited_and_respects_handler_disposition()
+    {
+        const string fakeKey = "sk-proj-1234567890abcdef";
+        var pattern = new SecretPattern(
+            "openai-api-key",
+            new Regex(@"sk-proj-[A-Za-z0-9]{16}", RegexOptions.NonBacktracking));
+
+        // 1. Default handler: audits suspicious finding on MemoryWrite and allows persistence
+        var defaultBackingStore = new InMemoryMemoryStore();
+        var defaultSink = new InMemoryEgressAuditSink();
+        var defaultClient = new DelegateChatClient(_ => "ok");
+
+        var defaultSession = await CreateSessionAsync(
+            defaultClient,
+            new MemoryFeature(defaultBackingStore),
+            new CanaryDefenseFeature(options =>
+            {
+                options.AuditSink = defaultSink;
+                options.SecretPatterns = [pattern];
+            }),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                await store.SetAsync(new MemoryEntry("key-1", "secrets", $"api_key={fakeKey}"));
+            }));
+
+        await defaultSession.InvokeAsync([AgentMessage.FromText("user", "save key")]);
+
+        var defaultPersisted = await defaultBackingStore.GetAsync("secrets", "key-1");
+        var defaultRecords = await defaultSink.ListAllAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(defaultPersisted, Is.Not.Null, "Default handler allows suspicious memory writes in shadow mode.");
+            Assert.That(defaultRecords, Has.Count.EqualTo(1));
+            Assert.That(defaultRecords[0].Channel, Is.EqualTo(EgressChannel.MemoryWrite));
+            Assert.That(defaultRecords[0].Severity, Is.EqualTo(EgressSeverity.Suspicious));
+            Assert.That(defaultRecords[0].DetectorName, Is.EqualTo("openai-api-key"));
+            Assert.That(defaultRecords[0].Reason, Does.Not.Contain(fakeKey));
+        });
+
+        // 2. Strict handler: audits and aborts suspicious memory write before persistence
+        var strictBackingStore = new InMemoryMemoryStore();
+        var strictSink = new InMemoryEgressAuditSink();
+        var strictClient = new DelegateChatClient(_ => "ok");
+        CanaryViolationException? strictException = null;
+
+        var strictSession = await CreateSessionAsync(
+            strictClient,
+            new MemoryFeature(strictBackingStore),
+            new CanaryDefenseFeature(
+                new StrictSuspiciousViolationHandler(),
+                options =>
+                {
+                    options.AuditSink = strictSink;
+                    options.SecretPatterns = [pattern];
+                }),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                try
+                {
+                    await store.SetAsync(new MemoryEntry("key-2", "secrets", $"api_key={fakeKey}"));
+                }
+                catch (CanaryViolationException ex)
+                {
+                    strictException = ex;
+                }
+            }));
+
+        await strictSession.InvokeAsync([AgentMessage.FromText("user", "save key")]);
+
+        var strictPersisted = await strictBackingStore.GetAsync("secrets", "key-2");
+        var strictRecords = await strictSink.ListAllAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(strictException, Is.Not.Null, "Strict handler must abort suspicious memory write.");
+            Assert.That(strictPersisted, Is.Null, "Aborted suspicious memory write must not be persisted.");
+            Assert.That(strictRecords, Has.Count.EqualTo(1));
+            Assert.That(strictRecords[0].Channel, Is.EqualTo(EgressChannel.MemoryWrite));
+        });
+    }
+
+    [Test]
+    public async Task ScanMemoryWrites_false_bypasses_memory_write_scanning()
+    {
+        var backingStore = new InMemoryMemoryStore();
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(_ => "ok");
+
+        var session = await CreateSessionAsync(
+            client,
+            new MemoryFeature(backingStore),
+            new CanaryDefenseFeature(options =>
+            {
+                options.AuditSink = sink;
+                options.ScanMemoryWrites = false;
+            }),
+            new MemoryWriteCallbackFeature(async context =>
+            {
+                var store = context.Services.GetRequiredService<IMemoryStore>();
+                var vault = context.Services.GetRequiredService<ICanaryVault>();
+                await store.SetAsync(new MemoryEntry("unscanned", "facts", vault.Canaries[0]));
+            }));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "hi")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo("ok"));
+            var persisted = await backingStore.GetAsync("facts", "unscanned");
+            Assert.That(persisted, Is.Not.Null, "When ScanMemoryWrites is false, memory writes are not scanned.");
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Is.Empty);
+        });
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private readonly List<ServiceProvider> _providers = [];
@@ -708,6 +970,24 @@ public sealed partial class CanaryEgressDefenseTests
     private sealed class ToolRegistrationFeature(ITool tool) : IAgentFeature
     {
         public void Contribute(AgentAssembly assembly) => assembly.Tools.Add(tool);
+    }
+
+    private sealed class MemoryWriteCallbackFeature(Func<AgentTurnContext, ValueTask> onTurnAsync) : IAgentFeature
+    {
+        public void Contribute(AgentAssembly assembly)
+            => assembly.Pipeline.Use(new CallbackMiddleware(onTurnAsync));
+
+        private sealed class CallbackMiddleware(Func<AgentTurnContext, ValueTask> onTurnAsync) : IAgentMiddleware
+        {
+            public async ValueTask<AgentTurnResult> InvokeAsync(
+                AgentTurnContext context,
+                Func<AgentTurnContext, CancellationToken, ValueTask<AgentTurnResult>> next,
+                CancellationToken cancellationToken = default)
+            {
+                await onTurnAsync(context).ConfigureAwait(false);
+                return await next(context, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 
     private sealed class SpyTool : ITool

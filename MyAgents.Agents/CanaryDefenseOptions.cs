@@ -47,4 +47,10 @@ public sealed class CanaryDefenseOptions
     /// Whether tool-call arguments are scanned before the tool runs. Default <see langword="true"/>.
     /// </summary>
     public bool ScanToolArguments { get; set; } = true;
+
+    /// <summary>
+    /// Whether memory entries written to <see cref="MyAgents.Core.Memory.IMemoryStore.SetAsync"/> are
+    /// scanned before being persisted. Default <see langword="true"/>.
+    /// </summary>
+    public bool ScanMemoryWrites { get; set; } = true;
 }

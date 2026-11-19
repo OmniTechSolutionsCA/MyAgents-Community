@@ -13,4 +13,10 @@ public enum EgressChannel
     /// violation prevents the call from reaching a network, MCP server, or subagent.
     /// </summary>
     ToolArguments = 1,
+
+    /// <summary>
+    /// A durable or session memory entry written via <see cref="MyAgents.Core.Memory.IMemoryStore.SetAsync"/>.
+    /// Scanned before the entry is persisted to prevent canary or secret poisoning of memory stores.
+    /// </summary>
+    MemoryWrite = 2,
 }
