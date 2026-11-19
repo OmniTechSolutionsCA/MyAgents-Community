@@ -23,18 +23,25 @@ internal sealed class DefaultEgressScanner : IEgressScanner
     private const double HighEntropyThreshold = 4.0;
 
     private readonly HashSet<string> _beaconHostAllowList;
+    private readonly SecretPattern[] _secretPatterns;
 
-    public DefaultEgressScanner(IEnumerable<string>? beaconHostAllowList)
+    public DefaultEgressScanner(
+        IEnumerable<string>? beaconHostAllowList,
+        IEnumerable<SecretPattern>? secretPatterns = null)
     {
         _beaconHostAllowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (beaconHostAllowList is null)
-            return;
-
-        foreach (var host in beaconHostAllowList)
+        if (beaconHostAllowList is not null)
         {
-            if (!string.IsNullOrWhiteSpace(host))
-                _beaconHostAllowList.Add(host);
+            foreach (var host in beaconHostAllowList)
+            {
+                if (!string.IsNullOrWhiteSpace(host))
+                    _beaconHostAllowList.Add(host);
+            }
         }
+
+        _secretPatterns = secretPatterns is null
+            ? []
+            : secretPatterns.Where(static p => p is not null).ToArray();
     }
 
     public ValueTask<EgressScanResult> ScanAsync(
@@ -72,6 +79,19 @@ internal sealed class DefaultEgressScanner : IEgressScanner
                     DetectorName: "high-entropy-url",
                     Severity: EgressSeverity.Suspicious,
                     Reason: $"URL carries a high-entropy query string (host '{uri.Host}')."));
+            }
+        }
+
+        foreach (var secretPattern in _secretPatterns)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (secretPattern.Pattern.IsMatch(payload))
+            {
+                (findings ??= []).Add(new EgressFinding(
+                    DetectorName: secretPattern.Name,
+                    Severity: EgressSeverity.Suspicious,
+                    Reason: $"Payload matched configured secret pattern '{secretPattern.Name}'."));
             }
         }
 

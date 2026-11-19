@@ -823,6 +823,15 @@ TYPE class MyAgents.Core.Security.InMemoryEgressAuditSink
   METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.Security.EgressAuditRecord record, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Security.SecretPattern
+  CTOR SecretPattern(string name, System.Text.RegularExpressions.Regex pattern)
+  PROP string Name { get; }
+  PROP System.Text.RegularExpressions.Regex Pattern { get; }
+  METHOD MyAgents.Core.Security.SecretPattern <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Security.SecretPattern other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
 TYPE class MyAgents.Core.SlidingWindowTrimmer
   CTOR SlidingWindowTrimmer(int maxMessages)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)

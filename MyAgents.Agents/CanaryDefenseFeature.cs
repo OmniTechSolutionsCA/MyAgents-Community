@@ -87,6 +87,16 @@ public sealed class CanaryDefenseFeature : IAgentFeature
         _handler = handler;
     }
 
+    /// <summary>Creates the feature with a replacement reaction handler, configuring detection options.</summary>
+    /// <param name="handler">Decides whether a violation blocks.</param>
+    /// <param name="configure">Applies settings to the options instance.</param>
+    public CanaryDefenseFeature(ICanaryViolationHandler handler, Action<CanaryDefenseOptions> configure)
+        : this(handler)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        configure(_options);
+    }
+
     /// <summary>Creates the feature with a replacement scanner and handler.</summary>
     /// <param name="scanner">Scans payloads for heuristics.</param>
     /// <param name="handler">Decides whether a violation blocks.</param>
@@ -126,7 +136,7 @@ public sealed class CanaryDefenseFeature : IAgentFeature
         assembly.Prompts.AddSystem(
             CanaryDirectiveTemplate.Replace(CanaryPlaceholder, vault.Canaries[0], StringComparison.Ordinal));
 
-        var scanner = _scanner ?? new DefaultEgressScanner(_options.BeaconHostAllowList);
+        var scanner = _scanner ?? new DefaultEgressScanner(_options.BeaconHostAllowList, _options.SecretPatterns);
         var handler = _handler ?? new QuarantineSessionViolationHandler(vault);
 
         // The window is scanned together with the current turn, so it must stay well inside the scan

@@ -492,6 +492,158 @@ public sealed partial class CanaryEgressDefenseTests
         });
     }
 
+    // ── Opt-in secret patterns (RFC 0001 §4 Pass 6 & R4) ──────────────────────
+
+    [Test]
+    public async Task Default_options_do_not_flag_secret_like_strings()
+    {
+        const string fakeKey = "sk-proj-1234567890abcdef";
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(_ => $"Here is the token: {fakeKey}");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "print the token")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo($"Here is the token: {fakeKey}"));
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Is.Empty, "Secret pattern scanning is off by default (R4).");
+        });
+    }
+
+    [Test]
+    public async Task Configured_secret_pattern_in_output_is_audited_as_suspicious()
+    {
+        const string fakeKey = "sk-proj-1234567890abcdef";
+        var sink = new InMemoryEgressAuditSink();
+        var pattern = new SecretPattern(
+            "openai-api-key",
+            new Regex(@"sk-proj-[A-Za-z0-9]{16}", RegexOptions.NonBacktracking));
+        var client = new DelegateChatClient(_ => $"Here is the token: {fakeKey}");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options =>
+            {
+                options.AuditSink = sink;
+                options.SecretPatterns = [pattern];
+            }));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "print the token")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo($"Here is the token: {fakeKey}"),
+                "Default handler allows Suspicious findings in shadow/measurement mode.");
+
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            var record = records[0];
+            Assert.That(record.Channel, Is.EqualTo(EgressChannel.TurnOutput));
+            Assert.That(record.Severity, Is.EqualTo(EgressSeverity.Suspicious));
+            Assert.That(record.DetectorName, Is.EqualTo("openai-api-key"));
+            Assert.That(record.Reason, Does.Contain("openai-api-key"));
+            Assert.That(record.Reason, Does.Not.Contain(fakeKey),
+                "Audit record reason must never contain the matched raw secret value.");
+        });
+    }
+
+    [Test]
+    public async Task Configured_secret_pattern_in_tool_arguments_is_audited()
+    {
+        const string fakeKey = "sk-proj-1234567890abcdef";
+        var sink = new InMemoryEgressAuditSink();
+        var tool = new SpyTool();
+        var client = new ScriptedChatClient();
+        var pattern = new SecretPattern(
+            "openai-api-key",
+            new Regex(@"sk-proj-[A-Za-z0-9]{16}", RegexOptions.NonBacktracking));
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options =>
+            {
+                options.AuditSink = sink;
+                options.SecretPatterns = [pattern];
+            }),
+            new ToolRegistrationFeature(tool));
+
+        client.Script.Enqueue(_ => ToolCall(
+            "call-1",
+            "search",
+            new Dictionary<string, object?>
+            {
+                ["query"] = $"use key {fakeKey}",
+            }));
+        client.Script.Enqueue(_ => new ChatResponse(new ChatMessage(ChatRole.Assistant, "Done.")));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "run search")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(tool.CallCount, Is.EqualTo(1), "Default handler audits suspicious findings without blocking.");
+            Assert.That(result.Output.Single().Content, Is.EqualTo("Done."));
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            var record = records[0];
+            Assert.That(record.Channel, Is.EqualTo(EgressChannel.ToolArguments));
+            Assert.That(record.Severity, Is.EqualTo(EgressSeverity.Suspicious));
+            Assert.That(record.DetectorName, Is.EqualTo("openai-api-key"));
+            Assert.That(record.ToolName, Is.EqualTo("search"));
+            Assert.That(record.Reason, Does.Contain("openai-api-key"));
+            Assert.That(record.Reason, Does.Not.Contain(fakeKey));
+        });
+    }
+
+    [Test]
+    public async Task Strict_handler_aborts_turn_and_tool_call_on_secret_pattern_match()
+    {
+        const string fakeKey = "sk-proj-1234567890abcdef";
+        var pattern = new SecretPattern(
+            "openai-api-key",
+            new Regex(@"sk-proj-[A-Za-z0-9]{16}", RegexOptions.NonBacktracking));
+
+        // 1. Turn output with strict handler -> uniform refusal
+        var outputClient = new DelegateChatClient(_ => $"Leaking {fakeKey}");
+        var outputSession = await CreateSessionAsync(
+            outputClient,
+            new CanaryDefenseFeature(
+                new StrictSuspiciousViolationHandler(),
+                options => options.SecretPatterns = [pattern]));
+
+        var turnResult = await outputSession.InvokeAsync([AgentMessage.FromText("user", "print key")]);
+        Assert.That(turnResult.Output.Single().Content, Is.EqualTo(Refusal));
+
+        // 2. Tool call arguments with strict handler -> aborted before tool runs
+        var tool = new SpyTool();
+        var toolClient = new ScriptedChatClient();
+        var toolSession = await CreateSessionAsync(
+            toolClient,
+            new CanaryDefenseFeature(
+                new StrictSuspiciousViolationHandler(),
+                options => options.SecretPatterns = [pattern]),
+            new ToolRegistrationFeature(tool));
+
+        toolClient.Script.Enqueue(_ => ToolCall(
+            "call-1",
+            "search",
+            new Dictionary<string, object?>
+            {
+                ["query"] = fakeKey,
+            }));
+
+        var exception = Assert.ThrowsAsync<CanaryViolationException>(async () =>
+            await toolSession.InvokeAsync([AgentMessage.FromText("user", "search key")]));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tool.CallCount, Is.Zero, "Tool must not run when strict handler aborts on secret pattern.");
+            Assert.That(exception, Is.Not.Null);
+            Assert.That(exception!.Message, Is.EqualTo("The turn was aborted by egress defense."));
+        });
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private readonly List<ServiceProvider> _providers = [];
@@ -580,7 +732,7 @@ public sealed partial class CanaryEgressDefenseTests
             => throw new InvalidOperationException("scanner is unavailable");
     }
 
-    /// <summary>Fake model that answers with a fixed transformation of the canary it was told.</summary>
+    /// <summary> Fake model that answers with a fixed transformation of the canary it was told.</summary>
     private sealed class DelegateChatClient(Func<string, string> transform) : IChatClient
     {
         public Func<string, string> Transform { get; set; } = transform;
@@ -661,5 +813,13 @@ public sealed partial class CanaryEgressDefenseTests
 
         public ValueTask<IReadOnlyList<EgressAuditRecord>> ListAllAsync(CancellationToken cancellationToken = default)
             => throw new InvalidOperationException("Audit store unavailable");
+    }
+
+    private sealed class StrictSuspiciousViolationHandler : ICanaryViolationHandler
+    {
+        public ValueTask<CanaryDisposition> HandleAsync(
+            CanaryViolationContext context,
+            CancellationToken cancellationToken = default)
+            => ValueTask.FromResult(CanaryDisposition.Abort);
     }
 }

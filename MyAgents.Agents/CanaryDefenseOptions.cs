@@ -36,6 +36,14 @@ public sealed class CanaryDefenseOptions
     public IReadOnlyCollection<string> BeaconHostAllowList { get; set; } = Array.Empty<string>();
 
     /// <summary>
+    /// Opt-in named regular expressions evaluated against egress payloads.
+    /// Each matched pattern emits an <see cref="MyAgents.Core.Security.EgressSeverity.Suspicious"/> finding
+    /// using <see cref="SecretPattern.Name"/> as the detector name without logging the matched secret value.
+    /// Empty by default.
+    /// </summary>
+    public IReadOnlyCollection<SecretPattern> SecretPatterns { get; set; } = Array.Empty<SecretPattern>();
+
+    /// <summary>
     /// Whether tool-call arguments are scanned before the tool runs. Default <see langword="true"/>.
     /// </summary>
     public bool ScanToolArguments { get; set; } = true;

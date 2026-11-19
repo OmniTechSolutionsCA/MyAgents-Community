@@ -10,6 +10,7 @@ TYPE class MyAgents.Agents.BlocklistGuardrailPolicy
 TYPE class MyAgents.Agents.CanaryDefenseFeature
   CTOR CanaryDefenseFeature()
   CTOR CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler handler)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler handler, System.Action<MyAgents.Agents.CanaryDefenseOptions> configure)
   CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner)
   CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner, MyAgents.Core.Security.ICanaryViolationHandler handler)
   CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner, MyAgents.Core.Security.ICanaryViolationHandler handler, MyAgents.Agents.CanaryDefenseOptions options)
@@ -23,6 +24,7 @@ TYPE class MyAgents.Agents.CanaryDefenseOptions
   PROP bool FailOpenOnScannerError { get; set; }
   PROP int MaxScanBytes { get; set; }
   PROP bool ScanToolArguments { get; set; }
+  PROP System.Collections.Generic.IReadOnlyCollection<MyAgents.Core.Security.SecretPattern> SecretPatterns { get; set; }
 TYPE class MyAgents.Agents.CapabilityFeature
   CTOR CapabilityFeature(MyAgents.Core.IAgentCapability[] capabilities)
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
