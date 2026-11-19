@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Canary Egress Defense | MyAgents Community Documentation </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Canary Egress Defense | MyAgents Community Documentation ">
+      
+      
+      <link rel="icon" href="../../favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/canary-egress-defense.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../../logo.svg" alt="MyAgents Community">
+            MyAgents Community
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="canary-egress-defense">Canary Egress Defense</h1>
+
+<p>Most agent safety in MyAgents is <strong>inbound</strong> (<code>IGuardrailPolicy</code> inspects what the model produced) or <strong>human oversight</strong> (<code>IToolApprovalGate</code> decides whether a tool may run). Neither answers the question an attacker actually cares about: <em>is secret material leaving the process?</em></p>
+<p>Canary egress defense answers it. A high-entropy <strong>canary</strong> token is issued for each session and placed in the system prompt. Every outbound payload — the assistant's reply, the JSON arguments of every tool call, and every durable memory write — is scanned for that token before it leaves. A hit fails closed: the turn is replaced with a uniform refusal and the session is quarantined.</p>
+<pre><code class="lang-mermaid">flowchart TD
+    Model[&quot;Model / IChatClient&quot;]
+    Prompt[&quot;System prompt + canary directive&quot;]
+
+    Prompt --&gt; Model
+    Model --&gt;|&quot;assistant text&quot;| MW[&quot;CanaryEgressMiddleware&lt;br/&gt;buffered&quot;]
+    Model --&gt;|&quot;tool call args&quot;| OBS[&quot;CanaryToolEgressObserver&lt;br/&gt;before InvokeAsync&quot;]
+    Mem[&quot;IMemoryStore.SetAsync&quot;] --&gt; STORE[&quot;Guarded memory store&quot;]
+
+    MW --&gt; Guard[&quot;Egress scan&lt;br/&gt;size cap → canary → heuristics&quot;]
+    OBS --&gt; Guard
+    STORE --&gt; Guard
+
+    Guard --&gt;|&quot;Informational&quot;| Pass[&quot;payload proceeds&quot;]
+    Guard --&gt;|&quot;Suspicious / Confirmed&quot;| Handler[&quot;ICanaryViolationHandler&quot;]
+    Handler --&gt;|&quot;Allow&quot;| Pass
+    Handler --&gt;|&quot;Abort&quot;| Block[&quot;Uniform refusal / CanaryViolationException&quot;]
+    Block --&gt; Quarantine[&quot;Session quarantined — monotonic&quot;]
+    Quarantine -.-&gt;|&quot;every later turn refused&quot;| MW
+</code></pre>
+<hr>
+<h2 id="getting-started">Getting started</h2>
+<p>Enable the feature on the agent definition. Everything else is opt-in configuration:</p>
+<pre><code class="lang-csharp">using MyAgents.Core;
+using MyAgents.Agents;
+
+var agent = new AgentDefinition(
+    &quot;GuardedAgent&quot;,
+    Features:
+    [
+        new ToolsFeature(/* ... */),
+        new CanaryDefenseFeature(),
+    ]);
+</code></pre>
+<p>To record violations for tuning, and to allow a CDN in markdown images:</p>
+<pre><code class="lang-csharp">var auditSink = new InMemoryEgressAuditSink();
+
+var feature = new CanaryDefenseFeature(options =&gt;
+{
+    options.AuditSink = auditSink;                      // record every finding
+    options.BeaconHostAllowList = [&quot;cdn.example.com&quot;];  // markdown images from here are fine
+    options.SecretPatterns =
+    [
+        new SecretPattern(&quot;aws-access-key&quot;, new Regex(@&quot;AKIA[0-9A-Z]{16}&quot;, RegexOptions.Compiled)),
+    ];
+});
+</code></pre>
+<hr>
+<h2 id="scanned-channels">Scanned channels</h2>
+<p><code>EgressChannel</code> names the three outbound paths that are checked.</p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Interception point</th>
+<th>Possible reactions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TurnOutput</code></td>
+<td><code>CanaryEgressMiddleware</code>, after the turn and before it is yielded</td>
+<td>replace with the uniform refusal, or allow</td>
+</tr>
+<tr>
+<td><code>ToolArguments</code></td>
+<td><code>CanaryToolEgressObserver</code>, <strong>before</strong> <code>ITool.InvokeAsync</code></td>
+<td>abort the call, or allow</td>
+</tr>
+<tr>
+<td><code>MemoryWrite</code></td>
+<td>guarded <code>IMemoryStore.SetAsync</code> decorator, <strong>before</strong> persisting</td>
+<td>abort the write, or allow</td>
+</tr>
+</tbody>
+</table>
+<p>Arguments and memory writes cannot be rewritten — the observer contract returns no value and the runtime passes the original argument string to the tool. On those channels the only outcomes are <strong>abort</strong> or <strong>allow</strong>. Redaction is not available.</p>
+<hr>
+<h2 id="what-is-detected">What is detected</h2>
+<ol>
+<li><strong>The session canary</strong>, matched exactly.</li>
+<li><strong>Obfuscated canaries</strong> — zero-width characters stripped, the payload reversed, and Base64 / hex / percent-encoded runs decoded, then re-matched.</li>
+<li><strong>Fragmented canaries</strong> across turns — a bounded window of recent turn output is scanned with the current turn, and a pass that ignores interleaved prose reassembles fragments.</li>
+<li><strong>Markdown image beacons</strong> — an image pointing at a host outside <code>BeaconHostAllowList</code>. Images are auto-fetched by most chat surfaces, so the URL is a silent one-way channel.</li>
+<li><strong>High-entropy URLs</strong> — a query string that looks like a payload.</li>
+<li><strong><code>SecretPatterns</code></strong> — opt-in named regular expressions. A match reports the pattern's <code>Name</code> and never logs the matched secret.</li>
+</ol>
+<p>Findings carry an <code>EgressSeverity</code>: <code>Informational</code>, <code>Suspicious</code> (heuristics, may be a false positive) or <code>Confirmed</code> (a canary, or a payload over the scan cap).</p>
+<hr>
+<h2 id="reactions">Reactions</h2>
+<p>Reaction is decided by an <code>ICanaryViolationHandler</code>, not by options.</p>
+<table>
+<thead>
+<tr>
+<th>Handler</th>
+<th><code>Confirmed</code></th>
+<th><code>Suspicious</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QuarantineSessionViolationHandler</code> (default)</td>
+<td>quarantines the session and aborts</td>
+<td>audited, turn continues</td>
+</tr>
+<tr>
+<td><code>AuditOnlyViolationHandler</code></td>
+<td><strong>allowed</strong></td>
+<td>allowed</td>
+</tr>
+</tbody>
+</table>
+<p><code>AuditOnlyViolationHandler</code> exists for shadow-mode rollout: measure trigger rates on real traffic before enforcing. It lets confirmed canaries through by design — <strong>do not ship it to production</strong>.</p>
+<p>A blocked turn produces exactly one message and a blocked tool call throws <code>CanaryViolationException</code>, whose <code>Message</code> is the uniform string <code>&quot;The turn was aborted by egress defense.&quot;</code>. The refusal the caller sees is <code>&quot;I'm sorry, but I cannot provide a response to that request.&quot;</code> — the same text guardrails use, so a caller cannot tell which control fired. Detail is kept in <code>Reason</code>, which is for host diagnostics and audit logs only. Never surface <code>Reason</code> to the model: naming the detector hands an attacker the feedback needed to iterate until a payload gets through.</p>
+<p><code>CanaryViolationException</code> implements <code>INonRetryableException</code>, so <code>ResilienceMiddleware</code> will not retry it even under a classifier that reports every exception as transient.</p>
+<p>Quarantine is <strong>monotonic</strong>: once a session is quarantined, nothing clears it, and later turns are refused without spending a model call.</p>
+<hr>
+<h2 id="audit-trail">Audit trail</h2>
+<p>The meter records aggregate counts. <code>IEgressAuditSink</code> records the individual events, which is what threshold tuning needs:</p>
+<pre><code class="lang-csharp">public sealed record EgressAuditRecord(
+    string AuditId,
+    string SessionId,
+    EgressChannel Channel,
+    EgressSeverity Severity,
+    string DetectorName,
+    string Reason,
+    DateTimeOffset Timestamp,
+    string? ToolName = null);
+</code></pre>
+<p><code>IEgressAuditSink</code> exposes <code>RecordAsync</code>, <code>ListBySessionAsync</code> and <code>ListAllAsync</code>. <code>InMemoryEgressAuditSink</code> is the supplied implementation; the interface is the extension point for a durable sink. A sink that throws does not fail the turn — losing an audit record must not take the agent down.</p>
+<hr>
+<h2 id="options-reference">Options reference</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AuditSink</code></td>
+<td><code>null</code></td>
+<td><code>IEgressAuditSink</code> receiving one record per finding</td>
+</tr>
+<tr>
+<td><code>MaxScanBytes</code></td>
+<td>1 MiB</td>
+<td>Payloads over this are rejected unscanned</td>
+</tr>
+<tr>
+<td><code>FailOpenOnScannerError</code></td>
+<td><code>false</code></td>
+<td>When <code>true</code>, a throwing <code>IEgressScanner</code> is ignored instead of blocking</td>
+</tr>
+<tr>
+<td><code>BeaconHostAllowList</code></td>
+<td>empty</td>
+<td>Hosts permitted in markdown image URLs; empty flags every image</td>
+</tr>
+<tr>
+<td><code>SecretPatterns</code></td>
+<td>empty</td>
+<td>Opt-in <code>SecretPattern</code> list</td>
+</tr>
+<tr>
+<td><code>ScanToolArguments</code></td>
+<td><code>true</code></td>
+<td>Scan tool-call arguments before the tool runs</td>
+</tr>
+<tr>
+<td><code>ScanMemoryWrites</code></td>
+<td><code>true</code></td>
+<td>Scan <code>IMemoryStore.SetAsync</code> payloads before persisting</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="states-and-what-happens-in-each">States, and what happens in each</h2>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Empty payload</strong></td>
+<td>Clean. An empty turn is not a failure.</td>
+</tr>
+<tr>
+<td><strong>Over the scan cap</strong></td>
+<td>Rejected without scanning; failing closed, because truncating would let a canary sit just past the cut.</td>
+</tr>
+<tr>
+<td><strong>Scanner throws</strong></td>
+<td>Blocks by default; <code>FailOpenOnScannerError</code> opts into ignoring it.</td>
+</tr>
+<tr>
+<td><strong>Already quarantined</strong></td>
+<td>Every later turn is refused before the model is called; tool calls and memory writes throw.</td>
+</tr>
+<tr>
+<td><strong>Concurrent turns</strong></td>
+<td>Canary reads are lock-free; the first quarantine wins and is idempotent.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="limits">Limits</h2>
+<p>Read these before relying on the feature in production.</p>
+<ul>
+<li><strong>Detection is not prevention.</strong> An attacker can still leak information one bit per turn through a signal that never touches a scanned payload. This raises the cost of exfiltration; it does not close the channel.</li>
+<li><strong>Cross-turn coverage is bounded</strong>: the window retains 8 turns and 8 KiB. A split spanning more than 8 turns, or whose fragments exceed that budget, is not caught. Both bounds are internal constants, not options.</li>
+<li><strong>Fragment matching is order-preserving</strong>, so interleaving canary-alphabet characters between fragments defeats it.</li>
+<li><strong><code>MemoryWrite</code> guards only the decorated store.</strong> Code that holds an <code>IMemoryStore</code> obtained outside the session bypasses the decorator.</li>
+<li><strong>Streaming is buffered</strong> for any agent using this feature: a canary can appear in the final tokens of a reply, and text already yielded cannot be retracted.</li>
+<li><strong>Thresholds are untuned defaults</strong> — 1 MiB scan cap, 8-turn / 8 KiB window, entropy ≥ 4.0 bits per character. Measure before enforcing.</li>
+<li><strong>Canary survival depends on the provider.</strong> A provider that truncates or summarises long system prompts may drop the canary, and then nothing trips. Verify against your provider before relying on enforcement.</li>
+<li>Use this alongside least-privilege tools and human approval, not instead of them.</li>
+</ul>
+<hr>
+<h2 id="api-surface">API surface</h2>
+<p><code>MyAgents.Core.Security</code>:</p>
+<ul>
+<li><code>EgressChannel</code>, <code>EgressSeverity</code>, <code>EgressFinding</code>, <code>EgressScanResult</code></li>
+<li><code>IEgressScanner</code> — pluggable heuristics; canaries are matched by the framework</li>
+<li><code>ICanaryVault</code> — the session's canaries and its quarantine state</li>
+<li><code>ICanaryViolationHandler</code>, <code>CanaryDisposition</code>, <code>CanaryViolationContext</code>, <code>CanaryViolationException</code></li>
+<li><code>IEgressAuditSink</code>, <code>EgressAuditRecord</code>, <code>InMemoryEgressAuditSink</code></li>
+<li><code>SecretPattern</code></li>
+</ul>
+<p><code>MyAgents.Core</code>:</p>
+<ul>
+<li><code>INonRetryableException</code> — implemented by <code>CanaryViolationException</code></li>
+</ul>
+<p><code>MyAgents.Agents</code>:</p>
+<ul>
+<li><code>CanaryDefenseFeature</code>, <code>CanaryDefenseOptions</code></li>
+<li><code>QuarantineSessionViolationHandler</code>, <code>AuditOnlyViolationHandler</code></li>
+</ul>
+<p>The design rationale, verified platform constraints and risk register live in <code>design/0001-canary-egress-defense.md</code> in the repository.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/docs-src/docs/governance/canary-egress-defense.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

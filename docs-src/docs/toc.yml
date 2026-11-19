@@ -52,6 +52,8 @@
       href: governance/guardrails-and-resilience.md
     - name: Circuit Breakers & Observability
       href: governance/circuit-breakers.md
+    - name: Canary Egress Defense
+      href: governance/canary-egress-defense.md
 - name: Multi-Agent Systems
   items:
     - name: Subagents, Group Chat & Routing

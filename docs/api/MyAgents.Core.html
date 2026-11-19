@@ -546,6 +546,12 @@ each turn. Multiple policies are evaluated in registration order.</p>
 </dd>
     </dl>
     <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Core.INonRetryableException.html">INonRetryableException</a></dt>
+      <dd><p>Marks an exception as terminal: <a class="xref" href="MyAgents.Core.ResilienceMiddleware.html">ResilienceMiddleware</a> never retries it,
+regardless of what the configured <a class="xref" href="MyAgents.Core.ITransientErrorClassifier.html">ITransientErrorClassifier</a> reports.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
       <dt><a class="xref" href="MyAgents.Core.IRunTraceCatalog.html">IRunTraceCatalog</a></dt>
       <dd><p>Optional query surface for enumerating known run IDs from a trace sink.</p>
 </dd>

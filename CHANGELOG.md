@@ -6,6 +6,47 @@ stable release.
 
 ## [Unreleased]
 
+### Added
+- **Canary egress defense against data exfiltration (`MyAgents.Core`, `MyAgents.Agents`).**
+  `CanaryDefenseFeature` issues a per-session canary into the system prompt and scans every outbound
+  payload for it before it leaves the process — the assistant's reply, every tool call's arguments,
+  and every durable memory write. A hit fails closed with a uniform refusal and a monotonic session
+  quarantine. Ships `EgressChannel`, `EgressSeverity`, `EgressFinding`, `EgressScanResult`,
+  `IEgressScanner`, `ICanaryVault`, `ICanaryViolationHandler`, `CanaryDisposition`,
+  `CanaryViolationContext`, `CanaryViolationException`, `CanaryDefenseOptions`,
+  `QuarantineSessionViolationHandler` and `AuditOnlyViolationHandler`. Detection covers exact canary
+  matches, zero-width stripping, reversal, Base64/hex/percent decoding, markdown image beacons and
+  high-entropy URLs. Streaming is buffered so a canary in the final tokens cannot leak.
+- **Cross-turn canary detection (`MyAgents.Core`, `MyAgents.Agents`).** A canary split across turns is
+  now caught: a bounded per-session window of recent turn output (8 turns / 8 KiB, oldest evicted
+  first) is scanned together with the current turn, and a fragment pass reassembles pieces separated
+  by prose.
+- **Egress audit trail (`MyAgents.Core`).** `IEgressAuditSink`, `EgressAuditRecord` and
+  `InMemoryEgressAuditSink` record one entry per finding — channel, severity, detector, session,
+  timestamp — so thresholds can be tuned from real traffic instead of aggregate counters. A sink that
+  throws does not fail the turn.
+- **Opt-in secret pattern detection (`MyAgents.Core`, `MyAgents.Agents`).** `SecretPattern` plus
+  `CanaryDefenseOptions.SecretPatterns` evaluate named regular expressions against egress payloads,
+  reporting the pattern name and never the matched value. Empty by default.
+- **Memory-write egress channel (`MyAgents.Core`, `MyAgents.Agents`).** `EgressChannel.MemoryWrite`
+  and a guarded `IMemoryStore` decorator scan namespace, key, content and metadata before persisting,
+  and refuse writes once the session is quarantined. Controlled by
+  `CanaryDefenseOptions.ScanMemoryWrites`, enabled by default.
+- **`INonRetryableException` (`MyAgents.Core`).** Marker interface for exceptions that
+  `ResilienceMiddleware` must never retry regardless of the injected `ITransientErrorClassifier`.
+  Implemented by `CanaryViolationException`, because replaying a security abort is never correct.
+- **`AgentAssembly.SessionId` (`MyAgents.Core`).** The assembly is now told the session it is being
+  built for before features contribute, so session-scoped features can bind to it.
+
+### Fixed
+- **Session service provider is always overlaid (`MyAgents.Core`).** `DefaultAgentSessionFactory`
+  gated the overlay on `toolCatalog is not null`, which is always true, leaving the no-overlay branch
+  unreachable. Deleting the dead clause alone would have been a regression: `FunctionCallingMiddleware`
+  resolves `ToolCatalog` from turn services and **silently disables the tool loop** when it is null, so
+  a session whose agent declared no tools, no observers and no services would have lost tool calling
+  with no diagnostic. The overlay is now unconditional and the invariant is pinned by
+  `A_session_with_no_tools_or_services_still_resolves_a_ToolCatalog`.
+
 ## [1.0.0] - 2026-11-05
 
 ### General Availability

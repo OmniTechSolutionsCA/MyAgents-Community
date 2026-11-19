@@ -45,6 +45,25 @@ references:
   isSpec: "True"
   fullName: MyAgents.Agents.AgentChannelFeature.Contribute
   nameWithType: AgentChannelFeature.Contribute
+- uid: MyAgents.Agents.AuditOnlyViolationHandler
+  name: AuditOnlyViolationHandler
+  href: api/MyAgents.Agents.AuditOnlyViolationHandler.html
+  commentId: T:MyAgents.Agents.AuditOnlyViolationHandler
+  fullName: MyAgents.Agents.AuditOnlyViolationHandler
+  nameWithType: AuditOnlyViolationHandler
+- uid: MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  name: HandleAsync(CanaryViolationContext, CancellationToken)
+  href: api/MyAgents.Agents.AuditOnlyViolationHandler.html#MyAgents_Agents_AuditOnlyViolationHandler_HandleAsync_MyAgents_Core_Security_CanaryViolationContext_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  fullName: MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext, System.Threading.CancellationToken)
+  nameWithType: AuditOnlyViolationHandler.HandleAsync(CanaryViolationContext, CancellationToken)
+- uid: MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync*
+  name: HandleAsync
+  href: api/MyAgents.Agents.AuditOnlyViolationHandler.html#MyAgents_Agents_AuditOnlyViolationHandler_HandleAsync_
+  commentId: Overload:MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync
+  isSpec: "True"
+  fullName: MyAgents.Agents.AuditOnlyViolationHandler.HandleAsync
+  nameWithType: AuditOnlyViolationHandler.HandleAsync
 - uid: MyAgents.Agents.BlocklistGuardrailPolicy
   name: BlocklistGuardrailPolicy
   href: api/MyAgents.Agents.BlocklistGuardrailPolicy.html
@@ -86,6 +105,204 @@ references:
   isSpec: "True"
   fullName: MyAgents.Agents.BlocklistGuardrailPolicy.EvaluateAsync
   nameWithType: BlocklistGuardrailPolicy.EvaluateAsync
+- uid: MyAgents.Agents.CanaryDefenseFeature
+  name: CanaryDefenseFeature
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html
+  commentId: T:MyAgents.Agents.CanaryDefenseFeature
+  fullName: MyAgents.Agents.CanaryDefenseFeature
+  nameWithType: CanaryDefenseFeature
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor
+  name: CanaryDefenseFeature()
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor
+  name.vb: New()
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature()
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New()
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature()
+  nameWithType.vb: CanaryDefenseFeature.New()
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.ICanaryViolationHandler)
+  name: CanaryDefenseFeature(ICanaryViolationHandler)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_ICanaryViolationHandler_
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.ICanaryViolationHandler)
+  name.vb: New(ICanaryViolationHandler)
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.ICanaryViolationHandler)
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(ICanaryViolationHandler)
+  nameWithType.vb: CanaryDefenseFeature.New(ICanaryViolationHandler)
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.ICanaryViolationHandler,System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name: CanaryDefenseFeature(ICanaryViolationHandler, Action<CanaryDefenseOptions>)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_ICanaryViolationHandler_System_Action_MyAgents_Agents_CanaryDefenseOptions__
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.ICanaryViolationHandler,System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name.vb: New(ICanaryViolationHandler, Action(Of CanaryDefenseOptions))
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler, System.Action<MyAgents.Agents.CanaryDefenseOptions>)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.ICanaryViolationHandler, System.Action(Of MyAgents.Agents.CanaryDefenseOptions))
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(ICanaryViolationHandler, Action<CanaryDefenseOptions>)
+  nameWithType.vb: CanaryDefenseFeature.New(ICanaryViolationHandler, Action(Of CanaryDefenseOptions))
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner)
+  name: CanaryDefenseFeature(IEgressScanner)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_IEgressScanner_
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner)
+  name.vb: New(IEgressScanner)
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.IEgressScanner)
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(IEgressScanner)
+  nameWithType.vb: CanaryDefenseFeature.New(IEgressScanner)
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,MyAgents.Core.Security.ICanaryViolationHandler)
+  name: CanaryDefenseFeature(IEgressScanner, ICanaryViolationHandler)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_IEgressScanner_MyAgents_Core_Security_ICanaryViolationHandler_
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,MyAgents.Core.Security.ICanaryViolationHandler)
+  name.vb: New(IEgressScanner, ICanaryViolationHandler)
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner, MyAgents.Core.Security.ICanaryViolationHandler)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.IEgressScanner, MyAgents.Core.Security.ICanaryViolationHandler)
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(IEgressScanner, ICanaryViolationHandler)
+  nameWithType.vb: CanaryDefenseFeature.New(IEgressScanner, ICanaryViolationHandler)
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,MyAgents.Core.Security.ICanaryViolationHandler,MyAgents.Agents.CanaryDefenseOptions)
+  name: CanaryDefenseFeature(IEgressScanner, ICanaryViolationHandler, CanaryDefenseOptions)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_IEgressScanner_MyAgents_Core_Security_ICanaryViolationHandler_MyAgents_Agents_CanaryDefenseOptions_
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,MyAgents.Core.Security.ICanaryViolationHandler,MyAgents.Agents.CanaryDefenseOptions)
+  name.vb: New(IEgressScanner, ICanaryViolationHandler, CanaryDefenseOptions)
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner, MyAgents.Core.Security.ICanaryViolationHandler, MyAgents.Agents.CanaryDefenseOptions)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.IEgressScanner, MyAgents.Core.Security.ICanaryViolationHandler, MyAgents.Agents.CanaryDefenseOptions)
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(IEgressScanner, ICanaryViolationHandler, CanaryDefenseOptions)
+  nameWithType.vb: CanaryDefenseFeature.New(IEgressScanner, ICanaryViolationHandler, CanaryDefenseOptions)
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name: CanaryDefenseFeature(IEgressScanner, Action<CanaryDefenseOptions>)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_MyAgents_Core_Security_IEgressScanner_System_Action_MyAgents_Agents_CanaryDefenseOptions__
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(MyAgents.Core.Security.IEgressScanner,System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name.vb: New(IEgressScanner, Action(Of CanaryDefenseOptions))
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner, System.Action<MyAgents.Agents.CanaryDefenseOptions>)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(MyAgents.Core.Security.IEgressScanner, System.Action(Of MyAgents.Agents.CanaryDefenseOptions))
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(IEgressScanner, Action<CanaryDefenseOptions>)
+  nameWithType.vb: CanaryDefenseFeature.New(IEgressScanner, Action(Of CanaryDefenseOptions))
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor(System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name: CanaryDefenseFeature(Action<CanaryDefenseOptions>)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_System_Action_MyAgents_Agents_CanaryDefenseOptions__
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.#ctor(System.Action{MyAgents.Agents.CanaryDefenseOptions})
+  name.vb: New(Action(Of CanaryDefenseOptions))
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature(System.Action<MyAgents.Agents.CanaryDefenseOptions>)
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New(System.Action(Of MyAgents.Agents.CanaryDefenseOptions))
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature(Action<CanaryDefenseOptions>)
+  nameWithType.vb: CanaryDefenseFeature.New(Action(Of CanaryDefenseOptions))
+- uid: MyAgents.Agents.CanaryDefenseFeature.#ctor*
+  name: CanaryDefenseFeature
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature__ctor_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseFeature.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Agents.CanaryDefenseFeature.CanaryDefenseFeature
+  fullName.vb: MyAgents.Agents.CanaryDefenseFeature.New
+  nameWithType: CanaryDefenseFeature.CanaryDefenseFeature
+  nameWithType.vb: CanaryDefenseFeature.New
+- uid: MyAgents.Agents.CanaryDefenseFeature.Contribute(MyAgents.Core.AgentAssembly)
+  name: Contribute(AgentAssembly)
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature_Contribute_MyAgents_Core_AgentAssembly_
+  commentId: M:MyAgents.Agents.CanaryDefenseFeature.Contribute(MyAgents.Core.AgentAssembly)
+  fullName: MyAgents.Agents.CanaryDefenseFeature.Contribute(MyAgents.Core.AgentAssembly)
+  nameWithType: CanaryDefenseFeature.Contribute(AgentAssembly)
+- uid: MyAgents.Agents.CanaryDefenseFeature.Contribute*
+  name: Contribute
+  href: api/MyAgents.Agents.CanaryDefenseFeature.html#MyAgents_Agents_CanaryDefenseFeature_Contribute_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseFeature.Contribute
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseFeature.Contribute
+  nameWithType: CanaryDefenseFeature.Contribute
+- uid: MyAgents.Agents.CanaryDefenseOptions
+  name: CanaryDefenseOptions
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html
+  commentId: T:MyAgents.Agents.CanaryDefenseOptions
+  fullName: MyAgents.Agents.CanaryDefenseOptions
+  nameWithType: CanaryDefenseOptions
+- uid: MyAgents.Agents.CanaryDefenseOptions.AuditSink
+  name: AuditSink
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_AuditSink
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.AuditSink
+  fullName: MyAgents.Agents.CanaryDefenseOptions.AuditSink
+  nameWithType: CanaryDefenseOptions.AuditSink
+- uid: MyAgents.Agents.CanaryDefenseOptions.AuditSink*
+  name: AuditSink
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_AuditSink_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.AuditSink
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.AuditSink
+  nameWithType: CanaryDefenseOptions.AuditSink
+- uid: MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList
+  name: BeaconHostAllowList
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_BeaconHostAllowList
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList
+  fullName: MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList
+  nameWithType: CanaryDefenseOptions.BeaconHostAllowList
+- uid: MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList*
+  name: BeaconHostAllowList
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_BeaconHostAllowList_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.BeaconHostAllowList
+  nameWithType: CanaryDefenseOptions.BeaconHostAllowList
+- uid: MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError
+  name: FailOpenOnScannerError
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_FailOpenOnScannerError
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError
+  fullName: MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError
+  nameWithType: CanaryDefenseOptions.FailOpenOnScannerError
+- uid: MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError*
+  name: FailOpenOnScannerError
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_FailOpenOnScannerError_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.FailOpenOnScannerError
+  nameWithType: CanaryDefenseOptions.FailOpenOnScannerError
+- uid: MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes
+  name: MaxScanBytes
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_MaxScanBytes
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes
+  fullName: MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes
+  nameWithType: CanaryDefenseOptions.MaxScanBytes
+- uid: MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes*
+  name: MaxScanBytes
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_MaxScanBytes_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.MaxScanBytes
+  nameWithType: CanaryDefenseOptions.MaxScanBytes
+- uid: MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites
+  name: ScanMemoryWrites
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_ScanMemoryWrites
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites
+  fullName: MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites
+  nameWithType: CanaryDefenseOptions.ScanMemoryWrites
+- uid: MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites*
+  name: ScanMemoryWrites
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_ScanMemoryWrites_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.ScanMemoryWrites
+  nameWithType: CanaryDefenseOptions.ScanMemoryWrites
+- uid: MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments
+  name: ScanToolArguments
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_ScanToolArguments
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments
+  fullName: MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments
+  nameWithType: CanaryDefenseOptions.ScanToolArguments
+- uid: MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments*
+  name: ScanToolArguments
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_ScanToolArguments_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.ScanToolArguments
+  nameWithType: CanaryDefenseOptions.ScanToolArguments
+- uid: MyAgents.Agents.CanaryDefenseOptions.SecretPatterns
+  name: SecretPatterns
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_SecretPatterns
+  commentId: P:MyAgents.Agents.CanaryDefenseOptions.SecretPatterns
+  fullName: MyAgents.Agents.CanaryDefenseOptions.SecretPatterns
+  nameWithType: CanaryDefenseOptions.SecretPatterns
+- uid: MyAgents.Agents.CanaryDefenseOptions.SecretPatterns*
+  name: SecretPatterns
+  href: api/MyAgents.Agents.CanaryDefenseOptions.html#MyAgents_Agents_CanaryDefenseOptions_SecretPatterns_
+  commentId: Overload:MyAgents.Agents.CanaryDefenseOptions.SecretPatterns
+  isSpec: "True"
+  fullName: MyAgents.Agents.CanaryDefenseOptions.SecretPatterns
+  nameWithType: CanaryDefenseOptions.SecretPatterns
 - uid: MyAgents.Agents.CapabilityFeature
   name: CapabilityFeature
   href: api/MyAgents.Agents.CapabilityFeature.html
@@ -2213,6 +2430,44 @@ references:
   isSpec: "True"
   fullName: MyAgents.Agents.PromptRegistryFeature.Contribute
   nameWithType: PromptRegistryFeature.Contribute
+- uid: MyAgents.Agents.QuarantineSessionViolationHandler
+  name: QuarantineSessionViolationHandler
+  href: api/MyAgents.Agents.QuarantineSessionViolationHandler.html
+  commentId: T:MyAgents.Agents.QuarantineSessionViolationHandler
+  fullName: MyAgents.Agents.QuarantineSessionViolationHandler
+  nameWithType: QuarantineSessionViolationHandler
+- uid: MyAgents.Agents.QuarantineSessionViolationHandler.#ctor(MyAgents.Core.Security.ICanaryVault)
+  name: QuarantineSessionViolationHandler(ICanaryVault)
+  href: api/MyAgents.Agents.QuarantineSessionViolationHandler.html#MyAgents_Agents_QuarantineSessionViolationHandler__ctor_MyAgents_Core_Security_ICanaryVault_
+  commentId: M:MyAgents.Agents.QuarantineSessionViolationHandler.#ctor(MyAgents.Core.Security.ICanaryVault)
+  name.vb: New(ICanaryVault)
+  fullName: MyAgents.Agents.QuarantineSessionViolationHandler.QuarantineSessionViolationHandler(MyAgents.Core.Security.ICanaryVault)
+  fullName.vb: MyAgents.Agents.QuarantineSessionViolationHandler.New(MyAgents.Core.Security.ICanaryVault)
+  nameWithType: QuarantineSessionViolationHandler.QuarantineSessionViolationHandler(ICanaryVault)
+  nameWithType.vb: QuarantineSessionViolationHandler.New(ICanaryVault)
+- uid: MyAgents.Agents.QuarantineSessionViolationHandler.#ctor*
+  name: QuarantineSessionViolationHandler
+  href: api/MyAgents.Agents.QuarantineSessionViolationHandler.html#MyAgents_Agents_QuarantineSessionViolationHandler__ctor_
+  commentId: Overload:MyAgents.Agents.QuarantineSessionViolationHandler.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Agents.QuarantineSessionViolationHandler.QuarantineSessionViolationHandler
+  fullName.vb: MyAgents.Agents.QuarantineSessionViolationHandler.New
+  nameWithType: QuarantineSessionViolationHandler.QuarantineSessionViolationHandler
+  nameWithType.vb: QuarantineSessionViolationHandler.New
+- uid: MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  name: HandleAsync(CanaryViolationContext, CancellationToken)
+  href: api/MyAgents.Agents.QuarantineSessionViolationHandler.html#MyAgents_Agents_QuarantineSessionViolationHandler_HandleAsync_MyAgents_Core_Security_CanaryViolationContext_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  fullName: MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext, System.Threading.CancellationToken)
+  nameWithType: QuarantineSessionViolationHandler.HandleAsync(CanaryViolationContext, CancellationToken)
+- uid: MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync*
+  name: HandleAsync
+  href: api/MyAgents.Agents.QuarantineSessionViolationHandler.html#MyAgents_Agents_QuarantineSessionViolationHandler_HandleAsync_
+  commentId: Overload:MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync
+  isSpec: "True"
+  fullName: MyAgents.Agents.QuarantineSessionViolationHandler.HandleAsync
+  nameWithType: QuarantineSessionViolationHandler.HandleAsync
 - uid: MyAgents.Agents.RoutingException
   name: RoutingException
   href: api/MyAgents.Agents.RoutingException.html
@@ -4068,6 +4323,19 @@ references:
   fullName.vb: MyAgents.Core.AgentAssembly.RegisterSessionService(Of TService)(TService)
   nameWithType: AgentAssembly.RegisterSessionService<TService>(TService)
   nameWithType.vb: AgentAssembly.RegisterSessionService(Of TService)(TService)
+- uid: MyAgents.Core.AgentAssembly.SessionId
+  name: SessionId
+  href: api/MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_SessionId
+  commentId: P:MyAgents.Core.AgentAssembly.SessionId
+  fullName: MyAgents.Core.AgentAssembly.SessionId
+  nameWithType: AgentAssembly.SessionId
+- uid: MyAgents.Core.AgentAssembly.SessionId*
+  name: SessionId
+  href: api/MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_SessionId_
+  commentId: Overload:MyAgents.Core.AgentAssembly.SessionId
+  isSpec: "True"
+  fullName: MyAgents.Core.AgentAssembly.SessionId
+  nameWithType: AgentAssembly.SessionId
 - uid: MyAgents.Core.AgentAssembly.SessionServices
   name: SessionServices
   href: api/MyAgents.Core.AgentAssembly.html#MyAgents_Core_AgentAssembly_SessionServices
@@ -7870,6 +8138,12 @@ references:
   isSpec: "True"
   fullName: MyAgents.Core.IGuardrailPolicy.EvaluateAsync
   nameWithType: IGuardrailPolicy.EvaluateAsync
+- uid: MyAgents.Core.INonRetryableException
+  name: INonRetryableException
+  href: api/MyAgents.Core.INonRetryableException.html
+  commentId: T:MyAgents.Core.INonRetryableException
+  fullName: MyAgents.Core.INonRetryableException
+  nameWithType: INonRetryableException
 - uid: MyAgents.Core.IRunTraceCatalog
   name: IRunTraceCatalog
   href: api/MyAgents.Core.IRunTraceCatalog.html
@@ -10146,6 +10420,730 @@ references:
   isSpec: "True"
   fullName: MyAgents.Core.RunTraceRecord.WorkflowId
   nameWithType: RunTraceRecord.WorkflowId
+- uid: MyAgents.Core.Security
+  name: MyAgents.Core.Security
+  href: api/MyAgents.Core.Security.html
+  commentId: N:MyAgents.Core.Security
+  fullName: MyAgents.Core.Security
+  nameWithType: MyAgents.Core.Security
+- uid: MyAgents.Core.Security.CanaryDisposition
+  name: CanaryDisposition
+  href: api/MyAgents.Core.Security.CanaryDisposition.html
+  commentId: T:MyAgents.Core.Security.CanaryDisposition
+  fullName: MyAgents.Core.Security.CanaryDisposition
+  nameWithType: CanaryDisposition
+- uid: MyAgents.Core.Security.CanaryDisposition.Abort
+  name: Abort
+  href: api/MyAgents.Core.Security.CanaryDisposition.html#MyAgents_Core_Security_CanaryDisposition_Abort
+  commentId: F:MyAgents.Core.Security.CanaryDisposition.Abort
+  fullName: MyAgents.Core.Security.CanaryDisposition.Abort
+  nameWithType: CanaryDisposition.Abort
+- uid: MyAgents.Core.Security.CanaryDisposition.Allow
+  name: Allow
+  href: api/MyAgents.Core.Security.CanaryDisposition.html#MyAgents_Core_Security_CanaryDisposition_Allow
+  commentId: F:MyAgents.Core.Security.CanaryDisposition.Allow
+  fullName: MyAgents.Core.Security.CanaryDisposition.Allow
+  nameWithType: CanaryDisposition.Allow
+- uid: MyAgents.Core.Security.CanaryViolationContext
+  name: CanaryViolationContext
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html
+  commentId: T:MyAgents.Core.Security.CanaryViolationContext
+  fullName: MyAgents.Core.Security.CanaryViolationContext
+  nameWithType: CanaryViolationContext
+- uid: MyAgents.Core.Security.CanaryViolationContext.#ctor(MyAgents.Core.Security.EgressChannel,MyAgents.Core.Security.EgressScanResult,System.String)
+  name: CanaryViolationContext(EgressChannel, EgressScanResult, string)
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext__ctor_MyAgents_Core_Security_EgressChannel_MyAgents_Core_Security_EgressScanResult_System_String_
+  commentId: M:MyAgents.Core.Security.CanaryViolationContext.#ctor(MyAgents.Core.Security.EgressChannel,MyAgents.Core.Security.EgressScanResult,System.String)
+  name.vb: New(EgressChannel, EgressScanResult, String)
+  fullName: MyAgents.Core.Security.CanaryViolationContext.CanaryViolationContext(MyAgents.Core.Security.EgressChannel, MyAgents.Core.Security.EgressScanResult, string)
+  fullName.vb: MyAgents.Core.Security.CanaryViolationContext.New(MyAgents.Core.Security.EgressChannel, MyAgents.Core.Security.EgressScanResult, String)
+  nameWithType: CanaryViolationContext.CanaryViolationContext(EgressChannel, EgressScanResult, string)
+  nameWithType.vb: CanaryViolationContext.New(EgressChannel, EgressScanResult, String)
+- uid: MyAgents.Core.Security.CanaryViolationContext.#ctor*
+  name: CanaryViolationContext
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext__ctor_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationContext.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.CanaryViolationContext.CanaryViolationContext
+  fullName.vb: MyAgents.Core.Security.CanaryViolationContext.New
+  nameWithType: CanaryViolationContext.CanaryViolationContext
+  nameWithType.vb: CanaryViolationContext.New
+- uid: MyAgents.Core.Security.CanaryViolationContext.Channel
+  name: Channel
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_Channel
+  commentId: P:MyAgents.Core.Security.CanaryViolationContext.Channel
+  fullName: MyAgents.Core.Security.CanaryViolationContext.Channel
+  nameWithType: CanaryViolationContext.Channel
+- uid: MyAgents.Core.Security.CanaryViolationContext.Channel*
+  name: Channel
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_Channel_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationContext.Channel
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.CanaryViolationContext.Channel
+  nameWithType: CanaryViolationContext.Channel
+- uid: MyAgents.Core.Security.CanaryViolationContext.Result
+  name: Result
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_Result
+  commentId: P:MyAgents.Core.Security.CanaryViolationContext.Result
+  fullName: MyAgents.Core.Security.CanaryViolationContext.Result
+  nameWithType: CanaryViolationContext.Result
+- uid: MyAgents.Core.Security.CanaryViolationContext.Result*
+  name: Result
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_Result_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationContext.Result
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.CanaryViolationContext.Result
+  nameWithType: CanaryViolationContext.Result
+- uid: MyAgents.Core.Security.CanaryViolationContext.SessionId
+  name: SessionId
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_SessionId
+  commentId: P:MyAgents.Core.Security.CanaryViolationContext.SessionId
+  fullName: MyAgents.Core.Security.CanaryViolationContext.SessionId
+  nameWithType: CanaryViolationContext.SessionId
+- uid: MyAgents.Core.Security.CanaryViolationContext.SessionId*
+  name: SessionId
+  href: api/MyAgents.Core.Security.CanaryViolationContext.html#MyAgents_Core_Security_CanaryViolationContext_SessionId_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationContext.SessionId
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.CanaryViolationContext.SessionId
+  nameWithType: CanaryViolationContext.SessionId
+- uid: MyAgents.Core.Security.CanaryViolationException
+  name: CanaryViolationException
+  href: api/MyAgents.Core.Security.CanaryViolationException.html
+  commentId: T:MyAgents.Core.Security.CanaryViolationException
+  fullName: MyAgents.Core.Security.CanaryViolationException
+  nameWithType: CanaryViolationException
+- uid: MyAgents.Core.Security.CanaryViolationException.#ctor
+  name: CanaryViolationException()
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException__ctor
+  commentId: M:MyAgents.Core.Security.CanaryViolationException.#ctor
+  name.vb: New()
+  fullName: MyAgents.Core.Security.CanaryViolationException.CanaryViolationException()
+  fullName.vb: MyAgents.Core.Security.CanaryViolationException.New()
+  nameWithType: CanaryViolationException.CanaryViolationException()
+  nameWithType.vb: CanaryViolationException.New()
+- uid: MyAgents.Core.Security.CanaryViolationException.#ctor(System.String)
+  name: CanaryViolationException(string)
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException__ctor_System_String_
+  commentId: M:MyAgents.Core.Security.CanaryViolationException.#ctor(System.String)
+  name.vb: New(String)
+  fullName: MyAgents.Core.Security.CanaryViolationException.CanaryViolationException(string)
+  fullName.vb: MyAgents.Core.Security.CanaryViolationException.New(String)
+  nameWithType: CanaryViolationException.CanaryViolationException(string)
+  nameWithType.vb: CanaryViolationException.New(String)
+- uid: MyAgents.Core.Security.CanaryViolationException.#ctor(System.String,System.Exception)
+  name: CanaryViolationException(string, Exception)
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException__ctor_System_String_System_Exception_
+  commentId: M:MyAgents.Core.Security.CanaryViolationException.#ctor(System.String,System.Exception)
+  name.vb: New(String, Exception)
+  fullName: MyAgents.Core.Security.CanaryViolationException.CanaryViolationException(string, System.Exception)
+  fullName.vb: MyAgents.Core.Security.CanaryViolationException.New(String, System.Exception)
+  nameWithType: CanaryViolationException.CanaryViolationException(string, Exception)
+  nameWithType.vb: CanaryViolationException.New(String, Exception)
+- uid: MyAgents.Core.Security.CanaryViolationException.#ctor*
+  name: CanaryViolationException
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException__ctor_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationException.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.CanaryViolationException.CanaryViolationException
+  fullName.vb: MyAgents.Core.Security.CanaryViolationException.New
+  nameWithType: CanaryViolationException.CanaryViolationException
+  nameWithType.vb: CanaryViolationException.New
+- uid: MyAgents.Core.Security.CanaryViolationException.Reason
+  name: Reason
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException_Reason
+  commentId: P:MyAgents.Core.Security.CanaryViolationException.Reason
+  fullName: MyAgents.Core.Security.CanaryViolationException.Reason
+  nameWithType: CanaryViolationException.Reason
+- uid: MyAgents.Core.Security.CanaryViolationException.Reason*
+  name: Reason
+  href: api/MyAgents.Core.Security.CanaryViolationException.html#MyAgents_Core_Security_CanaryViolationException_Reason_
+  commentId: Overload:MyAgents.Core.Security.CanaryViolationException.Reason
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.CanaryViolationException.Reason
+  nameWithType: CanaryViolationException.Reason
+- uid: MyAgents.Core.Security.EgressAuditRecord
+  name: EgressAuditRecord
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html
+  commentId: T:MyAgents.Core.Security.EgressAuditRecord
+  fullName: MyAgents.Core.Security.EgressAuditRecord
+  nameWithType: EgressAuditRecord
+- uid: MyAgents.Core.Security.EgressAuditRecord.#ctor(System.String,System.String,MyAgents.Core.Security.EgressChannel,MyAgents.Core.Security.EgressSeverity,System.String,System.String,System.DateTimeOffset,System.String)
+  name: EgressAuditRecord(string, string, EgressChannel, EgressSeverity, string, string, DateTimeOffset, string?)
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord__ctor_System_String_System_String_MyAgents_Core_Security_EgressChannel_MyAgents_Core_Security_EgressSeverity_System_String_System_String_System_DateTimeOffset_System_String_
+  commentId: M:MyAgents.Core.Security.EgressAuditRecord.#ctor(System.String,System.String,MyAgents.Core.Security.EgressChannel,MyAgents.Core.Security.EgressSeverity,System.String,System.String,System.DateTimeOffset,System.String)
+  name.vb: New(String, String, EgressChannel, EgressSeverity, String, String, DateTimeOffset, String)
+  fullName: MyAgents.Core.Security.EgressAuditRecord.EgressAuditRecord(string, string, MyAgents.Core.Security.EgressChannel, MyAgents.Core.Security.EgressSeverity, string, string, System.DateTimeOffset, string?)
+  fullName.vb: MyAgents.Core.Security.EgressAuditRecord.New(String, String, MyAgents.Core.Security.EgressChannel, MyAgents.Core.Security.EgressSeverity, String, String, System.DateTimeOffset, String)
+  nameWithType: EgressAuditRecord.EgressAuditRecord(string, string, EgressChannel, EgressSeverity, string, string, DateTimeOffset, string?)
+  nameWithType.vb: EgressAuditRecord.New(String, String, EgressChannel, EgressSeverity, String, String, DateTimeOffset, String)
+- uid: MyAgents.Core.Security.EgressAuditRecord.#ctor*
+  name: EgressAuditRecord
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord__ctor_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.EgressAuditRecord.EgressAuditRecord
+  fullName.vb: MyAgents.Core.Security.EgressAuditRecord.New
+  nameWithType: EgressAuditRecord.EgressAuditRecord
+  nameWithType.vb: EgressAuditRecord.New
+- uid: MyAgents.Core.Security.EgressAuditRecord.AuditId
+  name: AuditId
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_AuditId
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.AuditId
+  fullName: MyAgents.Core.Security.EgressAuditRecord.AuditId
+  nameWithType: EgressAuditRecord.AuditId
+- uid: MyAgents.Core.Security.EgressAuditRecord.AuditId*
+  name: AuditId
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_AuditId_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.AuditId
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.AuditId
+  nameWithType: EgressAuditRecord.AuditId
+- uid: MyAgents.Core.Security.EgressAuditRecord.Channel
+  name: Channel
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Channel
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.Channel
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Channel
+  nameWithType: EgressAuditRecord.Channel
+- uid: MyAgents.Core.Security.EgressAuditRecord.Channel*
+  name: Channel
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Channel_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.Channel
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Channel
+  nameWithType: EgressAuditRecord.Channel
+- uid: MyAgents.Core.Security.EgressAuditRecord.DetectorName
+  name: DetectorName
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_DetectorName
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.DetectorName
+  fullName: MyAgents.Core.Security.EgressAuditRecord.DetectorName
+  nameWithType: EgressAuditRecord.DetectorName
+- uid: MyAgents.Core.Security.EgressAuditRecord.DetectorName*
+  name: DetectorName
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_DetectorName_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.DetectorName
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.DetectorName
+  nameWithType: EgressAuditRecord.DetectorName
+- uid: MyAgents.Core.Security.EgressAuditRecord.Reason
+  name: Reason
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Reason
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.Reason
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Reason
+  nameWithType: EgressAuditRecord.Reason
+- uid: MyAgents.Core.Security.EgressAuditRecord.Reason*
+  name: Reason
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Reason_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.Reason
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Reason
+  nameWithType: EgressAuditRecord.Reason
+- uid: MyAgents.Core.Security.EgressAuditRecord.SessionId
+  name: SessionId
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_SessionId
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.SessionId
+  fullName: MyAgents.Core.Security.EgressAuditRecord.SessionId
+  nameWithType: EgressAuditRecord.SessionId
+- uid: MyAgents.Core.Security.EgressAuditRecord.SessionId*
+  name: SessionId
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_SessionId_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.SessionId
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.SessionId
+  nameWithType: EgressAuditRecord.SessionId
+- uid: MyAgents.Core.Security.EgressAuditRecord.Severity
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Severity
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.Severity
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Severity
+  nameWithType: EgressAuditRecord.Severity
+- uid: MyAgents.Core.Security.EgressAuditRecord.Severity*
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Severity_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.Severity
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Severity
+  nameWithType: EgressAuditRecord.Severity
+- uid: MyAgents.Core.Security.EgressAuditRecord.Timestamp
+  name: Timestamp
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Timestamp
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.Timestamp
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Timestamp
+  nameWithType: EgressAuditRecord.Timestamp
+- uid: MyAgents.Core.Security.EgressAuditRecord.Timestamp*
+  name: Timestamp
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_Timestamp_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.Timestamp
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.Timestamp
+  nameWithType: EgressAuditRecord.Timestamp
+- uid: MyAgents.Core.Security.EgressAuditRecord.ToolName
+  name: ToolName
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_ToolName
+  commentId: P:MyAgents.Core.Security.EgressAuditRecord.ToolName
+  fullName: MyAgents.Core.Security.EgressAuditRecord.ToolName
+  nameWithType: EgressAuditRecord.ToolName
+- uid: MyAgents.Core.Security.EgressAuditRecord.ToolName*
+  name: ToolName
+  href: api/MyAgents.Core.Security.EgressAuditRecord.html#MyAgents_Core_Security_EgressAuditRecord_ToolName_
+  commentId: Overload:MyAgents.Core.Security.EgressAuditRecord.ToolName
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressAuditRecord.ToolName
+  nameWithType: EgressAuditRecord.ToolName
+- uid: MyAgents.Core.Security.EgressChannel
+  name: EgressChannel
+  href: api/MyAgents.Core.Security.EgressChannel.html
+  commentId: T:MyAgents.Core.Security.EgressChannel
+  fullName: MyAgents.Core.Security.EgressChannel
+  nameWithType: EgressChannel
+- uid: MyAgents.Core.Security.EgressChannel.MemoryWrite
+  name: MemoryWrite
+  href: api/MyAgents.Core.Security.EgressChannel.html#MyAgents_Core_Security_EgressChannel_MemoryWrite
+  commentId: F:MyAgents.Core.Security.EgressChannel.MemoryWrite
+  fullName: MyAgents.Core.Security.EgressChannel.MemoryWrite
+  nameWithType: EgressChannel.MemoryWrite
+- uid: MyAgents.Core.Security.EgressChannel.ToolArguments
+  name: ToolArguments
+  href: api/MyAgents.Core.Security.EgressChannel.html#MyAgents_Core_Security_EgressChannel_ToolArguments
+  commentId: F:MyAgents.Core.Security.EgressChannel.ToolArguments
+  fullName: MyAgents.Core.Security.EgressChannel.ToolArguments
+  nameWithType: EgressChannel.ToolArguments
+- uid: MyAgents.Core.Security.EgressChannel.TurnOutput
+  name: TurnOutput
+  href: api/MyAgents.Core.Security.EgressChannel.html#MyAgents_Core_Security_EgressChannel_TurnOutput
+  commentId: F:MyAgents.Core.Security.EgressChannel.TurnOutput
+  fullName: MyAgents.Core.Security.EgressChannel.TurnOutput
+  nameWithType: EgressChannel.TurnOutput
+- uid: MyAgents.Core.Security.EgressFinding
+  name: EgressFinding
+  href: api/MyAgents.Core.Security.EgressFinding.html
+  commentId: T:MyAgents.Core.Security.EgressFinding
+  fullName: MyAgents.Core.Security.EgressFinding
+  nameWithType: EgressFinding
+- uid: MyAgents.Core.Security.EgressFinding.#ctor(System.String,MyAgents.Core.Security.EgressSeverity,System.String)
+  name: EgressFinding(string, EgressSeverity, string)
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding__ctor_System_String_MyAgents_Core_Security_EgressSeverity_System_String_
+  commentId: M:MyAgents.Core.Security.EgressFinding.#ctor(System.String,MyAgents.Core.Security.EgressSeverity,System.String)
+  name.vb: New(String, EgressSeverity, String)
+  fullName: MyAgents.Core.Security.EgressFinding.EgressFinding(string, MyAgents.Core.Security.EgressSeverity, string)
+  fullName.vb: MyAgents.Core.Security.EgressFinding.New(String, MyAgents.Core.Security.EgressSeverity, String)
+  nameWithType: EgressFinding.EgressFinding(string, EgressSeverity, string)
+  nameWithType.vb: EgressFinding.New(String, EgressSeverity, String)
+- uid: MyAgents.Core.Security.EgressFinding.#ctor*
+  name: EgressFinding
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding__ctor_
+  commentId: Overload:MyAgents.Core.Security.EgressFinding.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.EgressFinding.EgressFinding
+  fullName.vb: MyAgents.Core.Security.EgressFinding.New
+  nameWithType: EgressFinding.EgressFinding
+  nameWithType.vb: EgressFinding.New
+- uid: MyAgents.Core.Security.EgressFinding.DetectorName
+  name: DetectorName
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_DetectorName
+  commentId: P:MyAgents.Core.Security.EgressFinding.DetectorName
+  fullName: MyAgents.Core.Security.EgressFinding.DetectorName
+  nameWithType: EgressFinding.DetectorName
+- uid: MyAgents.Core.Security.EgressFinding.DetectorName*
+  name: DetectorName
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_DetectorName_
+  commentId: Overload:MyAgents.Core.Security.EgressFinding.DetectorName
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressFinding.DetectorName
+  nameWithType: EgressFinding.DetectorName
+- uid: MyAgents.Core.Security.EgressFinding.Reason
+  name: Reason
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_Reason
+  commentId: P:MyAgents.Core.Security.EgressFinding.Reason
+  fullName: MyAgents.Core.Security.EgressFinding.Reason
+  nameWithType: EgressFinding.Reason
+- uid: MyAgents.Core.Security.EgressFinding.Reason*
+  name: Reason
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_Reason_
+  commentId: Overload:MyAgents.Core.Security.EgressFinding.Reason
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressFinding.Reason
+  nameWithType: EgressFinding.Reason
+- uid: MyAgents.Core.Security.EgressFinding.Severity
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_Severity
+  commentId: P:MyAgents.Core.Security.EgressFinding.Severity
+  fullName: MyAgents.Core.Security.EgressFinding.Severity
+  nameWithType: EgressFinding.Severity
+- uid: MyAgents.Core.Security.EgressFinding.Severity*
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressFinding.html#MyAgents_Core_Security_EgressFinding_Severity_
+  commentId: Overload:MyAgents.Core.Security.EgressFinding.Severity
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressFinding.Severity
+  nameWithType: EgressFinding.Severity
+- uid: MyAgents.Core.Security.EgressScanResult
+  name: EgressScanResult
+  href: api/MyAgents.Core.Security.EgressScanResult.html
+  commentId: T:MyAgents.Core.Security.EgressScanResult
+  fullName: MyAgents.Core.Security.EgressScanResult
+  nameWithType: EgressScanResult
+- uid: MyAgents.Core.Security.EgressScanResult.#ctor(System.Collections.Generic.IReadOnlyList{MyAgents.Core.Security.EgressFinding})
+  name: EgressScanResult(IReadOnlyList<EgressFinding>)
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult__ctor_System_Collections_Generic_IReadOnlyList_MyAgents_Core_Security_EgressFinding__
+  commentId: M:MyAgents.Core.Security.EgressScanResult.#ctor(System.Collections.Generic.IReadOnlyList{MyAgents.Core.Security.EgressFinding})
+  name.vb: New(IReadOnlyList(Of EgressFinding))
+  fullName: MyAgents.Core.Security.EgressScanResult.EgressScanResult(System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressFinding>)
+  fullName.vb: MyAgents.Core.Security.EgressScanResult.New(System.Collections.Generic.IReadOnlyList(Of MyAgents.Core.Security.EgressFinding))
+  nameWithType: EgressScanResult.EgressScanResult(IReadOnlyList<EgressFinding>)
+  nameWithType.vb: EgressScanResult.New(IReadOnlyList(Of EgressFinding))
+- uid: MyAgents.Core.Security.EgressScanResult.#ctor*
+  name: EgressScanResult
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult__ctor_
+  commentId: Overload:MyAgents.Core.Security.EgressScanResult.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.EgressScanResult.EgressScanResult
+  fullName.vb: MyAgents.Core.Security.EgressScanResult.New
+  nameWithType: EgressScanResult.EgressScanResult
+  nameWithType.vb: EgressScanResult.New
+- uid: MyAgents.Core.Security.EgressScanResult.Clean
+  name: Clean
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Clean
+  commentId: P:MyAgents.Core.Security.EgressScanResult.Clean
+  fullName: MyAgents.Core.Security.EgressScanResult.Clean
+  nameWithType: EgressScanResult.Clean
+- uid: MyAgents.Core.Security.EgressScanResult.Clean*
+  name: Clean
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Clean_
+  commentId: Overload:MyAgents.Core.Security.EgressScanResult.Clean
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressScanResult.Clean
+  nameWithType: EgressScanResult.Clean
+- uid: MyAgents.Core.Security.EgressScanResult.Findings
+  name: Findings
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Findings
+  commentId: P:MyAgents.Core.Security.EgressScanResult.Findings
+  fullName: MyAgents.Core.Security.EgressScanResult.Findings
+  nameWithType: EgressScanResult.Findings
+- uid: MyAgents.Core.Security.EgressScanResult.Findings*
+  name: Findings
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Findings_
+  commentId: Overload:MyAgents.Core.Security.EgressScanResult.Findings
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressScanResult.Findings
+  nameWithType: EgressScanResult.Findings
+- uid: MyAgents.Core.Security.EgressScanResult.IsFlagged
+  name: IsFlagged
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_IsFlagged
+  commentId: P:MyAgents.Core.Security.EgressScanResult.IsFlagged
+  fullName: MyAgents.Core.Security.EgressScanResult.IsFlagged
+  nameWithType: EgressScanResult.IsFlagged
+- uid: MyAgents.Core.Security.EgressScanResult.IsFlagged*
+  name: IsFlagged
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_IsFlagged_
+  commentId: Overload:MyAgents.Core.Security.EgressScanResult.IsFlagged
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressScanResult.IsFlagged
+  nameWithType: EgressScanResult.IsFlagged
+- uid: MyAgents.Core.Security.EgressScanResult.Severity
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Severity
+  commentId: P:MyAgents.Core.Security.EgressScanResult.Severity
+  fullName: MyAgents.Core.Security.EgressScanResult.Severity
+  nameWithType: EgressScanResult.Severity
+- uid: MyAgents.Core.Security.EgressScanResult.Severity*
+  name: Severity
+  href: api/MyAgents.Core.Security.EgressScanResult.html#MyAgents_Core_Security_EgressScanResult_Severity_
+  commentId: Overload:MyAgents.Core.Security.EgressScanResult.Severity
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.EgressScanResult.Severity
+  nameWithType: EgressScanResult.Severity
+- uid: MyAgents.Core.Security.EgressSeverity
+  name: EgressSeverity
+  href: api/MyAgents.Core.Security.EgressSeverity.html
+  commentId: T:MyAgents.Core.Security.EgressSeverity
+  fullName: MyAgents.Core.Security.EgressSeverity
+  nameWithType: EgressSeverity
+- uid: MyAgents.Core.Security.EgressSeverity.Confirmed
+  name: Confirmed
+  href: api/MyAgents.Core.Security.EgressSeverity.html#MyAgents_Core_Security_EgressSeverity_Confirmed
+  commentId: F:MyAgents.Core.Security.EgressSeverity.Confirmed
+  fullName: MyAgents.Core.Security.EgressSeverity.Confirmed
+  nameWithType: EgressSeverity.Confirmed
+- uid: MyAgents.Core.Security.EgressSeverity.Informational
+  name: Informational
+  href: api/MyAgents.Core.Security.EgressSeverity.html#MyAgents_Core_Security_EgressSeverity_Informational
+  commentId: F:MyAgents.Core.Security.EgressSeverity.Informational
+  fullName: MyAgents.Core.Security.EgressSeverity.Informational
+  nameWithType: EgressSeverity.Informational
+- uid: MyAgents.Core.Security.EgressSeverity.Suspicious
+  name: Suspicious
+  href: api/MyAgents.Core.Security.EgressSeverity.html#MyAgents_Core_Security_EgressSeverity_Suspicious
+  commentId: F:MyAgents.Core.Security.EgressSeverity.Suspicious
+  fullName: MyAgents.Core.Security.EgressSeverity.Suspicious
+  nameWithType: EgressSeverity.Suspicious
+- uid: MyAgents.Core.Security.ICanaryVault
+  name: ICanaryVault
+  href: api/MyAgents.Core.Security.ICanaryVault.html
+  commentId: T:MyAgents.Core.Security.ICanaryVault
+  fullName: MyAgents.Core.Security.ICanaryVault
+  nameWithType: ICanaryVault
+- uid: MyAgents.Core.Security.ICanaryVault.Canaries
+  name: Canaries
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_Canaries
+  commentId: P:MyAgents.Core.Security.ICanaryVault.Canaries
+  fullName: MyAgents.Core.Security.ICanaryVault.Canaries
+  nameWithType: ICanaryVault.Canaries
+- uid: MyAgents.Core.Security.ICanaryVault.Canaries*
+  name: Canaries
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_Canaries_
+  commentId: Overload:MyAgents.Core.Security.ICanaryVault.Canaries
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryVault.Canaries
+  nameWithType: ICanaryVault.Canaries
+- uid: MyAgents.Core.Security.ICanaryVault.IsQuarantined
+  name: IsQuarantined
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_IsQuarantined
+  commentId: P:MyAgents.Core.Security.ICanaryVault.IsQuarantined
+  fullName: MyAgents.Core.Security.ICanaryVault.IsQuarantined
+  nameWithType: ICanaryVault.IsQuarantined
+- uid: MyAgents.Core.Security.ICanaryVault.IsQuarantined*
+  name: IsQuarantined
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_IsQuarantined_
+  commentId: Overload:MyAgents.Core.Security.ICanaryVault.IsQuarantined
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryVault.IsQuarantined
+  nameWithType: ICanaryVault.IsQuarantined
+- uid: MyAgents.Core.Security.ICanaryVault.Quarantine(System.String)
+  name: Quarantine(string)
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_Quarantine_System_String_
+  commentId: M:MyAgents.Core.Security.ICanaryVault.Quarantine(System.String)
+  name.vb: Quarantine(String)
+  fullName: MyAgents.Core.Security.ICanaryVault.Quarantine(string)
+  fullName.vb: MyAgents.Core.Security.ICanaryVault.Quarantine(String)
+  nameWithType: ICanaryVault.Quarantine(string)
+  nameWithType.vb: ICanaryVault.Quarantine(String)
+- uid: MyAgents.Core.Security.ICanaryVault.Quarantine*
+  name: Quarantine
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_Quarantine_
+  commentId: Overload:MyAgents.Core.Security.ICanaryVault.Quarantine
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryVault.Quarantine
+  nameWithType: ICanaryVault.Quarantine
+- uid: MyAgents.Core.Security.ICanaryVault.QuarantineReason
+  name: QuarantineReason
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_QuarantineReason
+  commentId: P:MyAgents.Core.Security.ICanaryVault.QuarantineReason
+  fullName: MyAgents.Core.Security.ICanaryVault.QuarantineReason
+  nameWithType: ICanaryVault.QuarantineReason
+- uid: MyAgents.Core.Security.ICanaryVault.QuarantineReason*
+  name: QuarantineReason
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_QuarantineReason_
+  commentId: Overload:MyAgents.Core.Security.ICanaryVault.QuarantineReason
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryVault.QuarantineReason
+  nameWithType: ICanaryVault.QuarantineReason
+- uid: MyAgents.Core.Security.ICanaryVault.SessionId
+  name: SessionId
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_SessionId
+  commentId: P:MyAgents.Core.Security.ICanaryVault.SessionId
+  fullName: MyAgents.Core.Security.ICanaryVault.SessionId
+  nameWithType: ICanaryVault.SessionId
+- uid: MyAgents.Core.Security.ICanaryVault.SessionId*
+  name: SessionId
+  href: api/MyAgents.Core.Security.ICanaryVault.html#MyAgents_Core_Security_ICanaryVault_SessionId_
+  commentId: Overload:MyAgents.Core.Security.ICanaryVault.SessionId
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryVault.SessionId
+  nameWithType: ICanaryVault.SessionId
+- uid: MyAgents.Core.Security.ICanaryViolationHandler
+  name: ICanaryViolationHandler
+  href: api/MyAgents.Core.Security.ICanaryViolationHandler.html
+  commentId: T:MyAgents.Core.Security.ICanaryViolationHandler
+  fullName: MyAgents.Core.Security.ICanaryViolationHandler
+  nameWithType: ICanaryViolationHandler
+- uid: MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  name: HandleAsync(CanaryViolationContext, CancellationToken)
+  href: api/MyAgents.Core.Security.ICanaryViolationHandler.html#MyAgents_Core_Security_ICanaryViolationHandler_HandleAsync_MyAgents_Core_Security_CanaryViolationContext_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext,System.Threading.CancellationToken)
+  fullName: MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync(MyAgents.Core.Security.CanaryViolationContext, System.Threading.CancellationToken)
+  nameWithType: ICanaryViolationHandler.HandleAsync(CanaryViolationContext, CancellationToken)
+- uid: MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync*
+  name: HandleAsync
+  href: api/MyAgents.Core.Security.ICanaryViolationHandler.html#MyAgents_Core_Security_ICanaryViolationHandler_HandleAsync_
+  commentId: Overload:MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.ICanaryViolationHandler.HandleAsync
+  nameWithType: ICanaryViolationHandler.HandleAsync
+- uid: MyAgents.Core.Security.IEgressAuditSink
+  name: IEgressAuditSink
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html
+  commentId: T:MyAgents.Core.Security.IEgressAuditSink
+  fullName: MyAgents.Core.Security.IEgressAuditSink
+  nameWithType: IEgressAuditSink
+- uid: MyAgents.Core.Security.IEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  name: ListAllAsync(CancellationToken)
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_ListAllAsync_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.IEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  fullName: MyAgents.Core.Security.IEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  nameWithType: IEgressAuditSink.ListAllAsync(CancellationToken)
+- uid: MyAgents.Core.Security.IEgressAuditSink.ListAllAsync*
+  name: ListAllAsync
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_ListAllAsync_
+  commentId: Overload:MyAgents.Core.Security.IEgressAuditSink.ListAllAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.IEgressAuditSink.ListAllAsync
+  nameWithType: IEgressAuditSink.ListAllAsync
+- uid: MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync(System.String,System.Threading.CancellationToken)
+  name: ListBySessionAsync(string, CancellationToken)
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_ListBySessionAsync_System_String_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync(System.String,System.Threading.CancellationToken)
+  name.vb: ListBySessionAsync(String, CancellationToken)
+  fullName: MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync(string, System.Threading.CancellationToken)
+  fullName.vb: MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync(String, System.Threading.CancellationToken)
+  nameWithType: IEgressAuditSink.ListBySessionAsync(string, CancellationToken)
+  nameWithType.vb: IEgressAuditSink.ListBySessionAsync(String, CancellationToken)
+- uid: MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync*
+  name: ListBySessionAsync
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_ListBySessionAsync_
+  commentId: Overload:MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.IEgressAuditSink.ListBySessionAsync
+  nameWithType: IEgressAuditSink.ListBySessionAsync
+- uid: MyAgents.Core.Security.IEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord,System.Threading.CancellationToken)
+  name: RecordAsync(EgressAuditRecord, CancellationToken)
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_RecordAsync_MyAgents_Core_Security_EgressAuditRecord_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.IEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord,System.Threading.CancellationToken)
+  fullName: MyAgents.Core.Security.IEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord, System.Threading.CancellationToken)
+  nameWithType: IEgressAuditSink.RecordAsync(EgressAuditRecord, CancellationToken)
+- uid: MyAgents.Core.Security.IEgressAuditSink.RecordAsync*
+  name: RecordAsync
+  href: api/MyAgents.Core.Security.IEgressAuditSink.html#MyAgents_Core_Security_IEgressAuditSink_RecordAsync_
+  commentId: Overload:MyAgents.Core.Security.IEgressAuditSink.RecordAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.IEgressAuditSink.RecordAsync
+  nameWithType: IEgressAuditSink.RecordAsync
+- uid: MyAgents.Core.Security.IEgressScanner
+  name: IEgressScanner
+  href: api/MyAgents.Core.Security.IEgressScanner.html
+  commentId: T:MyAgents.Core.Security.IEgressScanner
+  fullName: MyAgents.Core.Security.IEgressScanner
+  nameWithType: IEgressScanner
+- uid: MyAgents.Core.Security.IEgressScanner.ScanAsync(MyAgents.Core.Security.EgressChannel,System.String,System.Threading.CancellationToken)
+  name: ScanAsync(EgressChannel, string, CancellationToken)
+  href: api/MyAgents.Core.Security.IEgressScanner.html#MyAgents_Core_Security_IEgressScanner_ScanAsync_MyAgents_Core_Security_EgressChannel_System_String_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.IEgressScanner.ScanAsync(MyAgents.Core.Security.EgressChannel,System.String,System.Threading.CancellationToken)
+  name.vb: ScanAsync(EgressChannel, String, CancellationToken)
+  fullName: MyAgents.Core.Security.IEgressScanner.ScanAsync(MyAgents.Core.Security.EgressChannel, string, System.Threading.CancellationToken)
+  fullName.vb: MyAgents.Core.Security.IEgressScanner.ScanAsync(MyAgents.Core.Security.EgressChannel, String, System.Threading.CancellationToken)
+  nameWithType: IEgressScanner.ScanAsync(EgressChannel, string, CancellationToken)
+  nameWithType.vb: IEgressScanner.ScanAsync(EgressChannel, String, CancellationToken)
+- uid: MyAgents.Core.Security.IEgressScanner.ScanAsync*
+  name: ScanAsync
+  href: api/MyAgents.Core.Security.IEgressScanner.html#MyAgents_Core_Security_IEgressScanner_ScanAsync_
+  commentId: Overload:MyAgents.Core.Security.IEgressScanner.ScanAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.IEgressScanner.ScanAsync
+  nameWithType: IEgressScanner.ScanAsync
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink
+  name: InMemoryEgressAuditSink
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html
+  commentId: T:MyAgents.Core.Security.InMemoryEgressAuditSink
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink
+  nameWithType: InMemoryEgressAuditSink
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  name: ListAllAsync(CancellationToken)
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_ListAllAsync_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync(System.Threading.CancellationToken)
+  nameWithType: InMemoryEgressAuditSink.ListAllAsync(CancellationToken)
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync*
+  name: ListAllAsync
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_ListAllAsync_
+  commentId: Overload:MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.ListAllAsync
+  nameWithType: InMemoryEgressAuditSink.ListAllAsync
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync(System.String,System.Threading.CancellationToken)
+  name: ListBySessionAsync(string, CancellationToken)
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_ListBySessionAsync_System_String_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync(System.String,System.Threading.CancellationToken)
+  name.vb: ListBySessionAsync(String, CancellationToken)
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync(string, System.Threading.CancellationToken)
+  fullName.vb: MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync(String, System.Threading.CancellationToken)
+  nameWithType: InMemoryEgressAuditSink.ListBySessionAsync(string, CancellationToken)
+  nameWithType.vb: InMemoryEgressAuditSink.ListBySessionAsync(String, CancellationToken)
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync*
+  name: ListBySessionAsync
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_ListBySessionAsync_
+  commentId: Overload:MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.ListBySessionAsync
+  nameWithType: InMemoryEgressAuditSink.ListBySessionAsync
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord,System.Threading.CancellationToken)
+  name: RecordAsync(EgressAuditRecord, CancellationToken)
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_RecordAsync_MyAgents_Core_Security_EgressAuditRecord_System_Threading_CancellationToken_
+  commentId: M:MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord,System.Threading.CancellationToken)
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync(MyAgents.Core.Security.EgressAuditRecord, System.Threading.CancellationToken)
+  nameWithType: InMemoryEgressAuditSink.RecordAsync(EgressAuditRecord, CancellationToken)
+- uid: MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync*
+  name: RecordAsync
+  href: api/MyAgents.Core.Security.InMemoryEgressAuditSink.html#MyAgents_Core_Security_InMemoryEgressAuditSink_RecordAsync_
+  commentId: Overload:MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.InMemoryEgressAuditSink.RecordAsync
+  nameWithType: InMemoryEgressAuditSink.RecordAsync
+- uid: MyAgents.Core.Security.SecretPattern
+  name: SecretPattern
+  href: api/MyAgents.Core.Security.SecretPattern.html
+  commentId: T:MyAgents.Core.Security.SecretPattern
+  fullName: MyAgents.Core.Security.SecretPattern
+  nameWithType: SecretPattern
+- uid: MyAgents.Core.Security.SecretPattern.#ctor(System.String,System.Text.RegularExpressions.Regex)
+  name: SecretPattern(string, Regex)
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern__ctor_System_String_System_Text_RegularExpressions_Regex_
+  commentId: M:MyAgents.Core.Security.SecretPattern.#ctor(System.String,System.Text.RegularExpressions.Regex)
+  name.vb: New(String, Regex)
+  fullName: MyAgents.Core.Security.SecretPattern.SecretPattern(string, System.Text.RegularExpressions.Regex)
+  fullName.vb: MyAgents.Core.Security.SecretPattern.New(String, System.Text.RegularExpressions.Regex)
+  nameWithType: SecretPattern.SecretPattern(string, Regex)
+  nameWithType.vb: SecretPattern.New(String, Regex)
+- uid: MyAgents.Core.Security.SecretPattern.#ctor*
+  name: SecretPattern
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern__ctor_
+  commentId: Overload:MyAgents.Core.Security.SecretPattern.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: MyAgents.Core.Security.SecretPattern.SecretPattern
+  fullName.vb: MyAgents.Core.Security.SecretPattern.New
+  nameWithType: SecretPattern.SecretPattern
+  nameWithType.vb: SecretPattern.New
+- uid: MyAgents.Core.Security.SecretPattern.Name
+  name: Name
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern_Name
+  commentId: P:MyAgents.Core.Security.SecretPattern.Name
+  fullName: MyAgents.Core.Security.SecretPattern.Name
+  nameWithType: SecretPattern.Name
+- uid: MyAgents.Core.Security.SecretPattern.Name*
+  name: Name
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern_Name_
+  commentId: Overload:MyAgents.Core.Security.SecretPattern.Name
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.SecretPattern.Name
+  nameWithType: SecretPattern.Name
+- uid: MyAgents.Core.Security.SecretPattern.Pattern
+  name: Pattern
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern_Pattern
+  commentId: P:MyAgents.Core.Security.SecretPattern.Pattern
+  fullName: MyAgents.Core.Security.SecretPattern.Pattern
+  nameWithType: SecretPattern.Pattern
+- uid: MyAgents.Core.Security.SecretPattern.Pattern*
+  name: Pattern
+  href: api/MyAgents.Core.Security.SecretPattern.html#MyAgents_Core_Security_SecretPattern_Pattern_
+  commentId: Overload:MyAgents.Core.Security.SecretPattern.Pattern
+  isSpec: "True"
+  fullName: MyAgents.Core.Security.SecretPattern.Pattern
+  nameWithType: SecretPattern.Pattern
 - uid: MyAgents.Core.SlidingWindowTrimmer
   name: SlidingWindowTrimmer
   href: api/MyAgents.Core.SlidingWindowTrimmer.html

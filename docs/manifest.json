@@ -27,6 +27,20 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Agents.AuditOnlyViolationHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Agents.AuditOnlyViolationHandler.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Agents.AuditOnlyViolationHandler",
+      "Summary": "<p sourcefile=\"api/MyAgents.Agents.AuditOnlyViolationHandler.yml\" sourcestartlinenumber=\"1\">Never blocks: records every finding to telemetry and lets the turn proceed. Intended for a\nshadow-mode rollout, so trigger rates can be measured on real traffic before enforcement.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "api/MyAgents.Agents.BlocklistGuardrailPolicy.yml",
       "output": {
         ".html": {
@@ -38,6 +52,34 @@
       "IsMRef": true,
       "Title": "MyAgents.Agents.BlocklistGuardrailPolicy",
       "Summary": "<p sourcefile=\"api/MyAgents.Agents.BlocklistGuardrailPolicy.yml\" sourcestartlinenumber=\"1\">Flags turns whose output contains any of the configured blocked phrases\n(case-insensitive).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Agents.CanaryDefenseFeature.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Agents.CanaryDefenseFeature.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Agents.CanaryDefenseFeature",
+      "Summary": "<p sourcefile=\"api/MyAgents.Agents.CanaryDefenseFeature.yml\" sourcestartlinenumber=\"1\">Opt-in egress defense: issues a per-session canary, instructs the model to treat it as a secret,\nand refuses any turn or tool call that would carry it (or a configured heuristic signal) out of\nthe process.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Agents.CanaryDefenseOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Agents.CanaryDefenseOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Agents.CanaryDefenseOptions",
+      "Summary": "<p sourcefile=\"api/MyAgents.Agents.CanaryDefenseOptions.yml\" sourcestartlinenumber=\"1\">Tuning for <xref href=\"MyAgents.Agents.CanaryDefenseFeature\" data-throw-if-not-resolved=\"false\"></xref>. Detection and observability — how a violation is reacted to is\ndecided by <xref href=\"MyAgents.Core.Security.ICanaryViolationHandler\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
     },
     {
       "type": "ManagedReference",
@@ -542,6 +584,20 @@
       "IsMRef": true,
       "Title": "MyAgents.Agents.PromptRegistryFeature",
       "Summary": "<p sourcefile=\"api/MyAgents.Agents.PromptRegistryFeature.yml\" sourcestartlinenumber=\"1\">Feature that wires a <xref href=\"MyAgents.Core.Prompts.PromptRegistry\" data-throw-if-not-resolved=\"false\"></xref> into the agent session and\noptionally renders selected templates into the agent's system prompt at assembly time.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Agents.QuarantineSessionViolationHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Agents.QuarantineSessionViolationHandler.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Agents.QuarantineSessionViolationHandler",
+      "Summary": "<p sourcefile=\"api/MyAgents.Agents.QuarantineSessionViolationHandler.yml\" sourcestartlinenumber=\"1\">Quarantines the session and aborts when a canary is confirmed; leaves\n<xref href=\"MyAgents.Core.Security.EgressSeverity.Suspicious\" data-throw-if-not-resolved=\"false\"></xref> findings non-blocking so heuristics can be measured on\nreal traffic before they are trusted. This is the default handler.</p>\n"
     },
     {
       "type": "ManagedReference",
@@ -1931,6 +1987,20 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.INonRetryableException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.INonRetryableException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.INonRetryableException",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.INonRetryableException.yml\" sourcestartlinenumber=\"1\">Marks an exception as terminal: <xref href=\"MyAgents.Core.ResilienceMiddleware\" data-throw-if-not-resolved=\"false\"></xref> never retries it,\nregardless of what the configured <xref href=\"MyAgents.Core.ITransientErrorClassifier\" data-throw-if-not-resolved=\"false\"></xref> reports.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "api/MyAgents.Core.IRunTraceCatalog.yml",
       "output": {
         ".html": {
@@ -2558,6 +2628,216 @@
       "IsMRef": true,
       "Title": "MyAgents.Core.RunTraceRecord",
       "Summary": "<p sourcefile=\"api/MyAgents.Core.RunTraceRecord.yml\" sourcestartlinenumber=\"1\">A normalized run-trace event that can be stored locally, exported to CI artifacts,\nor projected into a local studio view.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.CanaryDisposition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.CanaryDisposition.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.CanaryDisposition",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.CanaryDisposition.yml\" sourcestartlinenumber=\"1\">What a <xref href=\"MyAgents.Core.Security.ICanaryViolationHandler\" data-throw-if-not-resolved=\"false\"></xref> decides to do about a violation it was given.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.CanaryViolationContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.CanaryViolationContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.CanaryViolationContext",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.CanaryViolationContext.yml\" sourcestartlinenumber=\"1\">Describes a violation handed to an <xref href=\"MyAgents.Core.Security.ICanaryViolationHandler\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.CanaryViolationException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.CanaryViolationException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.CanaryViolationException",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.CanaryViolationException.yml\" sourcestartlinenumber=\"1\">Raised when egress defense aborts a turn or a tool call.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.EgressAuditRecord.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.EgressAuditRecord.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.EgressAuditRecord",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.EgressAuditRecord.yml\" sourcestartlinenumber=\"1\">Structured audit record capturing an egress defense finding.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.EgressChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.EgressChannel.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.EgressChannel",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.EgressChannel.yml\" sourcestartlinenumber=\"1\">Identifies the outbound payload an egress scan examined.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.EgressFinding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.EgressFinding.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.EgressFinding",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.EgressFinding.yml\" sourcestartlinenumber=\"1\">A single detector's contribution to an <xref href=\"MyAgents.Core.Security.EgressScanResult\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.EgressScanResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.EgressScanResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.EgressScanResult",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.EgressScanResult.yml\" sourcestartlinenumber=\"1\">The outcome of scanning one outbound payload.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.EgressSeverity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.EgressSeverity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.EgressSeverity",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.EgressSeverity.yml\" sourcestartlinenumber=\"1\">Confidence of an <xref href=\"MyAgents.Core.Security.EgressFinding\" data-throw-if-not-resolved=\"false\"></xref>. Ordered, so a scan result's overall severity is\nthe maximum over its findings.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.ICanaryVault.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.ICanaryVault.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.ICanaryVault",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.ICanaryVault.yml\" sourcestartlinenumber=\"1\">Holds the canary tokens issued for one session and whether that session has been quarantined.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.ICanaryViolationHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.ICanaryViolationHandler.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.ICanaryViolationHandler",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.ICanaryViolationHandler.yml\" sourcestartlinenumber=\"1\">Decides the reaction to an egress violation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.IEgressAuditSink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.IEgressAuditSink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.IEgressAuditSink",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.IEgressAuditSink.yml\" sourcestartlinenumber=\"1\">Sink for recording and auditing egress defense findings across the platform.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.IEgressScanner.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.IEgressScanner.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.IEgressScanner",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.IEgressScanner.yml\" sourcestartlinenumber=\"1\">Pluggable heuristics applied to an outbound payload. Canary matching is <b>not</b> part of this\ncontract — canaries are session-scoped and are matched by the framework itself, so a scanner\nnever needs to see them.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.InMemoryEgressAuditSink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.InMemoryEgressAuditSink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.InMemoryEgressAuditSink",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.InMemoryEgressAuditSink.yml\" sourcestartlinenumber=\"1\">Thread-safe in-memory sink for egress audit logging.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.SecretPattern.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.SecretPattern.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security.SecretPattern",
+      "Summary": "<p sourcefile=\"api/MyAgents.Core.Security.SecretPattern.yml\" sourcestartlinenumber=\"1\">A named regular expression for opt-in secret detection in egress scanning.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MyAgents.Core.Security.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MyAgents.Core.Security.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "MyAgents.Core.Security",
+      "Summary": null
     },
     {
       "type": "ManagedReference",
@@ -5640,6 +5920,16 @@
       "output": {
         ".html": {
           "relative_path": "docs/getting-started/quickstart.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "docs/governance/canary-egress-defense.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/governance/canary-egress-defense.html"
         }
       },
       "version": ""

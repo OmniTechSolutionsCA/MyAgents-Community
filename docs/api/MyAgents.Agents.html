@@ -102,9 +102,28 @@ making it available to tools and middleware via
 </dd>
     </dl>
     <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.AuditOnlyViolationHandler.html">AuditOnlyViolationHandler</a></dt>
+      <dd><p>Never blocks: records every finding to telemetry and lets the turn proceed. Intended for a
+shadow-mode rollout, so trigger rates can be measured on real traffic before enforcement.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
       <dt><a class="xref" href="MyAgents.Agents.BlocklistGuardrailPolicy.html">BlocklistGuardrailPolicy</a></dt>
       <dd><p>Flags turns whose output contains any of the configured blocked phrases
 (case-insensitive).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.CanaryDefenseFeature.html">CanaryDefenseFeature</a></dt>
+      <dd><p>Opt-in egress defense: issues a per-session canary, instructs the model to treat it as a secret,
+and refuses any turn or tool call that would carry it (or a configured heuristic signal) out of
+the process.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.CanaryDefenseOptions.html">CanaryDefenseOptions</a></dt>
+      <dd><p>Tuning for <a class="xref" href="MyAgents.Agents.CanaryDefenseFeature.html">CanaryDefenseFeature</a>. Detection and observability — how a violation is reacted to is
+decided by <a class="xref" href="MyAgents.Core.Security.ICanaryViolationHandler.html">ICanaryViolationHandler</a>.</p>
 </dd>
     </dl>
     <dl class="jumplist">
@@ -293,6 +312,13 @@ automatic OTLP export pipeline.</p>
       <dt><a class="xref" href="MyAgents.Agents.PromptRegistryFeature.html">PromptRegistryFeature</a></dt>
       <dd><p>Feature that wires a <a class="xref" href="MyAgents.Core.Prompts.PromptRegistry.html">PromptRegistry</a> into the agent session and
 optionally renders selected templates into the agent's system prompt at assembly time.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="MyAgents.Agents.QuarantineSessionViolationHandler.html">QuarantineSessionViolationHandler</a></dt>
+      <dd><p>Quarantines the session and aborts when a canary is confirmed; leaves
+<a class="xref" href="MyAgents.Core.Security.EgressSeverity.html#MyAgents_Core_Security_EgressSeverity_Suspicious">Suspicious</a> findings non-blocking so heuristics can be measured on
+real traffic before they are trusted. This is the default handler.</p>
 </dd>
     </dl>
     <dl class="jumplist">

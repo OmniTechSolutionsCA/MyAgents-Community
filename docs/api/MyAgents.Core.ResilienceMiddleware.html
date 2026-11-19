@@ -89,7 +89,7 @@
 
 
   <h1 id="MyAgents_Core_ResilienceMiddleware" data-uid="MyAgents.Core.ResilienceMiddleware" class="text-break">
-Class ResilienceMiddleware  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L24"><i class="bi bi-code-slash"></i></a>
+Class ResilienceMiddleware  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L30"><i class="bi bi-code-slash"></i></a>
   </h1>
 
   <div class="facts text-secondary">
@@ -151,6 +151,12 @@ This should be placed at the outermost edge of the pipeline.</p>
 
 
 
+  <h2 id="MyAgents_Core_ResilienceMiddleware_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>An exception implementing <a class="xref" href="MyAgents.Core.INonRetryableException.html">INonRetryableException</a> is never retried, even when the
+configured <a class="xref" href="MyAgents.Core.ITransientErrorClassifier.html">ITransientErrorClassifier</a> reports it as transient. A classifier infers
+transience from the exception's type, which an application can widen indiscriminately; a marker
+on the exception itself is the throwing site's own statement that the failure is terminal.</p>
+</div>
 
 
   <h2 class="section" id="constructors">Constructors
@@ -161,7 +167,7 @@ This should be placed at the outermost edge of the pipeline.</p>
 
   <h3 id="MyAgents_Core_ResilienceMiddleware__ctor_Microsoft_Extensions_Options_IOptions_MyAgents_Core_ResilienceOptions__MyAgents_Core_ITransientErrorClassifier_Microsoft_Extensions_Logging_ILogger_MyAgents_Core_ResilienceMiddleware__" data-uid="MyAgents.Core.ResilienceMiddleware.#ctor(Microsoft.Extensions.Options.IOptions{MyAgents.Core.ResilienceOptions},MyAgents.Core.ITransientErrorClassifier,Microsoft.Extensions.Logging.ILogger{MyAgents.Core.ResilienceMiddleware})">
   ResilienceMiddleware(IOptions&lt;ResilienceOptions&gt;, ITransientErrorClassifier?, ILogger&lt;ResilienceMiddleware&gt;?)
-  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L52"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L58"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Creates a <a class="xref" href="MyAgents.Core.ResilienceMiddleware.html">ResilienceMiddleware</a> from <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.options.ioptions-1">IOptions&lt;TOptions&gt;</a>.</p>
@@ -197,7 +203,7 @@ This should be placed at the outermost edge of the pipeline.</p>
 
   <h3 id="MyAgents_Core_ResilienceMiddleware__ctor_MyAgents_Core_ITransientErrorClassifier_System_Int32_System_Nullable_System_TimeSpan__Microsoft_Extensions_Logging_ILogger_MyAgents_Core_ResilienceMiddleware__" data-uid="MyAgents.Core.ResilienceMiddleware.#ctor(MyAgents.Core.ITransientErrorClassifier,System.Int32,System.Nullable{System.TimeSpan},Microsoft.Extensions.Logging.ILogger{MyAgents.Core.ResilienceMiddleware})">
   ResilienceMiddleware(ITransientErrorClassifier?, int, TimeSpan?, ILogger&lt;ResilienceMiddleware&gt;?)
-  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L37"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L43"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"></div>
@@ -238,7 +244,7 @@ This should be placed at the outermost edge of the pipeline.</p>
 
   <h3 id="MyAgents_Core_ResilienceMiddleware_InvokeAsync_MyAgents_Core_AgentTurnContext_System_Func_MyAgents_Core_AgentTurnContext_System_Threading_CancellationToken_System_Threading_Tasks_ValueTask_MyAgents_Core_AgentTurnResult___System_Threading_CancellationToken_" data-uid="MyAgents.Core.ResilienceMiddleware.InvokeAsync(MyAgents.Core.AgentTurnContext,System.Func{MyAgents.Core.AgentTurnContext,System.Threading.CancellationToken,System.Threading.Tasks.ValueTask{MyAgents.Core.AgentTurnResult}},System.Threading.CancellationToken)">
   InvokeAsync(AgentTurnContext, Func&lt;AgentTurnContext, CancellationToken, ValueTask&lt;AgentTurnResult&gt;&gt;, CancellationToken)
-  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L58"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L64"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Invokes the middleware for a blocking (non-streaming) turn.</p>
@@ -283,7 +289,7 @@ This should be placed at the outermost edge of the pipeline.</p>
 
   <h3 id="MyAgents_Core_ResilienceMiddleware_InvokeStreamingAsync_MyAgents_Core_AgentTurnContext_System_Func_MyAgents_Core_AgentTurnContext_System_Threading_CancellationToken_System_Collections_Generic_IAsyncEnumerable_MyAgents_Core_AgentTurnResult___System_Threading_CancellationToken_" data-uid="MyAgents.Core.ResilienceMiddleware.InvokeStreamingAsync(MyAgents.Core.AgentTurnContext,System.Func{MyAgents.Core.AgentTurnContext,System.Threading.CancellationToken,System.Collections.Generic.IAsyncEnumerable{MyAgents.Core.AgentTurnResult}},System.Threading.CancellationToken)">
   InvokeStreamingAsync(AgentTurnContext, Func&lt;AgentTurnContext, CancellationToken, IAsyncEnumerable&lt;AgentTurnResult&gt;&gt;, CancellationToken)
-  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L99"><i class="bi bi-code-slash"></i></a>
+  <a class="header-action link-secondary" title="View source" href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L105"><i class="bi bi-code-slash"></i></a>
   </h3>
 
   <div class="markdown level1 summary"><p>Streaming variant: if the stream faults with a transient error <em>before</em>
@@ -334,7 +340,7 @@ imposed by the C# compiler for async iterator methods.</p>
 </article>
 
         <div class="contribution d-print-none">
-          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/docs/docfx-site/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L24" class="edit-link">Edit this page</a>
+          <a href="https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/MyAgents.Core/Middleware/ResilienceMiddleware.cs/#L30" class="edit-link">Edit this page</a>
         </div>
 
 
