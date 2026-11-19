@@ -68,6 +68,106 @@ public sealed class ResilienceAndCoreUtilitiesTests
         Assert.That(attempts, Is.EqualTo(2)); // initial attempt + 1 retry
     }
 
+    /// <summary>
+    /// Reports every exception as transient — the widest classifier a host can configure, and the
+    /// configuration that made a terminal abort retryable before <see cref="INonRetryableException"/>.
+    /// </summary>
+    private sealed class AlwaysTransientClassifier : ITransientErrorClassifier
+    {
+        public bool IsTransient(Exception exception) => true;
+    }
+
+    /// <summary>Terminal failure: carries the marker, so no classifier opinion can make it retryable.</summary>
+    private sealed class TerminalTestException : Exception, INonRetryableException
+    {
+        public TerminalTestException(string message) : base(message) { }
+    }
+
+    [Test]
+    public void ResilienceMiddleware_DoesNotRetry_NonRetryableException_EvenWhenClassifierSaysTransient()
+    {
+        var attempts = 0;
+        var middleware = new ResilienceMiddleware(
+            new AlwaysTransientClassifier(),
+            maxRetries: 2,
+            baseDelay: TimeSpan.FromMilliseconds(5));
+
+        var context = CreateContext();
+
+        Assert.ThrowsAsync<TerminalTestException>(async () =>
+        {
+            await middleware.InvokeAsync(context, (ctx, ct) =>
+            {
+                attempts++;
+                throw new TerminalTestException("security abort");
+            });
+        });
+
+        Assert.That(attempts, Is.EqualTo(1),
+            "A non-retryable exception must be attempted exactly once, regardless of the classifier.");
+    }
+
+    [Test]
+    public void ResilienceMiddleware_StillRetries_TransientException_UnderTheSameClassifier()
+    {
+        // Control for the test above: proves the guard is keyed on the marker and not simply
+        // disabling retries altogether. If the INonRetryableException check were applied to every
+        // exception, this test goes red on the attempt count.
+        var attempts = 0;
+        var middleware = new ResilienceMiddleware(
+            new AlwaysTransientClassifier(),
+            maxRetries: 2,
+            baseDelay: TimeSpan.FromMilliseconds(5));
+
+        var context = CreateContext();
+
+        Assert.ThrowsAsync<HttpRequestException>(async () =>
+        {
+            await middleware.InvokeAsync(context, (ctx, ct) =>
+            {
+                attempts++;
+                throw new HttpRequestException("transient");
+            });
+        });
+
+        Assert.That(attempts, Is.EqualTo(3), "initial attempt + 2 retries");
+    }
+
+    [Test]
+    public void ResilienceMiddleware_Streaming_DoesNotRetry_NonRetryableException()
+    {
+        var attempts = 0;
+        var middleware = new ResilienceMiddleware(
+            new AlwaysTransientClassifier(),
+            maxRetries: 2,
+            baseDelay: TimeSpan.FromMilliseconds(5));
+
+        var context = CreateContext();
+
+        async IAsyncEnumerable<AgentTurnResult> FailingStream()
+        {
+            attempts++;
+            await Task.Yield();
+
+            if (attempts > 0)
+                throw new TerminalTestException("security abort");
+
+            yield return new AgentTurnResult(
+                [new AgentMessage("assistant", "unreachable")],
+                new AgentTurnTelemetry(TimeSpan.Zero));
+        }
+
+        Assert.ThrowsAsync<TerminalTestException>(async () =>
+        {
+            await foreach (var unused in middleware.InvokeStreamingAsync(context, (ctx, ct) => FailingStream()))
+            {
+                Assert.Fail("A non-retryable failure must not yield any chunk.");
+            }
+        });
+
+        Assert.That(attempts, Is.EqualTo(1));
+    }
+
     [Test]
     public async Task FallbackMiddleware_CatchesException_InvokesStaticFallbackPolicy()
     {

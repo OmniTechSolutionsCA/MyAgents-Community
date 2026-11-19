@@ -1,9 +1,31 @@
 TYPE class MyAgents.Agents.AgentChannelFeature
   CTOR AgentChannelFeature(MyAgents.Core.Messaging.IAgentChannel channel)
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.AuditOnlyViolationHandler
+  CTOR AuditOnlyViolationHandler()
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.CanaryDisposition> HandleAsync(MyAgents.Core.Security.CanaryViolationContext context, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Agents.BlocklistGuardrailPolicy
   CTOR BlocklistGuardrailPolicy(System.Collections.Generic.IEnumerable<string> blockedPhrases)
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.GuardrailViolation> EvaluateAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> output, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Agents.CanaryDefenseFeature
+  CTOR CanaryDefenseFeature()
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler handler)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.ICanaryViolationHandler handler, System.Action<MyAgents.Agents.CanaryDefenseOptions> configure)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner, MyAgents.Core.Security.ICanaryViolationHandler handler)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner, MyAgents.Core.Security.ICanaryViolationHandler handler, MyAgents.Agents.CanaryDefenseOptions options)
+  CTOR CanaryDefenseFeature(MyAgents.Core.Security.IEgressScanner scanner, System.Action<MyAgents.Agents.CanaryDefenseOptions> configure)
+  CTOR CanaryDefenseFeature(System.Action<MyAgents.Agents.CanaryDefenseOptions> configure)
+  METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.CanaryDefenseOptions
+  CTOR CanaryDefenseOptions()
+  PROP MyAgents.Core.Security.IEgressAuditSink AuditSink { get; set; }
+  PROP System.Collections.Generic.IReadOnlyCollection<string> BeaconHostAllowList { get; set; }
+  PROP bool FailOpenOnScannerError { get; set; }
+  PROP int MaxScanBytes { get; set; }
+  PROP bool ScanMemoryWrites { get; set; }
+  PROP bool ScanToolArguments { get; set; }
+  PROP System.Collections.Generic.IReadOnlyCollection<MyAgents.Core.Security.SecretPattern> SecretPatterns { get; set; }
 TYPE class MyAgents.Agents.CapabilityFeature
   CTOR CapabilityFeature(MyAgents.Core.IAgentCapability[] capabilities)
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
@@ -218,6 +240,9 @@ TYPE class MyAgents.Agents.PromptRegistryFeature
   CTOR PromptRegistryFeature(MyAgents.Core.Prompts.PromptRegistry registry, string systemTemplateName, System.Collections.Generic.IReadOnlyDictionary<string, string> variables)
   CTOR PromptRegistryFeature(MyAgents.Core.Prompts.PromptRegistry registry, string systemTemplateName, string systemTemplateVersion, System.Collections.Generic.IReadOnlyDictionary<string, string> variables)
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
+TYPE class MyAgents.Agents.QuarantineSessionViolationHandler
+  CTOR QuarantineSessionViolationHandler(MyAgents.Core.Security.ICanaryVault vault)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.CanaryDisposition> HandleAsync(MyAgents.Core.Security.CanaryViolationContext context, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Agents.RoutingException
   CTOR RoutingException(string rawResponse)
   PROP string RawResponse { get; }
