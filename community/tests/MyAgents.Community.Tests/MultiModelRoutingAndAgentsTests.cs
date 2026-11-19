@@ -171,20 +171,120 @@ public sealed class MultiModelRoutingAndAgentsTests
 
         // Wait for background completion, stopping early on any terminal state so a failed fork
         // is reported immediately rather than after the full poll budget.
-        SubagentResult? forkResult = null;
-        for (var i = 0; i < 20; i++)
+        var forkResult = await WaitForTerminalResultAsync(dispatcher, "task-fork", TimeSpan.FromSeconds(10));
+
+        Assert.That(forkResult.Status, Is.EqualTo(SubagentExecutionState.Completed));
+        Assert.That(forkResult.FinalOutput, Is.EqualTo("forked background findings"));
+    }
+
+    /// <summary>
+    /// Decorates a real session factory so every child invocation is held for a fixed delay,
+    /// simulating a slow subagent without depending on the runtime's own timing.
+    /// </summary>
+    private sealed class DelayedSessionFactory : IAgentSessionFactory
+    {
+        private readonly IAgentSessionFactory _inner;
+        private readonly TimeSpan _delay;
+
+        public DelayedSessionFactory(IAgentSessionFactory inner, TimeSpan delay)
         {
-            forkResult = await dispatcher.GetTaskResultAsync("task-fork");
-            if (forkResult?.Status is SubagentExecutionState.Completed
-                or SubagentExecutionState.Failed
-                or SubagentExecutionState.Canceled)
-                break;
-            await Task.Delay(50);
+            _inner = inner;
+            _delay = delay;
         }
 
-        Assert.That(forkResult, Is.Not.Null);
-        Assert.That(forkResult!.Status, Is.EqualTo(SubagentExecutionState.Completed));
+        public IAgentSession CreateSession(string sessionId, AgentDefinition definition)
+            => new DelayedSession(_inner.CreateSession(sessionId, definition), _delay);
+
+        private sealed class DelayedSession : IAgentSession
+        {
+            private readonly IAgentSession _inner;
+            private readonly TimeSpan _delay;
+
+            public DelayedSession(IAgentSession inner, TimeSpan delay)
+            {
+                _inner = inner;
+                _delay = delay;
+            }
+
+            public string SessionId => _inner.SessionId;
+            public IReadOnlyList<IAgentCapability> Capabilities => _inner.Capabilities;
+
+            public async ValueTask<AgentTurnResult> InvokeAsync(
+                IReadOnlyList<AgentMessage> messages,
+                CancellationToken cancellationToken = default)
+            {
+                await Task.Delay(_delay, cancellationToken).ConfigureAwait(false);
+                return await _inner.InvokeAsync(messages, cancellationToken).ConfigureAwait(false);
+            }
+
+            public IAsyncEnumerable<AgentTurnResult> InvokeStreamingAsync(
+                IReadOnlyList<AgentMessage> messages,
+                CancellationToken cancellationToken = default)
+                => _inner.InvokeStreamingAsync(messages, cancellationToken);
+
+            public void Dispose() => _inner.Dispose();
+
+            public ValueTask DisposeAsync() => _inner.DisposeAsync();
+        }
+    }
+
+    [Test]
+    public async Task HierarchicalSubagentDispatcher_fork_reaches_terminal_state_when_child_is_slower_than_poll_budget()
+    {
+        var runtime = new InMemoryAgentRuntime()
+            .ForAgent("sub-analyst", q => q.EnqueueResponse("forked background findings"));
+
+        var services = new ServiceCollection().BuildServiceProvider();
+        var factory = new DelayedSessionFactory(
+            new DefaultAgentSessionFactory(runtime, services),
+            TimeSpan.FromMilliseconds(1500));
+        var subagentDef = new AgentDefinition("sub-analyst", []);
+
+        using var dispatcher = new HierarchicalSubagentDispatcher(
+            factory,
+            [subagentDef],
+            new SubagentOrchestratorOptions { MaxDelegationDepth = 2 });
+
+        var handle = await dispatcher.ForkAsync(new SubagentTask(
+            TaskId: "task-slow-fork",
+            TargetAgentName: "sub-analyst",
+            Instructions: "Background research",
+            CurrentDepth: 1));
+
+        var forkResult = await WaitForTerminalResultAsync(dispatcher, handle.TaskId, TimeSpan.FromSeconds(10));
+
+        Assert.That(forkResult.Status, Is.EqualTo(SubagentExecutionState.Completed));
         Assert.That(forkResult.FinalOutput, Is.EqualTo("forked background findings"));
+    }
+
+    /// <summary>
+    /// Polls a background task until it reaches a terminal state. Throws when the task is unknown,
+    /// or when it is still non-terminal at the deadline (naming the last observed status), so a
+    /// stuck or slow fork can never be mistaken for a pass.
+    /// </summary>
+    private static async Task<SubagentResult> WaitForTerminalResultAsync(
+        ISubagentDispatcher dispatcher,
+        string taskId,
+        TimeSpan timeout)
+    {
+        var deadline = DateTimeOffset.UtcNow + timeout;
+        while (true)
+        {
+            var result = await dispatcher.GetTaskResultAsync(taskId);
+            if (result is null)
+                throw new InvalidOperationException($"Background task '{taskId}' is unknown to the dispatcher.");
+
+            if (result.Status is SubagentExecutionState.Completed
+                or SubagentExecutionState.Failed
+                or SubagentExecutionState.Canceled)
+                return result;
+
+            if (DateTimeOffset.UtcNow >= deadline)
+                throw new TimeoutException(
+                    $"Background task '{taskId}' did not reach a terminal state within {timeout.TotalSeconds:F0}s; last status was {result.Status}.");
+
+            await Task.Delay(50);
+        }
     }
 
     [Test]
