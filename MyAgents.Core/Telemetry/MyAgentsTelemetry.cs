@@ -23,7 +23,7 @@ public static class MyAgentsTelemetry
     /// <summary>
     /// Framework version attached to telemetry primitives.
     /// </summary>
-    public const string Version = "1.0.0";
+    public const string Version = "1.1.0";
 
     /// <summary>
     /// Shared activity source for turn- and tool-level spans.

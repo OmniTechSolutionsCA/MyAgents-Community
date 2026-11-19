@@ -1,6 +1,6 @@
 # C# API Reference
 
-Browse the complete public API reference generated directly from the MyAgents Community v1.0.0 assemblies and XML documentation comments.
+Browse the complete public API reference generated directly from the MyAgents Community v1.1.0 assemblies and XML documentation comments.
 
 ## Namespaces by Package
 

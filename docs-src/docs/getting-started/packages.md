@@ -6,15 +6,15 @@ MyAgents Community is built as a set of modular, decoupled NuGet packages for .N
 
 | Package | Version | Description | Target Use Case |
 | :--- | :--- | :--- | :--- |
-| **`MyAgents.Core`** | `1.0.0` | Core abstractions: `IAgent`, `AgentDefinition`, `IAgentSession`, `ITool`, messages, and prompts. | Included in all applications. |
-| **`MyAgents.Runtime.Chat`** | `1.0.0` | Provider-neutral conversational runtime integrating with `Microsoft.Extensions.AI.IChatClient`. | Interactive chat applications, CLI bots, web APIs. |
-| **`MyAgents.Generators`** | `1.0.0` | Roslyn incremental source generator for `[AgentTool]` compile-time tool binding. | High-performance and NativeAOT trimmed applications. |
-| **`MyAgents.Memory`** | `1.0.0` | SIMD dense vector similarity (`TensorPrimitives`), BM25 sparse index, Reciprocal Rank Fusion, document readers. | In-memory RAG, semantic search, long-term memory. |
-| **`MyAgents.Runtime.Workers`** | `1.0.0` | Durable background worker host with lease coordination, idempotency, and retries. | Long-running asynchronous workflows, background task queues. |
-| **`MyAgents.Runtime.Workers.Sqlite`** | `1.0.0` | SQLite-backed persistent run backend for durable worker execution. | On-premises and single-node durable worker storage. |
-| **`MyAgents.Mcp`** | `1.0.0` | Model Context Protocol (MCP) tool adapters for stdio and HTTP/SSE transports. | Connecting to local or remote MCP servers and tools. |
-| **`MyAgents.Agents`** | `1.0.0` | High-level orchestrations: subagents, group chat, token cost tracking, and model routing. | Complex multi-agent teams, hierarchical delegation. |
-| **`MyAgents.Testing`** | `1.0.0` | In-memory test runtime, deterministic mock agents, and turn assertions. | Unit tests and integration test suites. |
+| **`MyAgents.Core`** | `1.1.0` | Core abstractions: `IAgent`, `AgentDefinition`, `IAgentSession`, `ITool`, messages, and prompts. | Included in all applications. |
+| **`MyAgents.Runtime.Chat`** | `1.1.0` | Provider-neutral conversational runtime integrating with `Microsoft.Extensions.AI.IChatClient`. | Interactive chat applications, CLI bots, web APIs. |
+| **`MyAgents.Generators`** | `1.1.0` | Roslyn incremental source generator for `[AgentTool]` compile-time tool binding. | High-performance and NativeAOT trimmed applications. |
+| **`MyAgents.Memory`** | `1.1.0` | SIMD dense vector similarity (`TensorPrimitives`), BM25 sparse index, Reciprocal Rank Fusion, document readers. | In-memory RAG, semantic search, long-term memory. |
+| **`MyAgents.Runtime.Workers`** | `1.1.0` | Durable background worker host with lease coordination, idempotency, and retries. | Long-running asynchronous workflows, background task queues. |
+| **`MyAgents.Runtime.Workers.Sqlite`** | `1.1.0` | SQLite-backed persistent run backend for durable worker execution. | On-premises and single-node durable worker storage. |
+| **`MyAgents.Mcp`** | `1.1.0` | Model Context Protocol (MCP) tool adapters for stdio and HTTP/SSE transports. | Connecting to local or remote MCP servers and tools. |
+| **`MyAgents.Agents`** | `1.1.0` | High-level orchestrations: subagents, group chat, token cost tracking, and model routing. | Complex multi-agent teams, hierarchical delegation. |
+| **`MyAgents.Testing`** | `1.1.0` | In-memory test runtime, deterministic mock agents, and turn assertions. | Unit tests and integration test suites. |
 
 ---
 

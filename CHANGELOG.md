@@ -6,6 +6,8 @@ stable release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-19
+
 ### Added
 - **Canary egress defense against data exfiltration (`MyAgents.Core`, `MyAgents.Agents`).**
   `CanaryDefenseFeature` issues a per-session canary into the system prompt and scans every outbound

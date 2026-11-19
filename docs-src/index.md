@@ -2,7 +2,7 @@
 
 **Modular, NativeAOT-ready, and provider-neutral AI agent runtime for .NET 10.**
 
-[![NuGet Version](https://img.shields.io/badge/nuget-v1.0.0-blue)](https://www.nuget.org/packages?q=MyAgents)
+[![NuGet Version](https://img.shields.io/badge/nuget-v1.1.0-blue)](https://www.nuget.org/packages?q=MyAgents)
 [![Target Framework](https://img.shields.io/badge/.NET-10.0-purple)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/blob/main/LICENSE)
 [![GitHub Workflow](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/actions)

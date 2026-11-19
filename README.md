@@ -10,9 +10,9 @@
 [![PR checks](https://img.shields.io/badge/PR%20checks-view-24292f?logo=github)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/pulls)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](#getting-started)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Release: 1.0.0](https://img.shields.io/badge/release-1.0.0-brightgreen)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/releases)
+[![Release: 1.1.0](https://img.shields.io/badge/release-1.1.0-brightgreen)](https://github.com/OmniTechSolutionsCA/MyAgents-Community/releases)
 [![NuGet](https://img.shields.io/nuget/v/MyAgents.Core?label=NuGet&logo=nuget)](https://www.nuget.org/packages/MyAgents.Core/)
-[![Status: General Availability](https://img.shields.io/badge/status-GA%201.0.0-brightgreen)](#project-status)
+[![Status: General Availability](https://img.shields.io/badge/status-GA%201.1.0-brightgreen)](#project-status)
 
 **Explore:** [Documentation Site](https://omnitechsolutionsca.github.io/MyAgents-Community/) · [Quick start](#getting-started) · [Capabilities](#capabilities) ·
 [Architecture](#architecture) · [Packages](#packages) · [Examples & Samples](#examples) ·
@@ -232,7 +232,7 @@ is maintained separately from this Community repository.
 
 ## Project status
 
-MyAgents Community is at **General Availability (GA) 1.0.0** with full semantic versioning
+MyAgents Community is at **General Availability (GA) 1.1.0** with full semantic versioning
 and backward-compatibility commitments. All packages are published to
 [NuGet.org](https://www.nuget.org/profiles/OmniTechSolutionsCA) with symbol packages
 (`snupkg`), Source Link, and deterministic builds.
