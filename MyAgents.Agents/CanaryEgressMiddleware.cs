@@ -120,6 +120,14 @@ internal sealed class CanaryEgressMiddleware : IAgentMiddleware
             return result;
         }
 
+        await RecordAuditAsync(
+            _options.AuditSink ?? context.Services.GetService<IEgressAuditSink>(),
+            context.SessionId,
+            EgressChannel.TurnOutput,
+            scan.Findings,
+            toolName: null,
+            cancellationToken).ConfigureAwait(false);
+
         var disposition = await _handler
             .HandleAsync(new CanaryViolationContext(EgressChannel.TurnOutput, scan, context.SessionId), cancellationToken)
             .ConfigureAwait(false);
@@ -161,5 +169,43 @@ internal sealed class CanaryEgressMiddleware : IAgentMiddleware
         }
 
         return builder.ToString();
+    }
+
+    internal static async ValueTask RecordAuditAsync(
+        IEgressAuditSink? sink,
+        string sessionId,
+        EgressChannel channel,
+        IReadOnlyList<EgressFinding> findings,
+        string? toolName = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (sink is null || findings.Count == 0)
+            return;
+
+        foreach (var finding in findings)
+        {
+            var record = new EgressAuditRecord(
+                AuditId: Guid.NewGuid().ToString("N"),
+                SessionId: sessionId,
+                Channel: channel,
+                Severity: finding.Severity,
+                DetectorName: finding.DetectorName,
+                Reason: finding.Reason,
+                Timestamp: DateTimeOffset.UtcNow,
+                ToolName: toolName);
+
+            try
+            {
+                await sink.RecordAsync(record, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch
+            {
+                // A failing audit sink must not take the agent turn down.
+            }
+        }
     }
 }

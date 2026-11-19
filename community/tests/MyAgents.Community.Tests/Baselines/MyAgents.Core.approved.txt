@@ -758,6 +758,22 @@ TYPE class MyAgents.Core.Security.CanaryViolationException
   CTOR CanaryViolationException(string reason)
   CTOR CanaryViolationException(string reason, System.Exception innerException)
   PROP string Reason { get; }
+TYPE class MyAgents.Core.Security.EgressAuditRecord
+  CTOR EgressAuditRecord(string AuditId, string SessionId, MyAgents.Core.Security.EgressChannel Channel, MyAgents.Core.Security.EgressSeverity Severity, string DetectorName, string Reason, System.DateTimeOffset Timestamp, string ToolName)
+  PROP string AuditId { get; set; }
+  PROP MyAgents.Core.Security.EgressChannel Channel { get; set; }
+  PROP string DetectorName { get; set; }
+  PROP string Reason { get; set; }
+  PROP string SessionId { get; set; }
+  PROP MyAgents.Core.Security.EgressSeverity Severity { get; set; }
+  PROP System.DateTimeOffset Timestamp { get; set; }
+  PROP string ToolName { get; set; }
+  METHOD MyAgents.Core.Security.EgressAuditRecord <Clone>$()
+  METHOD bool Equals(MyAgents.Core.Security.EgressAuditRecord other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(string& AuditId, string& SessionId, MyAgents.Core.Security.EgressChannel& Channel, MyAgents.Core.Security.EgressSeverity& Severity, string& DetectorName, string& Reason, System.DateTimeOffset& Timestamp, string& ToolName)
 TYPE enum MyAgents.Core.Security.EgressChannel
   FIELD MyAgents.Core.Security.EgressChannel ToolArguments
   FIELD MyAgents.Core.Security.EgressChannel TurnOutput
@@ -796,8 +812,17 @@ TYPE interface MyAgents.Core.Security.ICanaryVault
   METHOD void Quarantine(string reason)
 TYPE interface MyAgents.Core.Security.ICanaryViolationHandler
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.CanaryDisposition> HandleAsync(MyAgents.Core.Security.CanaryViolationContext context, System.Threading.CancellationToken cancellationToken)
+TYPE interface MyAgents.Core.Security.IEgressAuditSink
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.Security.EgressAuditRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
 TYPE interface MyAgents.Core.Security.IEgressScanner
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Security.EgressScanResult> ScanAsync(MyAgents.Core.Security.EgressChannel channel, string payload, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Core.Security.InMemoryEgressAuditSink
+  CTOR InMemoryEgressAuditSink()
+  METHOD System.Threading.Tasks.ValueTask RecordAsync(MyAgents.Core.Security.EgressAuditRecord record, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListAllAsync(System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.Security.EgressAuditRecord>> ListBySessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Core.SlidingWindowTrimmer
   CTOR SlidingWindowTrimmer(int maxMessages)
   METHOD System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> TrimAsync(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> messages, System.Threading.CancellationToken cancellationToken)

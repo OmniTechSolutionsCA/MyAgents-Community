@@ -64,6 +64,14 @@ internal sealed class CanaryToolEgressObserver : IToolCallObserver
         if (scan.Severity == EgressSeverity.Informational)
             return;
 
+        await CanaryEgressMiddleware.RecordAuditAsync(
+            _options.AuditSink,
+            call.SessionId,
+            EgressChannel.ToolArguments,
+            scan.Findings,
+            toolName: call.ToolName,
+            cancellationToken).ConfigureAwait(false);
+
         var disposition = await _handler
             .HandleAsync(
                 new CanaryViolationContext(EgressChannel.ToolArguments, scan, call.SessionId),

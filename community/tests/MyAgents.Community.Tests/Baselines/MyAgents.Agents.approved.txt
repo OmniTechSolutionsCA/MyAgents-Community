@@ -18,6 +18,7 @@ TYPE class MyAgents.Agents.CanaryDefenseFeature
   METHOD void Contribute(MyAgents.Core.AgentAssembly assembly)
 TYPE class MyAgents.Agents.CanaryDefenseOptions
   CTOR CanaryDefenseOptions()
+  PROP MyAgents.Core.Security.IEgressAuditSink AuditSink { get; set; }
   PROP System.Collections.Generic.IReadOnlyCollection<string> BeaconHostAllowList { get; set; }
   PROP bool FailOpenOnScannerError { get; set; }
   PROP int MaxScanBytes { get; set; }

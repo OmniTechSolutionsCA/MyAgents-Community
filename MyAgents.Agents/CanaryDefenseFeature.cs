@@ -120,6 +120,9 @@ public sealed class CanaryDefenseFeature : IAgentFeature
             [CanaryTokens.Create()]);
 
         assembly.RegisterSessionService<ICanaryVault>(vault);
+        if (_options.AuditSink is not null)
+            assembly.RegisterSessionService<IEgressAuditSink>(_options.AuditSink);
+
         assembly.Prompts.AddSystem(
             CanaryDirectiveTemplate.Replace(CanaryPlaceholder, vault.Canaries[0], StringComparison.Ordinal));
 

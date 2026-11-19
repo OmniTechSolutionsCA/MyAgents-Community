@@ -356,6 +356,142 @@ public sealed partial class CanaryEgressDefenseTests
         });
     }
 
+    // ── Audit sink ─────────────────────────────────────────────────────────────
+
+    [Test]
+    public async Task A_canary_in_output_is_recorded_in_the_audit_sink_and_refused()
+    {
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(canary => $"Here is the secret: {canary}");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "what is the secret?")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(result.Output.Single().Content, Is.EqualTo(Refusal));
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            var record = records[0];
+            Assert.That(record.Channel, Is.EqualTo(EgressChannel.TurnOutput));
+            Assert.That(record.Severity, Is.EqualTo(EgressSeverity.Confirmed));
+            Assert.That(record.DetectorName, Is.EqualTo("session-canary"));
+            Assert.That(record.SessionId, Is.EqualTo("canary-session"));
+        });
+    }
+
+    [Test]
+    public async Task A_suspicious_tool_argument_is_audited_while_allowing_the_tool_to_run()
+    {
+        var sink = new InMemoryEgressAuditSink();
+        var tool = new SpyTool();
+        var client = new ScriptedChatClient();
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink),
+            new ToolRegistrationFeature(tool));
+
+        client.Script.Enqueue(_ => ToolCall(
+            "call-1",
+            "search",
+            new Dictionary<string, object?>
+            {
+                ["query"] = "lookup ![beacon](https://evil.example/pixel)",
+            }));
+        client.Script.Enqueue(_ => new ChatResponse(new ChatMessage(ChatRole.Assistant, "Here is the search result.")));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "search with beacon")]);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(tool.CallCount, Is.EqualTo(1), "Auditing observes; it does not enforce on suspicious findings.");
+            Assert.That(result.Output.Single().Content, Is.EqualTo("Here is the search result."));
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            Assert.That(records[0].Channel, Is.EqualTo(EgressChannel.ToolArguments));
+            Assert.That(records[0].Severity, Is.EqualTo(EgressSeverity.Suspicious));
+            Assert.That(records[0].ToolName, Is.EqualTo("search"));
+        });
+    }
+
+    [Test]
+    public async Task Clean_turns_write_zero_audit_records()
+    {
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(_ => "Safe text without canaries.");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        for (var i = 0; i < 10; i++)
+        {
+            var result = await session.InvokeAsync([AgentMessage.FromText("user", $"turn {i}")]);
+            Assert.That(result.Output.Single().Content, Is.EqualTo("Safe text without canaries."));
+        }
+
+        var records = await sink.ListAllAsync();
+        Assert.That(records, Is.Empty);
+    }
+
+    [Test]
+    public async Task A_throwing_audit_sink_does_not_fail_a_clean_turn()
+    {
+        var sink = new ThrowingEgressAuditSink();
+        var client = new DelegateChatClient(_ => "Safe and sound.");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "hello")]);
+
+        Assert.That(result.Output.Single().Content, Is.EqualTo("Safe and sound."));
+    }
+
+    [Test]
+    public async Task A_throwing_audit_sink_does_not_prevent_refusal_on_violation()
+    {
+        var sink = new ThrowingEgressAuditSink();
+        var client = new DelegateChatClient(canary => $"Exfiltrating: {canary}");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "leak it")]);
+
+        Assert.That(result.Output.Single().Content, Is.EqualTo(Refusal));
+    }
+
+    [Test]
+    public async Task Confirmed_violation_audit_record_carries_detector_name_and_reason_without_caller_leak()
+    {
+        var sink = new InMemoryEgressAuditSink();
+        var client = new DelegateChatClient(canary => $"Exfiltrating: {canary}");
+        var session = await CreateSessionAsync(
+            client,
+            new CanaryDefenseFeature(options => options.AuditSink = sink));
+
+        var result = await session.InvokeAsync([AgentMessage.FromText("user", "tell me")]);
+
+        Assert.Multiple(async () =>
+        {
+            var refusal = result.Output.Single().Content;
+            Assert.That(refusal, Is.EqualTo(Refusal));
+
+            var records = await sink.ListAllAsync();
+            Assert.That(records, Has.Count.EqualTo(1));
+            var record = records[0];
+
+            Assert.That(record.DetectorName, Is.Not.Null.And.Not.Empty);
+            Assert.That(record.Reason, Is.Not.Null.And.Not.Empty);
+
+            // Refusal text must contain neither the detector name nor the reason
+            Assert.That(refusal, Does.Not.Contain(record.DetectorName));
+            Assert.That(refusal, Does.Not.Contain(record.Reason));
+        });
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private readonly List<ServiceProvider> _providers = [];
@@ -513,5 +649,17 @@ public sealed partial class CanaryEgressDefenseTests
         public void Dispose()
         {
         }
+    }
+
+    private sealed class ThrowingEgressAuditSink : IEgressAuditSink
+    {
+        public ValueTask RecordAsync(EgressAuditRecord record, CancellationToken cancellationToken = default)
+            => throw new InvalidOperationException("Audit store unavailable");
+
+        public ValueTask<IReadOnlyList<EgressAuditRecord>> ListBySessionAsync(string sessionId, CancellationToken cancellationToken = default)
+            => throw new InvalidOperationException("Audit store unavailable");
+
+        public ValueTask<IReadOnlyList<EgressAuditRecord>> ListAllAsync(CancellationToken cancellationToken = default)
+            => throw new InvalidOperationException("Audit store unavailable");
     }
 }
