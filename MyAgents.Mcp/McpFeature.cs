@@ -9,7 +9,8 @@ namespace MyAgents.Mcp;
 /// </summary>
 public sealed record McpFeatureOptions(
     bool ImportPrompts = false,
-    bool ExposeResourceTools = false);
+    bool ExposeResourceTools = false,
+    IReadOnlySet<string>? AllowedToolNames = null);
 
 /// <summary>
 /// Agent feature that connects to an MCP server and contributes all its tools
@@ -73,9 +74,14 @@ public sealed class McpFeature : IAgentFeature
             cancellationToken: cancellationToken).ConfigureAwait(false);
         assembly.RegisterOwnedResource(client);
 
-        IList<McpClientTool> tools = await client.ListToolsAsync(
+        IList<McpClientTool> listedTools = await client.ListToolsAsync(
             options: null,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        // Null or empty allow-list means "expose everything", matching McpMultiServerFeature.
+        IList<McpClientTool> tools = _options.AllowedToolNames is { Count: > 0 } allowed
+            ? listedTools.Where(tool => allowed.Contains(tool.Name)).ToArray()
+            : listedTools;
 
         var descriptors = tools
             .Select(static tool => new McpToolDescriptor(tool.Name, tool.Description))

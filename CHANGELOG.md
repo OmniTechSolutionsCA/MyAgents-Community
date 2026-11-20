@@ -6,6 +6,19 @@ stable release.
 
 ## [Unreleased]
 
+### Added
+- **Per-server tool allow-list for `McpFeature` (`MyAgents.Mcp`).** `McpFeatureOptions.AllowedToolNames`
+  exposes only the named tools. Null or empty keeps every tool, matching `McpMultiServerFeatureOptions`.
+
+### Changed
+- **ModelContextProtocol 1.0.0 → 2.4.0 (`MyAgents.Mcp`).** The MCP client now prefers the 2026-07-28
+  protocol revision and falls back to the `initialize` handshake for servers that do not support it.
+  Over Streamable HTTP, a server can expose a different tool set than under 1.0.0: against the MCP
+  reference server (`server-everything@2.3.1`), 2.4.0 listed 22 tools instead of 16. Roots, sampling,
+  elicitation and research tools were added, and logging and subscriber toggles were removed. Stdio
+  connections listed the same 16 tools under both versions. To limit the tools an agent sees, set
+  `McpFeatureOptions.AllowedToolNames`.
+
 ## [1.1.0] - 2026-11-19
 
 ### Added
