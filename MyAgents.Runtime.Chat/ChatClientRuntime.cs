@@ -366,7 +366,8 @@ public sealed class ChatClientRuntime : IAgentRuntime
             if (decision.Status == ToolApprovalStatus.Rejected)
                 throw new InvalidOperationException($"Tool '{tool.Name}' was rejected by the approval policy. {decision.Reason}".Trim());
 
-            var observation = new ToolCallObservation(tool.Name, arguments, call.CallId, context.SessionId, requestedAt);
+            var effectiveArguments = decision.ModifiedArgumentsJson ?? arguments;
+            var observation = new ToolCallObservation(tool.Name, effectiveArguments, call.CallId, context.SessionId, requestedAt);
             foreach (var observer in observers)
                 await observer.OnToolCallingAsync(observation, cancellationToken).ConfigureAwait(false);
 
@@ -375,7 +376,7 @@ public sealed class ChatClientRuntime : IAgentRuntime
             Exception? failure = null;
             try
             {
-                result = await tool.InvokeAsync(arguments, cancellationToken).ConfigureAwait(false);
+                result = await tool.InvokeAsync(effectiveArguments, cancellationToken).ConfigureAwait(false);
                 return result;
             }
             catch (Exception exception)

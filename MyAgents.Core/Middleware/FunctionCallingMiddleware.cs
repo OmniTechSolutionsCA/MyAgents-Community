@@ -195,7 +195,8 @@ public sealed class FunctionCallingMiddleware : IAgentMiddleware
 
             try
             {
-                toolResult = await tool.InvokeAsync(functionCall.ArgumentsJson, cancellationToken).ConfigureAwait(false);
+                var effectiveArguments = policyDecision.ModifiedArgumentsJson ?? functionCall.ArgumentsJson;
+                toolResult = await tool.InvokeAsync(effectiveArguments, cancellationToken).ConfigureAwait(false);
                 activity?.SetTag("agent.tool.success", true);
             }
             catch (Exception ex)

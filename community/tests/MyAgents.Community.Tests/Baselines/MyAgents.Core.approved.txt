@@ -313,19 +313,20 @@ TYPE enum MyAgents.Core.Execution.AgentRunHandlerDisposition
   FIELD MyAgents.Core.Execution.AgentRunHandlerDisposition Completed
   FIELD MyAgents.Core.Execution.AgentRunHandlerDisposition WaitingForInput
 TYPE class MyAgents.Core.Execution.AgentRunHandlerResult
-  CTOR AgentRunHandlerResult(MyAgents.Core.Execution.AgentRunHandlerDisposition Disposition, string OutputJson, string CheckpointJson, string PendingInputDescription)
+  CTOR AgentRunHandlerResult(MyAgents.Core.Execution.AgentRunHandlerDisposition Disposition, string OutputJson, string CheckpointJson, string PendingInputDescription, System.Nullable<System.DateTimeOffset> PendingInputExpiresAt)
   PROP string CheckpointJson { get; set; }
   PROP MyAgents.Core.Execution.AgentRunHandlerDisposition Disposition { get; set; }
   PROP string OutputJson { get; set; }
   PROP string PendingInputDescription { get; set; }
+  PROP System.Nullable<System.DateTimeOffset> PendingInputExpiresAt { get; set; }
   METHOD MyAgents.Core.Execution.AgentRunHandlerResult <Clone>$()
   METHOD MyAgents.Core.Execution.AgentRunHandlerResult Completed(string outputJson)
-  METHOD MyAgents.Core.Execution.AgentRunHandlerResult WaitingForInput(string checkpointJson, string pendingInputDescription)
+  METHOD MyAgents.Core.Execution.AgentRunHandlerResult WaitingForInput(string checkpointJson, string pendingInputDescription, System.Nullable<System.DateTimeOffset> expiresAt)
   METHOD bool Equals(MyAgents.Core.Execution.AgentRunHandlerResult other)
   METHOD bool Equals(object obj)
   METHOD int GetHashCode()
   METHOD string ToString()
-  METHOD void Deconstruct(MyAgents.Core.Execution.AgentRunHandlerDisposition& Disposition, string& OutputJson, string& CheckpointJson, string& PendingInputDescription)
+  METHOD void Deconstruct(MyAgents.Core.Execution.AgentRunHandlerDisposition& Disposition, string& OutputJson, string& CheckpointJson, string& PendingInputDescription, System.Nullable<System.DateTimeOffset>& PendingInputExpiresAt)
 TYPE class MyAgents.Core.Execution.AgentRunLease
   CTOR AgentRunLease(string RunId, MyAgents.Core.Execution.AgentRunRequest Request, string WorkerId, string LeaseId, long FencingToken, int Attempt, int FailureCount, System.DateTimeOffset LeaseExpiresAt, string CheckpointJson, string ResumeInputJson, bool CancellationRequested)
   PROP int Attempt { get; set; }
@@ -877,21 +878,23 @@ TYPE class MyAgents.Core.ToolApprovalAuditRecord
   METHOD string ToString()
   METHOD void Deconstruct(string& AuditId, string& ApprovalId, string& SessionId, string& ToolName, string& ArgumentsJson, MyAgents.Core.ToolApprovalDecision& Decision, System.DateTimeOffset& Timestamp, System.TimeSpan& Duration, string& GateType)
 TYPE class MyAgents.Core.ToolApprovalDecision
-  CTOR ToolApprovalDecision(MyAgents.Core.ToolApprovalStatus Status, System.DateTimeOffset DecidedAt, string DecidedBy, string Reason, MyAgents.Core.ApprovalScope Scope)
+  CTOR ToolApprovalDecision(MyAgents.Core.ToolApprovalStatus Status, System.DateTimeOffset DecidedAt, string DecidedBy, string Reason, MyAgents.Core.ApprovalScope Scope, string ModifiedArgumentsJson)
   PROP System.DateTimeOffset DecidedAt { get; set; }
   PROP string DecidedBy { get; set; }
+  PROP string ModifiedArgumentsJson { get; set; }
   PROP string Reason { get; set; }
   PROP MyAgents.Core.ApprovalScope Scope { get; set; }
   PROP MyAgents.Core.ToolApprovalStatus Status { get; set; }
   METHOD MyAgents.Core.ToolApprovalDecision <Clone>$()
   METHOD MyAgents.Core.ToolApprovalDecision Approve(string decidedBy, string reason, MyAgents.Core.ApprovalScope scope)
+  METHOD MyAgents.Core.ToolApprovalDecision ApproveWithEdits(string modifiedArgumentsJson, string decidedBy, string reason, MyAgents.Core.ApprovalScope scope)
   METHOD MyAgents.Core.ToolApprovalDecision Pending(string reason)
   METHOD MyAgents.Core.ToolApprovalDecision Reject(string decidedBy, string reason)
   METHOD bool Equals(MyAgents.Core.ToolApprovalDecision other)
   METHOD bool Equals(object obj)
   METHOD int GetHashCode()
   METHOD string ToString()
-  METHOD void Deconstruct(MyAgents.Core.ToolApprovalStatus& Status, System.DateTimeOffset& DecidedAt, string& DecidedBy, string& Reason, MyAgents.Core.ApprovalScope& Scope)
+  METHOD void Deconstruct(MyAgents.Core.ToolApprovalStatus& Status, System.DateTimeOffset& DecidedAt, string& DecidedBy, string& Reason, MyAgents.Core.ApprovalScope& Scope, string& ModifiedArgumentsJson)
 TYPE class MyAgents.Core.ToolApprovalEvaluator
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.AgentTurnServices services, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> EvaluateAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ISessionApprovalMemory sessionMemory, MyAgents.Core.IToolApprovalStore approvalStore, MyAgents.Core.IToolApprovalPolicy policy, MyAgents.Core.IToolApprovalGate gate, MyAgents.Core.IToolApprovalAuditSink auditSink, System.Threading.CancellationToken cancellationToken)

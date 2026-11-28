@@ -59,6 +59,20 @@ TYPE class MyAgents.Runtime.Workers.AgentRunWorkerOptions
   PROP string WorkerId { get; set; }
 TYPE class MyAgents.Runtime.Workers.AgentRunWorkerServiceCollectionExtensions
   METHOD Microsoft.Extensions.DependencyInjection.IServiceCollection AddMyAgentsRunWorker(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<MyAgents.Runtime.Workers.AgentRunWorkerOptions> configure)
+TYPE class MyAgents.Runtime.Workers.ChatAgentRunCheckpoint
+  CTOR ChatAgentRunCheckpoint(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages, MyAgents.Core.PendingToolApproval PendingToolApproval)
+  PROP System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage> Messages { get; set; }
+  PROP MyAgents.Core.PendingToolApproval PendingToolApproval { get; set; }
+  METHOD MyAgents.Runtime.Workers.ChatAgentRunCheckpoint <Clone>$()
+  METHOD bool Equals(MyAgents.Runtime.Workers.ChatAgentRunCheckpoint other)
+  METHOD bool Equals(object obj)
+  METHOD int GetHashCode()
+  METHOD string ToString()
+  METHOD void Deconstruct(System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>& Messages, MyAgents.Core.PendingToolApproval& PendingToolApproval)
+TYPE class MyAgents.Runtime.Workers.ChatAgentRunHandler
+  CTOR ChatAgentRunHandler(string handlerId, MyAgents.Core.IAgentSessionFactory sessionFactory, MyAgents.Core.AgentDefinition definition, System.Text.Json.Serialization.Metadata.JsonTypeInfo<System.Collections.Generic.IReadOnlyList<MyAgents.Core.AgentMessage>> messagesTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Runtime.Workers.ChatAgentRunCheckpoint> checkpointTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.ToolApprovalDecision> approvalDecisionTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.AgentTurnResult> turnResultTypeInfo)
+  PROP string HandlerId { get; }
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.Execution.AgentRunHandlerResult> ExecuteAsync(MyAgents.Core.Execution.AgentRunContext context, System.Threading.CancellationToken cancellationToken)
 TYPE class MyAgents.Runtime.Workers.WorkflowAgentRunHandler<TState>
   CTOR WorkflowAgentRunHandler`1(string handlerId, MyAgents.Core.Workflows.WorkflowHost workflowHost, MyAgents.Core.Workflows.IWorkflow<TState> workflow, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TState> stateTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.Workflows.WorkflowSnapshot> snapshotTypeInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<MyAgents.Core.ToolApprovalDecision> approvalDecisionTypeInfo)
   PROP string HandlerId { get; }
