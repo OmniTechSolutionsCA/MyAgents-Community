@@ -356,6 +356,7 @@ public sealed class AsyncHitlSuspendResumeTests
         }
         finally
         {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             if (File.Exists(dbPath)) File.Delete(dbPath);
         }
     }
@@ -380,6 +381,7 @@ public sealed class AsyncHitlSuspendResumeTests
         }
         finally
         {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             if (File.Exists(dbPath)) File.Delete(dbPath);
         }
     }
@@ -467,6 +469,7 @@ public sealed class AsyncHitlSuspendResumeTests
         }
         finally
         {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             if (File.Exists(dbPath)) File.Delete(dbPath);
         }
     }
