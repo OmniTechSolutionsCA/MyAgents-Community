@@ -145,4 +145,22 @@ public sealed class ApprovalAndMiddlewareTests
             Assert.That(effective[2].Content, Is.EqualTo("Message 4"));
         });
     }
+
+    [Test]
+    public void ToolApprovalDecision_ApproveWithEdits_sets_modified_arguments_json()
+    {
+        var decision = ToolApprovalDecision.ApproveWithEdits(
+            "{\"dosage\":\"250mg\"}",
+            decidedBy: "dr-smith",
+            reason: "Adjusted dosage");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(decision.Status, Is.EqualTo(ToolApprovalStatus.Approved));
+            Assert.That(decision.ModifiedArgumentsJson, Is.EqualTo("{\"dosage\":\"250mg\"}"));
+            Assert.That(decision.DecidedBy, Is.EqualTo("dr-smith"));
+            Assert.That(decision.Reason, Is.EqualTo("Adjusted dosage"));
+            Assert.That(decision.Scope, Is.EqualTo(ApprovalScope.Once));
+        });
+    }
 }

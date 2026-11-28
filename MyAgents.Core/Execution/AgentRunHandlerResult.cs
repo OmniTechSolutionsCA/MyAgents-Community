@@ -5,7 +5,8 @@ public sealed record AgentRunHandlerResult(
     AgentRunHandlerDisposition Disposition,
     string? OutputJson = null,
     string? CheckpointJson = null,
-    string? PendingInputDescription = null)
+    string? PendingInputDescription = null,
+    DateTimeOffset? PendingInputExpiresAt = null)
 {
     /// <summary>Creates a successful terminal result.</summary>
     public static AgentRunHandlerResult Completed(string? outputJson = null)
@@ -14,13 +15,15 @@ public sealed record AgentRunHandlerResult(
     /// <summary>Pauses a run and stores the handler's resume checkpoint.</summary>
     public static AgentRunHandlerResult WaitingForInput(
         string checkpointJson,
-        string pendingInputDescription)
+        string pendingInputDescription,
+        DateTimeOffset? expiresAt = null)
     {
         ArgumentNullException.ThrowIfNull(checkpointJson);
         ArgumentException.ThrowIfNullOrWhiteSpace(pendingInputDescription);
         return new AgentRunHandlerResult(
             AgentRunHandlerDisposition.WaitingForInput,
             CheckpointJson: checkpointJson,
-            PendingInputDescription: pendingInputDescription);
+            PendingInputDescription: pendingInputDescription,
+            PendingInputExpiresAt: expiresAt);
     }
 }

@@ -14,3 +14,10 @@ TYPE class MyAgents.Runtime.Workers.Sqlite.SqliteAgentRunBackend
   METHOD System.Threading.Tasks.ValueTask<bool> SaveCheckpointAsync(MyAgents.Core.Execution.AgentRunLease lease, string checkpointJson, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<bool> WaitForInputAsync(MyAgents.Core.Execution.AgentRunLease lease, string checkpointJson, string pendingInputDescription, System.Threading.CancellationToken cancellationToken)
   METHOD System.Threading.Tasks.ValueTask<int> CancelBatchAsync(string batchId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<int> ExpireWaitingRunsAsync(System.Nullable<System.DateTimeOffset> now, System.Threading.CancellationToken cancellationToken)
+TYPE class MyAgents.Runtime.Workers.Sqlite.SqliteSessionApprovalMemory
+  CTOR SqliteSessionApprovalMemory(string connectionString)
+  METHOD System.Threading.Tasks.ValueTask ClearSessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask RecordDecisionAsync(MyAgents.Core.ToolApprovalRequest request, MyAgents.Core.ToolApprovalDecision decision, System.Threading.CancellationToken cancellationToken)
+  METHOD System.Threading.Tasks.ValueTask<MyAgents.Core.ToolApprovalDecision> TryGetGrantedDecisionAsync(MyAgents.Core.ToolApprovalRequest request, System.Threading.CancellationToken cancellationToken)
+  METHOD void Dispose()

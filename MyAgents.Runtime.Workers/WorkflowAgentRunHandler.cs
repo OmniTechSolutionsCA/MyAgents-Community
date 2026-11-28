@@ -92,10 +92,7 @@ public sealed class WorkflowAgentRunHandler<TState> : IAgentRunHandler
 
         if (snapshot.PendingHumanInput is not null)
         {
-            var reply = context.ResumeInputJson is null
-                ? throw new InvalidOperationException("A human-input reply is required to resume this workflow.")
-                : JsonSerializer.Deserialize<string>(context.ResumeInputJson);
-            ArgumentException.ThrowIfNullOrWhiteSpace(reply);
+            var reply = NormalizeHumanInputReply(context.ResumeInputJson);
             return await _workflowHost.ResumeWithInputAsync(
                 _workflow,
                 snapshot,
@@ -118,5 +115,23 @@ public sealed class WorkflowAgentRunHandler<TState> : IAgentRunHandler
 
         return await _workflowHost.ResumeAsync(_workflow, snapshot, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    private static string NormalizeHumanInputReply(string? resumeInputJson)
+    {
+        if (string.IsNullOrWhiteSpace(resumeInputJson))
+            throw new InvalidOperationException("A human-input reply is required to resume this workflow.");
+
+        var trimmed = resumeInputJson.TrimStart();
+        if (trimmed.StartsWith('"'))
+        {
+            var reply = JsonSerializer.Deserialize<string>(resumeInputJson);
+            ArgumentException.ThrowIfNullOrWhiteSpace(reply);
+            return reply;
+        }
+
+        // Structured JSON (object, array, number, boolean) is passed through as raw JSON.
+        using var _ = JsonDocument.Parse(resumeInputJson);
+        return resumeInputJson;
     }
 }

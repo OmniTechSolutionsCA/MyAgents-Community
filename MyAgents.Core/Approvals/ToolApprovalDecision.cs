@@ -8,7 +8,8 @@ public sealed record ToolApprovalDecision(
     DateTimeOffset DecidedAt,
     string? DecidedBy = null,
     string? Reason = null,
-    ApprovalScope Scope = ApprovalScope.Once)
+    ApprovalScope Scope = ApprovalScope.Once,
+    string? ModifiedArgumentsJson = null)
 {
     /// <summary>
     /// Creates an approval decision with optional decision maker, reason, and approval scope.
@@ -18,6 +19,20 @@ public sealed record ToolApprovalDecision(
         string? reason = null,
         ApprovalScope scope = ApprovalScope.Once)
         => new(ToolApprovalStatus.Approved, DateTimeOffset.UtcNow, decidedBy, reason, scope);
+
+    /// <summary>
+    /// Creates an approval decision that overrides the tool's arguments with edited JSON.
+    /// </summary>
+    public static ToolApprovalDecision ApproveWithEdits(
+        string modifiedArgumentsJson,
+        string? decidedBy = null,
+        string? reason = null,
+        ApprovalScope scope = ApprovalScope.Once)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(modifiedArgumentsJson);
+        using var _ = System.Text.Json.JsonDocument.Parse(modifiedArgumentsJson);
+        return new(ToolApprovalStatus.Approved, DateTimeOffset.UtcNow, decidedBy, reason, scope, modifiedArgumentsJson);
+    }
 
     /// <summary>
     /// Creates a rejection decision.

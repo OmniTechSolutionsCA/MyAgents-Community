@@ -344,6 +344,33 @@ public sealed class SqliteAgentRunBackend : IAgentRunBackend, IAgentRunBatchCata
         return true;
     }
 
+    /// <summary>
+    /// Transitions any <see cref="AgentRunStatus.WaitingForInput"/> runs whose deadline has elapsed
+    /// to <see cref="AgentRunStatus.DeadlineExceeded"/> and returns the number of expired runs.
+    /// </summary>
+    public async ValueTask<int> ExpireWaitingRunsAsync(
+        DateTimeOffset? now = null,
+        CancellationToken cancellationToken = default)
+    {
+        var effectiveNow = now ?? DateTimeOffset.UtcNow;
+
+        await using var connection = await OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            UPDATE agent_runs
+            SET status = $expiredStatus,
+                record_json = json_set(record_json, '$.Status', $expiredStatus)
+            WHERE status = $waitingStatus
+              AND deadline_ticks IS NOT NULL
+              AND deadline_ticks <= $nowTicks;
+            """;
+        command.Parameters.AddWithValue("$expiredStatus", (int)AgentRunStatus.DeadlineExceeded);
+        command.Parameters.AddWithValue("$waitingStatus", (int)AgentRunStatus.WaitingForInput);
+        command.Parameters.AddWithValue("$nowTicks", effectiveNow.UtcTicks);
+
+        return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     /// <inheritdoc />
     public async ValueTask<bool> WaitForInputAsync(
         AgentRunLease lease,
@@ -549,6 +576,9 @@ public sealed class SqliteAgentRunBackend : IAgentRunBackend, IAgentRunBatchCata
                 fencing_token INTEGER NOT NULL,
                 record_json TEXT NOT NULL
             );
+            CREATE INDEX IF NOT EXISTS ix_agent_runs_waiting_deadline
+                ON agent_runs(deadline_ticks)
+                WHERE status = 3 AND deadline_ticks IS NOT NULL;
             CREATE TABLE IF NOT EXISTS agent_run_configuration (
                 config_id INTEGER PRIMARY KEY CHECK(config_id = 1),
                 max_outstanding_runs_per_scope INTEGER NULL,
